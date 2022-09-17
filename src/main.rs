@@ -1,7 +1,8 @@
 mod gl;
+mod drawable;
 
+use drawable::{Drawable, Vertex};
 use glfw::Context;
-use gl::*;
 
 const WINDOW_WIDTH: u32 = 1920;
 const WINDOW_HEIGHT: u32 = 1080;
@@ -14,19 +15,41 @@ fn main() {
     let (mut window, _) = glfw.create_window(WINDOW_WIDTH, WINDOW_HEIGHT, "PC Tycoon", glfw::WindowMode::Windowed).expect("failed to create window you dumb fuck");
     window.make_current();
 
-    let gl = Gl::load_with(|s| window.get_proc_address(s));
+    gl::load_with(|s| window.get_proc_address(s));
+
+    unsafe {
+        gl::Viewport(0, 0, WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32);
+    }
+
+    let mut test = Drawable::new("textures/test.png");
+    test.set_vbo(&vec![
+        Vertex {
+            position: [-0.5, -0.5],
+            uv: [0.0, 0.0]
+        },
+        Vertex {
+            position: [0.5, -0.5],
+            uv: [1.0, 0.0]
+        },
+        Vertex {
+            position: [0.0, 0.5],
+            uv: [0.5, 1.0]
+        }
+    ]);
 
     while !window.should_close() {
         glfw.poll_events();
 
         unsafe {
-            gl.ClearColor(0.0, 0.0, 0.0, 1.0);
-            gl.Clear(gl::COLOR_BUFFER_BIT);
+            gl::ClearColor(0.0, 0.0, 0.0, 1.0);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
         }
 
         if window.get_key(glfw::Key::Escape) == glfw::Action::Press {
             window.set_should_close(true);
         }
+
+        test.draw();
 
         window.swap_buffers();
     }

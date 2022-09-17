@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 glfw = { version = "0.45.0", default-features = false }
+image = "0.24.3"
