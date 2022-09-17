@@ -1,3 +1,3 @@
 # PC Tycoon
 
-100% rust
+code is rustier than my bike
