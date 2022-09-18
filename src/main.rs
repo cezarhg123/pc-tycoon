@@ -1,8 +1,9 @@
 mod gl;
-mod drawable;
+pub mod drawable;
+mod ui;
 
-use drawable::{Drawable, Vertex};
 use glfw::Context;
+use ui::{rect::Rect, text::Text};
 
 const WINDOW_WIDTH: u32 = 1920;
 const WINDOW_HEIGHT: u32 = 1080;
@@ -21,21 +22,8 @@ fn main() {
         gl::Viewport(0, 0, WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32);
     }
 
-    let mut test = Drawable::new("textures/test.png");
-    test.set_vbo(&vec![
-        Vertex {
-            position: [-0.5, -0.5],
-            uv: [0.0, 0.0]
-        },
-        Vertex {
-            position: [0.5, -0.5],
-            uv: [1.0, 0.0]
-        },
-        Vertex {
-            position: [0.0, 0.5],
-            uv: [0.5, 1.0]
-        }
-    ]);
+    let test = Rect::new(0, 0, 1920, 1080, "textures/background.png");
+    let test_text = Text::new("this is a test sentence. does this work?!?!", [400, 200], 10.0);
 
     while !window.should_close() {
         glfw.poll_events();
@@ -50,6 +38,7 @@ fn main() {
         }
 
         test.draw();
+        test_text.draw();
 
         window.swap_buffers();
     }

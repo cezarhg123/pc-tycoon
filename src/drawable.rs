@@ -4,7 +4,7 @@ use image::GenericImageView;
 
 use crate::gl;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vertex {
     pub position: [f32; 2],
     pub uv: [f32; 2]
@@ -20,7 +20,7 @@ pub struct Drawable {
 }
 
 impl Drawable {
-    pub fn new(image_path: &str) -> Self {
+    pub fn new(image_path: &str, vertex_path: &str, fragment_path: &str) -> Self {
         let mut vao = 0;
         let mut vbo = 0;
         let shader;
@@ -38,7 +38,7 @@ impl Drawable {
         let bytes = image.into_raw();
 
         unsafe {
-            shader = create_shader_program("shaders/default.vert", "shaders/default.frag");
+            shader = create_shader_program(vertex_path, fragment_path);
 
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
