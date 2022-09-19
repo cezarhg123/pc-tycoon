@@ -37,6 +37,7 @@ fn main() {
         if window.get_key(glfw::Key::Escape) == glfw::Action::Press {
             window.set_should_close(true);
         }
+        test_button.clicked(&window);
 
         test.draw();
         test_text.draw();

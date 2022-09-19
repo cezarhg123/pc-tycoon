@@ -1,3 +1,5 @@
+use glfw::{Window, Action};
+
 use super::{rect::Rect, text::Text};
 
 #[derive(Debug, Clone)]
@@ -29,6 +31,21 @@ impl Button {
             rect,
             text
         }
+    }
+
+    pub fn clicked(&self, window: &Window) -> bool {
+        let mouse_pos = window.get_cursor_pos();
+        let mouse_pos = (mouse_pos.0 as f32, mouse_pos.1 as f32);
+
+        if window.get_mouse_button(glfw::MouseButton::Button1) == Action::Press {
+            if mouse_pos.0 >= self.rect.get_left() as f32 && mouse_pos.0 <= self.rect.get_left()  as f32 + self.rect.get_width() as f32 {
+                if mouse_pos.1 >= self.rect.get_top() as f32 && mouse_pos.1 <= self.rect.get_top() as f32 + self.rect.get_height() as f32 {
+                    return true;
+                }
+            } 
+        }
+
+        false
     }
 
     pub fn draw(&self) {
