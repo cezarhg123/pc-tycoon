@@ -72,27 +72,27 @@ impl Rect {
 
             vertices.append(&mut vec![
                 Vertex {
-                    position: px_to_float(x, y),
-                    uv: uv.clone()
-                },
-                Vertex {
-                    position: px_to_float(x + size, y - size),
-                    uv: [uv[0] + 0.1, uv[1] + 0.2]
-                },
-                Vertex {
-                    position: px_to_float(x, y - size),
-                    uv: [uv[0], uv[1] + 0.2]
-                },
-                Vertex {
-                    position: px_to_float(x, y),
+                    position: px_to_float(x, y + size),
                     uv: uv.clone()
                 },
                 Vertex {
                     position: px_to_float(x + size, y),
+                    uv: [uv[0] + 0.1, uv[1] + 0.2]
+                },
+                Vertex {
+                    position: px_to_float(x, y),
+                    uv: [uv[0], uv[1] + 0.2]
+                },
+                Vertex {
+                    position: px_to_float(x, y + size),
+                    uv: uv.clone()
+                },
+                Vertex {
+                    position: px_to_float(x + size, y + size),
                     uv: [uv[0] + 0.1, uv[1]]
                 },
                 Vertex {
-                    position: px_to_float(x + size, y - size),
+                    position: px_to_float(x + size, y),
                     uv: [uv[0] + 0.1, uv[1] + 0.2]
                 }
             ]);
@@ -138,6 +138,10 @@ impl Rect {
     pub fn set_height(&mut self, height: i32) {
         self.height = height;
         self.update_quad();
+    }
+
+    pub fn get_center(&self) -> [i32; 2] {
+        [self.left + (self.width / 2), self.top + (self.height / 2)]
     }
 }
 

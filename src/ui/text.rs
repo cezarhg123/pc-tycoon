@@ -3,20 +3,68 @@ use super::rect::Rect;
 #[derive(Debug, Clone)]
 pub struct Text {
     size: f32,
-    rect: Rect
+    rect: Rect,
+    uvs: Vec<[f32; 2]>
 }
 
 impl Text {
-    pub fn new(text: &str, position: [i32; 2], size: f32) -> Self {
+    pub fn new(text: &str, position: [i32; 2], size: f32, black: bool) -> Self {
         let uvs = parse_string(text);
         
-        let mut rect = Rect::new(position[0], position[1] + size as i32, uvs.len() as i32 * size as i32, size as i32, "textures/character-map.png");
+        let image_path = if black {
+            "textures/character-map-black.png"
+        } else {
+            "textures/character-map-white.png"
+        };
+
+        let mut rect = Rect::new(position[0], position[1] + size as i32, uvs.len() as i32 * size as i32, size as i32, image_path);
         rect.split_quad(uvs.as_slice());
         
         Text {
             size,
-            rect
+            rect,
+            uvs
         }
+    }
+
+    pub fn get_center(&self) -> [i32; 2] {
+        self.rect.get_center()
+    }
+
+    pub fn get_left(&self) -> i32 {
+        self.rect.get_left()
+    }
+
+    pub fn set_left(&mut self, left: i32) {
+        self.rect.set_left(left);
+        self.rect.split_quad(self.uvs.as_slice())
+    }
+
+    pub fn get_top(&self) -> i32 {
+        self.rect.get_top()
+    }
+
+    pub fn set_top(&mut self, top: i32) {
+        self.rect.set_top(top);
+        self.rect.split_quad(self.uvs.as_slice())
+    }
+
+    pub fn get_width(&self) -> i32 {
+        self.rect.get_width()
+    }
+
+    pub fn set_width(&mut self, width: i32) {
+        self.rect.set_width(width);
+        self.rect.split_quad(self.uvs.as_slice())
+    }
+
+    pub fn get_height(&self) -> i32 {
+        self.rect.get_height()
+    }
+
+    pub fn set_height(&mut self, height: i32) {
+        self.rect.set_height(height);
+        self.rect.split_quad(self.uvs.as_slice())
     }
 
     pub fn draw(&self) {
