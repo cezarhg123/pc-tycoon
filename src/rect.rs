@@ -100,10 +100,6 @@ impl Rect {
         self.drawable.set_vbo(&vertices);
     }
 
-    pub fn draw(&self) {
-        self.drawable.draw();
-    }
-
     pub fn get_left(&self) -> i32 {
         self.left
     }
@@ -142,6 +138,10 @@ impl Rect {
 
     pub fn get_center(&self) -> [i32; 2] {
         [self.left + (self.width / 2), self.top + (self.height / 2)]
+    }
+
+    pub fn draw(&self) {
+        self.drawable.draw();
     }
 }
 
