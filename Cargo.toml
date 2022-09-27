@@ -6,6 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egui_glfw_gl = "0.13.1"
 image = "0.24.3"
-rusttype = "0.9.2"
+imgui-glfw-rs = "0.4.1"

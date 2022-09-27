@@ -1,6 +1,6 @@
 mod save;
 
-use egui_glfw_gl::glfw::Window;
+use imgui_glfw_rs::glfw::Window;
 
 use crate::rect::Rect;
 
@@ -15,7 +15,7 @@ enum GameState {
 pub struct Game {
     active_save: Save,
     game_state: GameState,
-    background: Rect
+    background: Rect,
 }
 
 impl Game {
