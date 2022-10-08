@@ -1,0 +1,11 @@
+{
+  "name": "Test A100\r\n",
+  "size": "Atx",
+  "socket_type": "Am4",
+  "max_cpu_speed": 4000,
+  "max_ram_speed": 3600,
+  "ram_slots": 4,
+  "m2_slots": 2,
+  "max_storage_devices": 6,
+  "price": 100
+}

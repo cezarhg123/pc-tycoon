@@ -140,6 +140,16 @@ impl Rect {
         [self.left + (self.width / 2), self.top + (self.height / 2)]
     }
 
+    pub fn contains(&self, pos: [f32; 2]) -> bool {
+        if pos[0] >= self.get_left() as f32 && pos[0] <= (self.get_left() + self.get_width()) as f32 {
+            if pos[1] >= self.get_top() as f32 && pos[1] <= (self.get_top() + self.get_height()) as f32 {
+                return true;
+            }
+        }
+
+        false
+    }
+
     pub fn draw(&self) {
         self.drawable.draw();
     }

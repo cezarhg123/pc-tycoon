@@ -1,0 +1,8 @@
+{
+  "name": "Test Cooler\r\n",
+  "socket_type": "Am4",
+  "height": 100,
+  "base": 1.0,
+  "power_usage": 20,
+  "price": 100
+}

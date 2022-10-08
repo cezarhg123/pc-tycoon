@@ -1,0 +1,13 @@
+{
+  "name": "Test 1\r\n",
+  "size": "Atx",
+  "max_fans": 4,
+  "max_cpu_cooler_height": 280,
+  "max_gpu_length": 300,
+  "max_gpu_width": 150,
+  "max_power_supply_length": 150,
+  "power_supply_form_factor": "Atx",
+  "max_drives_2_5": 2,
+  "max_drives_3_5": 4,
+  "price": 100
+}

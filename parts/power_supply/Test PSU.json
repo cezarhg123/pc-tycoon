@@ -1,0 +1,7 @@
+{
+  "name": "Test PSU\r\n",
+  "form_factor": "Atx",
+  "length": 100,
+  "wattage": 1000,
+  "price": 100
+}

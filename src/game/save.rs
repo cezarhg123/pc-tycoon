@@ -8,7 +8,7 @@ pub struct Save {
     pub points: u32
 }
 
-pub fn save_save(save: &Save) {
+pub fn save_game(save: &Save) {
     let mut string = String::new();
     string.push_str(format!("money:{}\n", save.money).as_str());
     string.push_str(format!("level:{}\n", save.level).as_str());

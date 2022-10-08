@@ -1,13 +1,13 @@
 pub mod drawable;
 pub mod rect;
+pub mod game;
 mod gl;
-mod game;
 mod timer;
+mod components_list;
 
-use std::{time::Instant, sync::mpsc::Receiver};
-
-use game::{save_save, Save, load_save, Game};
-use imgui_glfw_rs::{glfw::{self, Context}, imgui::{self, ImStr, im_str}};
+use components_list::load_all_components;
+use game::{Game, save_game};
+use imgui_glfw_rs::{glfw::{self, Context}, imgui::{self, ImStr}};
 use timer::Timer;
 
 const WINDOW_WIDTH: u32 = 1920;
@@ -24,20 +24,18 @@ fn main() {
     window.make_current();
 
     gl::load_with(|s| window.get_proc_address(s));
-
     unsafe {
         gl::Viewport(0, 0, WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32);
     }
+    load_all_components();
 
     let mut imgui_context = imgui::Context::create();
     let mut imgui_glfw = imgui_glfw_rs::ImguiGLFW::new(&mut imgui_context, &mut window); 
 
     let mut game = Game::new();
-    game.start();
 
     let mut fps_timer = Timer::new();
     let mut fps_ticks = 0;
-
     let mut fps_string = String::new();
 
     while !window.should_close() {        
@@ -57,21 +55,39 @@ fn main() {
         //TIMINGS
         
         let ui = imgui_glfw.frame(&mut window, &mut imgui_context);
-        let test = ui.window(unsafe {&ImStr::from_utf8_with_nul_unchecked(b"hello\0")}).build(|| {
-            ui.text("text");
+        ui.window(str_to_imstr("Debug")).build(|| {
+            ui.text(&fps_string);
         });
         
         if window.get_key(glfw::Key::Escape) == glfw::Action::Press {
             window.set_should_close(true);
         }
-        
-        game.run(&mut window);
+
+        game.run(&mut window, &ui);
         imgui_glfw.draw(ui, &mut window);
-        
+
         window.swap_buffers();
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
             imgui_glfw.handle_event(&mut imgui_context, &event);
         }
     }
+
+    save_game(&game.active_save);
+}
+
+pub fn str_to_imstr(text: &str) -> &ImStr {
+    unsafe {
+        if text.contains("\0") {
+            ImStr::from_utf8_with_nul_unchecked(text.as_bytes())
+        } else {
+            let mut string = text.to_string();
+            string.push('\0');
+            ImStr::from_ptr_unchecked(string.as_ptr().cast())
+        }
+    }
+}
+
+pub fn f64_array_to_f32(array: (f64, f64)) -> [f32; 2] {
+    [array.0 as f32, array.1 as f32]
 }

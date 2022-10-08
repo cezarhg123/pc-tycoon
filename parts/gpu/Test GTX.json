@@ -1,0 +1,12 @@
+{
+  "name": "Test GTX\r\n",
+  "cores": 600,
+  "rt_cores": 20,
+  "speed": 2600,
+  "vram": 8,
+  "length": 170,
+  "width": 70,
+  "cooling": 1.0,
+  "power_usage": 160,
+  "price": 100
+}
