@@ -13,7 +13,7 @@ pub struct Pc {
 }
 
 impl Pc {
-    pub fn check_compatability(&self) -> Result<(), String> {
+    pub fn check_compatability(&self) -> Result<String, String> {
         let mut errors = String::new();
         
         //checking case parameters
@@ -75,20 +75,16 @@ impl Pc {
             errors.push_str("cpu too fast for motherboard\n");
         }
 
-        if self.ram[0].speed > self.motherboard.max_ram_speed {
-            errors.push_str("ram too fast for motherboard\n");
-        }
-
         let m2_num = 
-            self.storage.iter()
-                .clone()
-                .filter(|s| s.storage_device_type == StorageDeviceType::M2)
-                .count() as u32;
+        self.storage.iter()
+        .clone()
+        .filter(|s| s.storage_device_type == StorageDeviceType::M2)
+        .count() as u32;
         
         if m2_num > self.motherboard.m2_slots {
             errors.push_str("too many m2 drives\n");
         }
-
+        
         if self.storage.len() as u32 > self.motherboard.max_storage_devices {
             errors.push_str("too many storage devices\n");
         }
@@ -99,17 +95,26 @@ impl Pc {
             errors.push_str("cpu cooler does not support the cpu socket type\n");
         }
         //CPU COOLER
-
+        
         //RAM
         if self.ram.len() == 0 {
             errors.push_str("what the fuck do you think you're gonna do with no RAM?\n");
         } else {
+            if self.ram[0].speed > self.motherboard.max_ram_speed {
+                errors.push_str("ram too fast for motherboard\n");
+            }
             let first = self.ram.iter().next().unwrap();
-            if self.ram.iter().all(|r| r.name == first.name) {
+            if !self.ram.iter().all(|r| r.name == first.name) {
                 errors.push_str("all ram arn't the same type\n");
             }
         }
         //RAM
+
+        //STORAGE
+        if self.storage.len() == 0 {
+            errors.push_str("no storage\n");
+        }
+        //STORAGE
 
         //POWER SUPPLY
         let mut power_usage = 
@@ -127,7 +132,7 @@ impl Pc {
         //POWER SUPPLY
 
         if errors.len() == 0 {
-            Ok(())
+            Ok("pc is perfectly fine".to_string())
         } else {
             Err(errors)
         }

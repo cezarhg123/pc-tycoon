@@ -26,6 +26,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             let mut size = Size::Atx;
             loop {
@@ -133,6 +135,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             let mut size = Size::Atx;
             loop {
@@ -229,6 +233,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             let mut socket_type = SocketType::Am4;
             loop {
@@ -305,6 +311,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             let mut socket_type = SocketType::Am4;
             loop {
@@ -368,6 +376,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             print!("size: ");
             std::io::stdout().flush().unwrap();
@@ -405,6 +415,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             print!("cores: ");
             std::io::stdout().flush().unwrap();
@@ -484,6 +496,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             let mut storage_device_type = StorageDeviceType::Hdd;
             loop {
@@ -536,6 +550,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             let mut large = false;
             loop {
@@ -584,6 +600,8 @@ fn main() {
             std::io::stdout().flush().unwrap();
             let mut name = String::new();
             std::io::stdin().read_line(&mut name).unwrap();
+            let name = name.trim();
+            let name = name.to_owned();
 
             let form_factor = PowerSupplyFormFactor::Atx;
 

@@ -1,12 +1,12 @@
 pub mod drawable;
 pub mod rect;
 pub mod game;
+pub mod components_list;
 mod gl;
 mod timer;
-mod components_list;
 
-use components_list::load_all_components;
-use game::{Game, save_game};
+pub use components_list::*;
+use game::{Game, save_game, pc::Pc};
 use imgui_glfw_rs::{glfw::{self, Context}, imgui::{self, ImStr}};
 use timer::Timer;
 
@@ -37,7 +37,6 @@ fn main() {
     let mut fps_timer = Timer::new();
     let mut fps_ticks = 0;
     let mut fps_string = String::new();
-
     while !window.should_close() {        
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
@@ -55,7 +54,7 @@ fn main() {
         //TIMINGS
         
         let ui = imgui_glfw.frame(&mut window, &mut imgui_context);
-        ui.window(str_to_imstr("Debug")).build(|| {
+        ui.window(str_to_imstr("Debug\0")).build(|| {
             ui.text(&fps_string);
         });
         
@@ -76,18 +75,13 @@ fn main() {
     save_game(&game.active_save);
 }
 
+/// MAKESURE TO END STR WITH \0
 pub fn str_to_imstr(text: &str) -> &ImStr {
     unsafe {
-        if text.contains("\0") {
-            ImStr::from_utf8_with_nul_unchecked(text.as_bytes())
-        } else {
-            let mut string = text.to_string();
-            string.push('\0');
-            ImStr::from_ptr_unchecked(string.as_ptr().cast())
-        }
+        ImStr::from_ptr_unchecked(text.as_ptr().cast())
     }
 }
 
-pub fn f64_array_to_f32(array: (f64, f64)) -> [f32; 2] {
+pub fn f64_tuple_to_f32_array(array: (f64, f64)) -> [f32; 2] {
     [array.0 as f32, array.1 as f32]
 }

@@ -100,6 +100,17 @@ impl Drawable {
     }
 }
 
+impl Drop for Drawable {
+    fn drop(&mut self) {
+        unsafe {
+            gl::DeleteProgram(self.shader);
+            gl::DeleteBuffers(1, &self.vbo);
+            gl::DeleteVertexArrays(1, &self.vao);
+            gl::DeleteTextures(1, &self.texture);
+        }
+    }
+}
+
 fn create_shader_program(vertex_path: &str, fragment_path: &str) -> u32 {
     let vertex_source = std::fs::read_to_string(vertex_path).unwrap();
     let fragment_source = std::fs::read_to_string(fragment_path).unwrap();

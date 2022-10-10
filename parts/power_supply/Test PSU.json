@@ -1,5 +1,5 @@
 {
-  "name": "Test PSU\r\n",
+  "name": "Test PSU",
   "form_factor": "Atx",
   "length": 100,
   "wattage": 1000,
