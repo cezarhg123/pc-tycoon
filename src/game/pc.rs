@@ -9,7 +9,10 @@ pub struct Pc {
     pub gpu: Gpu,
     pub storage: Vec<StorageDevice>,
     pub fans: Vec<Fan>,
-    pub power_supply: PowerSupply
+    pub power_supply: PowerSupply,
+    pub computing_score: u32,
+    pub graphics_score: u32,
+    pub total_score: u32
 }
 
 impl Pc {
@@ -136,5 +139,54 @@ impl Pc {
         } else {
             Err(errors)
         }
+    }
+
+    pub fn calculate_score(&mut self) {
+        let mut case_cooling = 1.0;
+        for fan in &self.fans {
+            case_cooling += fan.effectiveness * 0.1;
+        }
+
+        let mut ram_score: u32 = 0;
+        for ram in &self.ram {
+            ram_score += ram.speed / 2;
+        }
+
+        let cpu_cooling = case_cooling + self.cpu_cooler.base;
+        let cpu_score = ((self.cpu.threads + self.cpu.cores) as f32 * 0.2) * self.cpu.speed as f32 * self.cpu.base_multiplier;
+        let cpu_score = (cpu_score * cpu_cooling) as u32;
+        let cpu_score = cpu_score + ram_score;
+
+        let gpu_cooling = case_cooling + self.gpu.cooling;
+        let gpu_score = (self.gpu.cores + self.gpu.rt_cores * 4) as f32 * (self.gpu.speed as f32 * 0.2);
+        let gpu_score = gpu_score + (self.gpu.vram * 10) as f32;
+        let gpu_score = gpu_score * 0.2;
+        let gpu_score = (gpu_score * gpu_cooling) as u32;
+
+        let mut other_score = 0;
+        for ram in &self.ram {
+            other_score += ram.size * 10;
+        }
+
+        for storage in &self.storage {
+            match &storage.storage_device_type {
+                StorageDeviceType::M2 => {
+                    other_score += 1000;
+                    other_score += storage.size * 10;
+                }
+                StorageDeviceType::Ssd => {
+                    other_score += 300;
+                    other_score += storage.size * 2;
+                }
+                StorageDeviceType::Hdd => {
+                    other_score += 50;
+                    other_score += storage.size;
+                }
+            }
+        }
+
+        self.computing_score = cpu_score;
+        self.graphics_score = gpu_score;
+        self.total_score = cpu_score + gpu_score + other_score;
     }
 }

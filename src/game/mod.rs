@@ -16,7 +16,7 @@ enum GameState {
     PcBuilder,
     Inventory,
     Market,
-    Research
+    Contract
 }
 
 pub struct Game {
@@ -145,8 +145,8 @@ impl Game {
             let crnt_y = ui.get_cursor_pos()[1];
             ui.set_cursor_pos([116.5, crnt_y]);
 
-            if ui.button(str_to_imstr("Research\0"), [400.0, 120.0]) {
-                self.game_state = GameState::Research;
+            if ui.button(str_to_imstr("Contracts\0"), [400.0, 120.0]) {
+                self.game_state = GameState::Contract;
             }
         });
     }
@@ -392,7 +392,7 @@ impl Game {
                         }
 
                         if missing_parts.len() == 0 {
-                            let pc = Pc {
+                            let mut pc = Pc {
                                 case: case.unwrap(),
                                 motherboard: motherboard.unwrap(),
                                 cpu: cpu.unwrap(),
@@ -401,12 +401,19 @@ impl Game {
                                 gpu: gpu.unwrap(),
                                 storage,
                                 fans,
-                                power_supply: power_supply.unwrap()
+                                power_supply: power_supply.unwrap(),
+                                computing_score: 0,
+                                graphics_score: 0,
+                                total_score: 0
                             };
 
                             match pc.check_compatability() {
                                 Ok(good) => {
                                     ui.text(good);
+                                    pc.calculate_score();
+                                    ui.text(pc.computing_score.to_string());
+                                    ui.text(pc.graphics_score.to_string());
+                                    ui.text(pc.total_score.to_string());
                                 }
                                 Err(bad) => {
                                     for issue in bad.split("\n") {
