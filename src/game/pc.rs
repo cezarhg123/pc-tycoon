@@ -1,5 +1,6 @@
 use super::pc_components::{case::Case, motherboard::MotherBoard, cpu::Cpu, ram::Ram, cpu_cooler::CpuCooler, gpu::Gpu, storage_device::{StorageDevice, StorageDeviceType}, fan::Fan, power_supply::PowerSupply};
 
+#[derive(Debug, Clone)]
 pub struct Pc {
     pub case: Case,
     pub motherboard: MotherBoard,
@@ -188,5 +189,23 @@ impl Pc {
         self.computing_score = cpu_score;
         self.graphics_score = gpu_score;
         self.total_score = cpu_score + gpu_score + other_score;
+    }
+
+    pub fn get_price(&self) -> u32 {
+        let mut price = 0;
+        price += self.case.price + self.motherboard.price + self.cpu.price + self.cpu_cooler.price + self.gpu.price + self.power_supply.price;
+        for ram in &self.ram {
+            price += ram.price;
+        }
+
+        for storage in &self.storage {
+            price += storage.price;
+        }
+
+        for fan in &self.fans {
+            price += fan.price;
+        }
+
+        price
     }
 }
