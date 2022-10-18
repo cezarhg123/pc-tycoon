@@ -1,8 +1,9 @@
 {
   "name": "Test Cooler",
+  "alias": "test_cooler",
   "socket_type": "Am4",
   "height": 100,
   "base": 1.0,
-  "power_usage": 20,
+  "power_usage": 10,
   "price": 100
 }

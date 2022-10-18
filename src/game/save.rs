@@ -1,11 +1,14 @@
-use std::{io::{Write, Read}, str::FromStr};
+use std::{io::{Write, Read}, str::FromStr, ops::RangeBounds};
+
+use super::inventory::Inventory;
 
 #[derive(Debug, Clone)]
 pub struct Save {
     pub name: String,
     pub money: i32,
     pub level: u32,
-    pub points: u32
+    pub points: u32,
+    pub inventory: Inventory
 }
 
 pub fn save_game(save: &Save) {
@@ -16,9 +19,12 @@ pub fn save_game(save: &Save) {
 
     let mut file = std::fs::File::create(format!("saves/{}.save", save.name)).unwrap();
     file.write_all(string.as_bytes()).unwrap();
+
+    let mut file = std::fs::File::create(format!("saves/{}.json", save.name)).unwrap();
+    file.write_all(serde_json::to_string_pretty(&save.inventory).unwrap().as_bytes()).unwrap();
 }
 
-fn get_attribute_value<T: FromStr>(string: &String, attribute: &str) -> Result<T, T::Err> {
+fn get_profile_attribute_value<T: FromStr>(string: &String, attribute: &str) -> Result<T, T::Err> {
     string.split("\n")
         .find(|attrib| attrib.contains(attribute))
         .unwrap()
@@ -36,8 +42,9 @@ pub fn load_save(name: &str) -> Save {
     
     Save {
         name: name.to_string(),
-        money: get_attribute_value(&string, "money").unwrap(),
-        level: get_attribute_value(&string, "level").unwrap(),
-        points: get_attribute_value(&string, "points").unwrap()
+        money: get_profile_attribute_value(&string, "money").unwrap(),
+        level: get_profile_attribute_value(&string, "level").unwrap(),
+        points: get_profile_attribute_value(&string, "points").unwrap(),
+        inventory: serde_json::from_str(std::fs::read_to_string(format!("saves/{}.json", name)).unwrap().as_str()).unwrap()
     }
 }

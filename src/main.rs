@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 pub mod drawable;
 pub mod rect;
 pub mod game;
@@ -6,8 +8,8 @@ mod gl;
 mod timer;
 
 pub use components_list::*;
-use game::{Game, save_game, pc::Pc};
-use imgui_glfw_rs::{glfw::{self, Context}, imgui::{self, ImStr}};
+use game::{Game, save_game, pc::Pc, Save, inventory::Inventory};
+use imgui_glfw_rs::{glfw::{self, Context}, imgui::{self, ImStr, ImString}};
 use timer::Timer;
 
 const WINDOW_WIDTH: u32 = 1920;
@@ -34,6 +36,7 @@ fn main() {
 
     let mut game = Game::new();
 
+
     let mut fps_timer = Timer::new();
     let mut fps_ticks = 0;
     let mut fps_string = String::new();
@@ -54,14 +57,13 @@ fn main() {
         //TIMINGS
         
         let ui = imgui_glfw.frame(&mut window, &mut imgui_context);
-        ui.window(str_to_imstr("Debug\0")).build(|| {
-            ui.text(&fps_string);
-        });
+        //ui.window(str_to_imstr("Debug\0")).build(|| {
+        //    ui.text(&fps_string);
+        //});
         
         if window.get_key(glfw::Key::Escape) == glfw::Action::Press {
             window.set_should_close(true);
         }
-
         game.run(&mut window, &ui);
         imgui_glfw.draw(ui, &mut window);
 

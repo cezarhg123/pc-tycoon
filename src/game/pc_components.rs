@@ -11,6 +11,7 @@ pub mod case {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct Case {
         pub name: String,
+        pub alias: String,
         pub size: Size,
         pub max_fans: u32,
         pub max_cpu_cooler_height: u32,
@@ -37,6 +38,7 @@ pub mod motherboard {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct MotherBoard {
         pub name: String,
+        pub alias: String,
         pub size: Size,
         pub socket_type: SocketType,
         pub max_cpu_speed: u32,
@@ -55,6 +57,7 @@ pub mod cpu {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct Cpu {
         pub name: String,
+        pub alias: String,
         pub socket_type: SocketType,
         pub base_multiplier: f32,
         pub cores: u32,
@@ -72,6 +75,7 @@ pub mod cpu_cooler {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct CpuCooler {
         pub name: String,
+        pub alias: String,
         pub socket_type: SocketType,
         pub height: u32,
         pub base: f32,
@@ -86,6 +90,7 @@ pub mod ram {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct Ram {
         pub name: String,
+        pub alias: String,
         pub size: u32,
         pub speed: u32,
         pub price: u32
@@ -98,6 +103,7 @@ pub mod gpu {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct Gpu {
         pub name: String,
+        pub alias: String,
         pub cores: u32,
         pub rt_cores: u32,
         pub speed: u32,
@@ -123,6 +129,7 @@ pub mod storage_device {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct StorageDevice {
         pub name: String,
+        pub alias: String,
         pub storage_device_type: StorageDeviceType,
         pub size: u32, //in GB
         pub price: u32
@@ -135,6 +142,7 @@ pub mod fan {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct Fan {
         pub name: String,
+        pub alias: String,
         pub large: bool,
         pub effectiveness: f32,
         pub price: u32
@@ -152,6 +160,7 @@ pub mod power_supply {
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
     pub struct PowerSupply {
         pub name: String,
+        pub alias: String,
         pub form_factor: PowerSupplyFormFactor,
         pub length: u32,
         pub wattage: u32,

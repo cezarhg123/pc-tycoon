@@ -1,27 +1,29 @@
 pub mod pc_components;
 pub mod pc;
+pub mod inventory;
 mod pcbuilder;
 mod save;
+mod market;
 
 use imgui_glfw_rs::{glfw::{Window, self}, imgui::{Ui, self, ImStr, ImString}};
 use crate::{rect::Rect, str_to_imstr, WINDOW_WIDTH, WINDOW_HEIGHT, f64_tuple_to_f32_array, components_list::*};
 
-use self::{pcbuilder::PCBuilder, pc_components::{ram::Ram, storage_device::StorageDevice, fan::Fan}, pc::Pc};
+use self::{pcbuilder::PCBuilder, pc_components::{ram::Ram, storage_device::StorageDevice, fan::Fan}, pc::Pc, inventory::show_inventory, market::market};
 pub use self::save::*;
 
 #[derive(Debug, Clone, PartialEq)]
-enum GameState {
+pub enum GameState {
     MainMenu,
     InGame,
-    PcBuilder,
-    Inventory,
-    Market,
-    Contract
+    PcBuilder
 }
 
 pub struct Game {
     pub active_save: Save,
     game_state: GameState,
+    show_inventory: bool,
+    show_market: bool,
+    show_contracts: bool,
     background: Rect,
     rects: Vec<Rect>,
     pc_builder: Option<PCBuilder>
@@ -30,13 +32,11 @@ pub struct Game {
 impl Game {
     pub fn new() -> Self {
         Game {
-            active_save: Save {
-                name: "save1".to_string(),
-                money: 1500,
-                level: 1,
-                points: 0
-            },
+            active_save: load_save("save1"),
             game_state: GameState::MainMenu,
+            show_inventory: false,
+            show_market: false,
+            show_contracts: false,
             background: Rect::new(0, 0, 1920, 1080, "textures/background.png"),
             rects: Vec::new(),
             pc_builder: None
@@ -118,57 +118,33 @@ impl Game {
                 //set gamestate and background
                 self.game_state = GameState::PcBuilder;
                 self.background = Rect::new(0, 0, WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32, "textures/pc-builder.png");
-
-                //create pc builder instance to hold all the necesasary variables
-                self.pc_builder = Some(PCBuilder {
-                    back_button: Rect::new(1751, 0, 229, 96, "textures/transparent.png"),
-                    current_case: 0,
-                    current_motherboard: 0,
-                    current_cpu: 0,
-                    current_cpu_cooler: 0,
-                    current_rams: Vec::new(),
-                    current_gpu: 0,
-                    current_storages: [0; 6],
-                    current_fans: Vec::new(),
-                    current_power_supply: 0,
-                    compatability_window: false,
-                    pc_works: false,
-                    sell_window: false,
-                    comp_change: 0,
-                    pc_to_sell: None,
-                    pc_input_price: ImString::new(""),
-                    offer_window: false,
-                    pc_final_price: 0,
-                    offers: Vec::new(),
-                    offers_index: 0
-                });
+                
+                //create pc builder instance to hold all the necesasary 'global' variables
+                self.pc_builder = Some(PCBuilder::new());
             }
             
-            //read line 112
             let crnt_y = ui.get_cursor_pos()[1];
             ui.set_cursor_pos([116.5, crnt_y]);
 
             //INVENTORY BUTTON
             if ui.button(str_to_imstr("Inventory\0"), [400.0, 120.0]) {
-                self.game_state = GameState::Inventory;
+                self.show_inventory = true;
             }
 
-            //read line 112
             let crnt_y = ui.get_cursor_pos()[1];
             ui.set_cursor_pos([116.5, crnt_y]);
             
             //MARKET BUTTON
             if ui.button(str_to_imstr("Market\0"), [400.0, 120.0]) {
-                self.game_state = GameState::Market;
+                self.show_market = true;
             }
             
-            //read line 112
             let crnt_y = ui.get_cursor_pos()[1];
             ui.set_cursor_pos([116.5, crnt_y]);
 
             //CONTRACTS BUTTON
             if ui.button(str_to_imstr("Contracts\0"), [400.0, 120.0]) {
-                self.game_state = GameState::Contract;
+                self.show_contracts = true;
             }
         });
     }
@@ -198,184 +174,277 @@ impl Game {
                     prev_comp_change = pc_builder.comp_change;
                     pc_builder.comp_change = 0;
 
-                    //create vector of imgui strings
                     let mut cases: Vec<&ImStr> = Vec::new();
-                    //push none so its the first one that appears in the dropdown
-                    cases.push(str_to_imstr("none\0"));
-                    //push all case names to the vector
-                    for case in get_case_list() {
-                        cases.push(str_to_imstr(case.name.as_str()));
+                    cases.push(str_to_imstr("None\0"));
+                    for case in &self.active_save.inventory.cases {
+                        match get_case_list().iter().find(|f| f.alias == *case) {
+                            Some(item) => {
+                                cases.push(str_to_imstr(item.name.as_str()));
+                            }
+                            None => {}
+                        };
                     }
-                    //actually create dropdown (imgui calls it a combo)
-                    pc_builder.current_case = create_combo(
-                        str_to_imstr("Case\0"),
-                        pc_builder.current_case,
-                        cases.as_slice(),
-                        ui
-                    );
-                    
+                    pc_builder.current_case = create_combo(str_to_imstr("Case\0"), pc_builder.current_case, cases.as_slice(), ui);
                     pc_builder.comp_change += pc_builder.current_case;
 
-                    if cases.len() > 1 && pc_builder.current_case > 0 {
-                        if get_case_list()[pc_builder.current_case as usize - 1].max_fans != pc_builder.current_fans.len() as u32 {
+                    if pc_builder.current_case > 0 {
+                        let max_fans = get_case_list().iter().find(|f| f.alias == self.active_save.inventory.cases[pc_builder.current_case as usize - 1]).unwrap().max_fans;
+                        if max_fans != pc_builder.current_fans.len() as u32 {
                             loop {
-                                if get_case_list()[pc_builder.current_case as usize - 1].max_fans > pc_builder.current_fans.len() as u32 {
+                                if max_fans > pc_builder.current_fans.len() as u32 {
                                     pc_builder.current_fans.push(0);
                                     continue;
-                                } else if get_case_list()[pc_builder.current_case as usize - 1].max_fans < pc_builder.current_fans.len() as u32 {
+                                } else if max_fans < pc_builder.current_fans.len() as u32 {
                                     pc_builder.current_fans.pop();
                                     continue;
                                 }
                                 break;
                             }
                         }
-                    } else if pc_builder.current_fans.len() > 0 {
+                    } else if pc_builder.current_fans.len() as u32 > 0 {
                         pc_builder.current_fans.pop();
                     }
 
                     let mut motherboards: Vec<&ImStr> = Vec::new();
-                    motherboards.push(str_to_imstr("none\0"));
-                    for motherboard in get_motherboard_list() {
-                        motherboards.push(str_to_imstr(motherboard.name.as_str()));
+                    motherboards.push(str_to_imstr("None\0"));
+                    for motherboard in &self.active_save.inventory.motherboards {
+                        match get_motherboard_list().iter().find(|f| f.alias == *motherboard) {
+                            Some(item) => {
+                                motherboards.push(str_to_imstr(item.name.as_str()));
+                            }
+                            None => {}
+                        }
                     }
-                    pc_builder.current_motherboard = create_combo(
-                        str_to_imstr("Motherboard\0"),
-                        pc_builder.current_motherboard,
-                        motherboards.as_slice(),
-                        ui
-                    );
-
+                    pc_builder.current_motherboard = create_combo(str_to_imstr("Motherboard\0"), pc_builder.current_motherboard, motherboards.as_slice(), ui);
                     pc_builder.comp_change += pc_builder.current_motherboard;
 
-                    if motherboards.len() > 1 && pc_builder.current_motherboard > 0 {
-                        if get_motherboard_list()[pc_builder.current_motherboard as usize - 1].ram_slots != pc_builder.current_rams.len() as u32 {
+                    if pc_builder.current_motherboard > 0 {
+                        let max_rams = get_motherboard_list().iter().find(|f| f.alias == self.active_save.inventory.motherboards[pc_builder.current_motherboard as usize - 1]).unwrap().ram_slots;
+                        if max_rams != pc_builder.current_rams.len() as u32 {
                             loop {
-                                if get_motherboard_list()[pc_builder.current_motherboard as usize - 1].ram_slots > pc_builder.current_rams.len() as u32 {
+                                if max_rams > pc_builder.current_rams.len() as u32 {
                                     pc_builder.current_rams.push(0);
                                     continue;
-                                } else if get_motherboard_list()[pc_builder.current_motherboard as usize - 1].ram_slots < pc_builder.current_rams.len() as u32 {
+                                } else if max_rams < pc_builder.current_rams.len() as u32 {
                                     pc_builder.current_rams.pop();
                                     continue;
                                 }
                                 break;
                             }
                         }
-                    } else if pc_builder.current_rams.len() > 0 {
+                    } else if pc_builder.current_rams.len() as u32 > 0 {
                         pc_builder.current_rams.pop();
                     }
-
+                        
                     let mut cpus: Vec<&ImStr> = Vec::new();
-                    cpus.push(str_to_imstr("none\0"));
-                    for cpu in get_cpu_list() {
-                        cpus.push(str_to_imstr(cpu.name.as_str()));
+                    cpus.push(str_to_imstr("None\0"));
+                    for cpu in &self.active_save.inventory.cpus {
+                        match get_cpu_list().iter().find(|f| f.alias == *cpu) {
+                            Some(item) => {
+                                cpus.push(str_to_imstr(item.name.as_str()));
+                            }
+                            None => {}
+                        }
                     }
-                    pc_builder.current_cpu = create_combo(
-                        str_to_imstr("CPU\0"),
-                        pc_builder.current_cpu,
-                        cpus.as_slice(),
-                        ui
-                    );
-
+                    pc_builder.current_cpu = create_combo(str_to_imstr("CPU\0"), pc_builder.current_cpu, cpus.as_slice(), ui);
                     pc_builder.comp_change += pc_builder.current_cpu;
 
                     let mut cpu_coolers: Vec<&ImStr> = Vec::new();
-                    cpu_coolers.push(str_to_imstr("none\0"));
-                    for cpu_cooler in get_cpu_cooler_list() {
-                        cpu_coolers.push(str_to_imstr(cpu_cooler.name.as_str()));
+                    cpu_coolers.push(str_to_imstr("None\0"));
+                    for cpu_cooler in &self.active_save.inventory.cpu_coolers {
+                        match get_cpu_cooler_list().iter().find(|f| f.alias == *cpu_cooler) {
+                            Some(item) => {
+                                cpu_coolers.push(str_to_imstr(item.name.as_str()));
+                            }
+                            None => {}
+                        }
                     }
-                    pc_builder.current_cpu_cooler = create_combo(
-                        str_to_imstr("CPU Cooler\0"),
-                        pc_builder.current_cpu_cooler,
-                        cpu_coolers.as_slice(),
-                        ui
-                    );
-
+                    pc_builder.current_cpu_cooler = create_combo(str_to_imstr("CPU Cooler\0"), pc_builder.current_cpu_cooler, cpu_coolers.as_slice(), ui);
                     pc_builder.comp_change += pc_builder.current_cpu_cooler;
 
-                    let mut i = 1;
+                    let mut i = 0;
                     for current_ram in &mut pc_builder.current_rams {
                         let mut rams: Vec<&ImStr> = Vec::new();
-                        rams.push(str_to_imstr("none\0"));
-                        for ram in get_ram_list() {
-                            rams.push(str_to_imstr(ram.name.as_str()));
+                        rams.push(str_to_imstr("None\0"));
+                        for ram in &self.active_save.inventory.rams {
+                            match get_ram_list().iter().find(|f| f.alias == *ram) {
+                                Some(item) => {
+                                    rams.push(str_to_imstr(item.name.as_str()));
+                                }
+                                None => {}
+                            }
                         }
-                        *current_ram = create_combo(
-                            str_to_imstr(format!("Ram slot {}\0", i).as_str()),
-                            *current_ram,
-                            rams.as_slice(),
-                            ui
-                        );
-                        i += 1;
-
+                        *current_ram = create_combo(str_to_imstr(format!("RAM {}\0", i).as_str()), *current_ram, rams.as_slice(), ui);
                         pc_builder.comp_change += *current_ram;
+                        i += 1;
                     }
 
                     let mut gpus: Vec<&ImStr> = Vec::new();
-                    gpus.push(str_to_imstr("none\0"));
-                    for gpu in get_gpu_list() {
-                        gpus.push(str_to_imstr(gpu.name.as_str()));
+                    gpus.push(str_to_imstr("None\0"));
+                    for gpu in &self.active_save.inventory.gpus {
+                        match get_gpu_list().iter().find(|f| f.alias == *gpu) {
+                            Some(item) => {
+                                gpus.push(str_to_imstr(item.name.as_str()));
+                            }
+                            None => {}
+                        }
                     }
-                    pc_builder.current_gpu = create_combo(
-                        str_to_imstr("GPU\0"),
-                        pc_builder.current_gpu,
-                        gpus.as_slice(),
-                        ui
-                    );
-
+                    pc_builder.current_gpu = create_combo(str_to_imstr("GPU\0"), pc_builder.current_gpu, gpus.as_slice(), ui);
                     pc_builder.comp_change += pc_builder.current_gpu;
 
-                    let mut i = 1;
+                    let mut i = 0;
                     for current_storage in &mut pc_builder.current_storages {
                         let mut storages: Vec<&ImStr> = Vec::new();
-                        storages.push(str_to_imstr("none\0"));
-                        for storage in get_storage_list() {
-                            storages.push(str_to_imstr(storage.name.as_str()));
+                        storages.push(str_to_imstr("None\0"));
+                        for storage in &self.active_save.inventory.storages {
+                            match get_storage_list().iter().find(|f| f.alias == *storage) {
+                                Some(item) => {
+                                    storages.push(str_to_imstr(item.name.as_str()));
+                                }
+                                None => {}
+                            }
                         }
-                        *current_storage = create_combo(
-                            str_to_imstr(format!("Storage {}\0", i).as_str()),
-                            *current_storage,
-                            storages.as_slice(),
-                            ui
-                        );
-                        i += 1;
+                        *current_storage = create_combo(str_to_imstr(format!("Storage {}\0", i).as_str()), *current_storage, storages.as_slice(), ui);
                         pc_builder.comp_change += *current_storage;
+                        i += 1;
                     }
 
-                    let mut i = 1;
+                    let mut i = 0;
                     for current_fan in &mut pc_builder.current_fans {
                         let mut fans: Vec<&ImStr> = Vec::new();
-                        fans.push(str_to_imstr("none\0"));
-                        for fan in get_fan_list() {
-                            fans.push(str_to_imstr(fan.name.as_str()));
+                        fans.push(str_to_imstr("None\0"));
+                        for fan in &self.active_save.inventory.fans {
+                            match get_fan_list().iter().find(|f| f.alias == *fan) {
+                                Some(item) => {
+                                    fans.push(str_to_imstr(item.name.as_str()));
+                                }
+                                None => {}
+                            }
                         }
-                        *current_fan = create_combo(
-                            str_to_imstr(format!("Fan {}\0", i).as_str()),
-                            *current_fan,
-                            fans.as_slice(),
-                            ui
-                        );
-                        i += 1;
+                        *current_fan = create_combo(str_to_imstr(format!("Fan {}\0", i).as_str()), *current_fan, fans.as_slice(), ui);
                         pc_builder.comp_change += *current_fan;
+                        i += 1;
                     }
 
                     let mut power_supplys: Vec<&ImStr> = Vec::new();
-                    power_supplys.push(str_to_imstr("none\0"));
-                    for power_supply in get_power_supply_list() {
-                        power_supplys.push(str_to_imstr(power_supply.name.as_str()));
+                    power_supplys.push(str_to_imstr("None\0"));
+                    for power_supply in &self.active_save.inventory.power_supplys {
+                        match get_power_supply_list().iter().find(|f| f.alias == *power_supply) {
+                            Some(item) => {
+                                power_supplys.push(str_to_imstr(item.name.as_str()));
+                            }
+                            None => {}
+                        }
                     }
-                    pc_builder.current_power_supply = create_combo(
-                        str_to_imstr("Power Supply\0"),
-                        pc_builder.current_power_supply,
-                        power_supplys.as_slice(),
-                        ui
-                    );
+                    pc_builder.current_power_supply = create_combo(str_to_imstr("Power Supply\0"), pc_builder.current_power_supply, power_supplys.as_slice(), ui);
+                    pc_builder.comp_change = pc_builder.current_power_supply;
 
-                    pc_builder.comp_change += pc_builder.current_power_supply;
-                    
-                    //CHECK COMPATABILITY BUTTON
-                    if ui.button(str_to_imstr("Check Compatability\0"), [300.0, 80.0]) {
-                        if !pc_builder.compatability_window {
-                            pc_builder.compatability_window = true;
+                    let mut missing_parts = String::new();
+
+                    let case = if pc_builder.current_case > 0 {
+                        Some(get_case_list().iter().find(|f| f.alias == self.active_save.inventory.cases[pc_builder.current_case as usize - 1]).unwrap().clone())
+                    } else {
+                        missing_parts.push_str("no case\n");
+                        None
+                    };
+
+                    let motherboard = if pc_builder.current_motherboard > 0 {
+                        Some(get_motherboard_list().iter().find(|f| f.alias == self.active_save.inventory.motherboards[pc_builder.current_motherboard as usize - 1]).unwrap().clone())
+                    } else {
+                        missing_parts.push_str("no motherboard\n");
+                        None
+                    };
+
+                    let cpu = if pc_builder.current_cpu > 0 {
+                        Some(get_cpu_list().iter().find(|f| f.alias == self.active_save.inventory.cpus[pc_builder.current_cpu as usize - 1]).unwrap().clone())
+                    } else {
+                        missing_parts.push_str("no cpu\n");
+                        None
+                    };
+
+                    let cpu_cooler = if pc_builder.current_cpu_cooler > 0 {
+                        Some(get_cpu_cooler_list().iter().find(|f| f.alias == self.active_save.inventory.cpu_coolers[pc_builder.current_cpu_cooler as usize - 1]).unwrap().clone())
+                    } else {
+                        missing_parts.push_str("no cpu cooler\n");
+                        None
+                    };
+
+                    let mut slots_filled = 0;
+                    let mut ram = Vec::new();
+                    for current_ram in &pc_builder.current_rams {
+                        if *current_ram > 0 {
+                            ram.push(get_ram_list().iter().find(|f| f.alias == self.active_save.inventory.rams[*current_ram as usize - 1]).unwrap().clone());
+                            slots_filled += 1;
+                        }
+                    }
+                    if self.active_save.inventory.rams.len() < slots_filled {
+                        missing_parts.push_str("selected more ram than there is in inventory\n");
+                    }
+
+                    let gpu = if pc_builder.current_gpu > 0 {
+                        Some(get_gpu_list().iter().find(|f| f.alias == self.active_save.inventory.gpus[pc_builder.current_gpu as usize - 1]).unwrap().clone())
+                    } else {
+                        missing_parts.push_str("no gpu\n");
+                        None
+                    };
+
+                    let mut storage_devices = 0;
+                    let mut storage = Vec::new();
+                    for current_storage in &pc_builder.current_storages {
+                        if *current_storage > 0 {
+                            storage.push(get_storage_list().iter().find(|f| f.alias == self.active_save.inventory.storages[*current_storage as usize - 1]).unwrap().clone());
+                            storage_devices += 1;
+                        }
+                    }
+                    if self.active_save.inventory.storages.len() < storage_devices {
+                        missing_parts.push_str("selected more storage devices than there is in inventory\n");
+                    }
+
+                    let mut fans_used = 0;
+                    let mut fan = Vec::new();
+                    for current_fan in &pc_builder.current_fans {
+                        if *current_fan > 0 {
+                            fan.push(get_fan_list().iter().find(|f| f.alias == self.active_save.inventory.fans[*current_fan as usize - 1]).unwrap().clone());
+                            fans_used += 1;
+                        }
+                    }
+                    if self.active_save.inventory.fans.len() < fans_used {
+                        missing_parts.push_str("selected more fans than there is in inventory\n");
+                    }
+
+                    let power_supply = if pc_builder.current_power_supply > 0 {
+                        Some(get_power_supply_list().iter().find(|f| f.alias == self.active_save.inventory.power_supplys[pc_builder.current_power_supply as usize - 1]).unwrap().clone())
+                    } else {
+                        missing_parts.push_str("no power supply\n");
+                        None
+                    };
+
+                    if missing_parts.len() == 0 {
+                        let pc = Pc {
+                            case: case.unwrap(),
+                            motherboard: motherboard.unwrap(),
+                            cpu: cpu.unwrap(),
+                            cpu_cooler: cpu_cooler.unwrap(),
+                            ram,
+                            gpu: gpu.unwrap(),
+                            storage,
+                            fans: fan,
+                            power_supply: power_supply.unwrap(),
+                            computing_score: 0,
+                            graphics_score: 0,
+                            total_score: 0
+                        };
+                        pc_builder.pc_to_sell = Some(pc);
+                        
+                        //CHECK COMPATABILITY BUTTON
+                        if ui.button(str_to_imstr("Check Compatability\0"), [300.0, 80.0]) {
+                            if !pc_builder.compatability_window {
+                                pc_builder.compatability_window = true;
+                            }
+                        }
+                    } else {
+                        for issue in missing_parts.split("\n") {
+                            ui.text(issue);
                         }
                     }
 
@@ -394,109 +463,26 @@ impl Game {
                 if pc_builder.compatability_window {
                     ui.window(str_to_imstr("Compatability\0"))
                     .build(|| {
-                        let mut missing_parts = String::new();
-
-                        let case = if pc_builder.current_case > 0 {
-                            Some(get_case_list()[pc_builder.current_case as usize - 1].clone())
-                        } else {
-                            missing_parts.push_str("no case\n");
-                            None
-                        };
-
-                        let motherboard = if pc_builder.current_motherboard > 0 {
-                            Some(get_motherboard_list()[pc_builder.current_case as usize - 1].clone())
-                        } else {
-                            missing_parts.push_str("no motherboard\n");
-                            None
-                        };
-
-                        let cpu = if pc_builder.current_cpu > 0 {
-                            Some(get_cpu_list()[pc_builder.current_cpu as usize - 1].clone())
-                        } else {
-                            missing_parts.push_str("no cpu\n");
-                            None
-                        };
-
-                        let cpu_cooler = if pc_builder.current_cpu_cooler > 0 {
-                            Some(get_cpu_cooler_list()[pc_builder.current_cpu_cooler as usize - 1].clone())
-                        } else {
-                            missing_parts.push_str("no cpu cooler\n");
-                            None
-                        };
-
-                        let gpu = if pc_builder.current_gpu > 0 {
-                            Some(get_gpu_list()[pc_builder.current_gpu as usize - 1].clone())
-                        } else {
-                            missing_parts.push_str("no gpu\n");
-                            None
-                        };
-
-                        let power_supply = if pc_builder.current_power_supply > 0 {
-                            Some(get_power_supply_list()[pc_builder.current_power_supply as usize - 1].clone())
-                        } else {
-                            missing_parts.push_str("no power supply\n");
-                            None
-                        };
-
-                        let mut ram: Vec<Ram> = Vec::new();
-                        for ram_i in &pc_builder.current_rams {
-                            if *ram_i > 0 {
-                                ram.push(get_ram_list()[*ram_i as usize - 1].clone());
+                        let pc = pc_builder.pc_to_sell.as_mut().unwrap();
+                        
+                        match pc.check_compatability() {
+                            Ok(good) => {
+                                ui.text(good);
+                                pc.calculate_score();
+                                ui.text(format!("computing score - {}", pc.computing_score));
+                                ui.text(format!("graphics score - {}", pc.graphics_score));
+                                ui.text(format!("total score - {}", pc.total_score));
+                                pc_builder.pc_works = true;
+                                pc_builder.compatability_window = false;
+                            }
+                            Err(bad) => {
+                                ui.text(bad);
                             }
                         }
 
-                        let mut storage: Vec<StorageDevice> = Vec::new();
-                        for storage_i in &pc_builder.current_storages {
-                            if *storage_i > 0 {
-                                storage.push(get_storage_list()[*storage_i as usize - 1].clone());
-                            }
-                        }
+                        ui.same_line(60.0);
 
-                        let mut fans: Vec<Fan> = Vec::new();
-                        for fan_i in &pc_builder.current_fans {
-                            if *fan_i > 0 {
-                                fans.push(get_fan_list()[*fan_i as usize - 1].clone());
-                            }
-                        }
-
-                        if missing_parts.len() == 0 {
-                            let mut pc = Pc {
-                                case: case.unwrap(),
-                                motherboard: motherboard.unwrap(),
-                                cpu: cpu.unwrap(),
-                                cpu_cooler: cpu_cooler.unwrap(),
-                                ram,
-                                gpu: gpu.unwrap(),
-                                storage,
-                                fans,
-                                power_supply: power_supply.unwrap(),
-                                computing_score: 0,
-                                graphics_score: 0,
-                                total_score: 0
-                            };
-
-                            match pc.check_compatability() {
-                                Ok(good) => {
-                                    pc_builder.pc_works = true;
-                                    pc_builder.pc_to_sell = Some(pc.clone());
-                                    ui.text(good);
-                                    pc.calculate_score();
-                                    ui.text(format!("computing score - {}", pc.computing_score));
-                                    ui.text(format!("graphics score - {}", pc.graphics_score));
-                                    ui.text(format!("total score - {}", pc.total_score));
-                                }
-                                Err(bad) => {
-                                    for issue in bad.split("\n") {
-                                        ui.text(issue);
-                                    }
-                                }
-                            }
-                        } else {
-                            for issue in missing_parts.split("\n") {
-                                ui.text(issue);
-                            }
-                        }
-
+                        //COMPATABILITY WINDOW CLOSE BUTTON
                         if ui.button(str_to_imstr("Close\0"), [40.0, 20.0]) {
                             pc_builder.compatability_window = false;
                         }
@@ -546,6 +532,8 @@ impl Game {
                         //CALCULATE OFFERS
                         let offers_amount = if overcharge.is_negative() {
                             8
+                        } else if overcharge > 700 {
+                            0
                         } else if overcharge > 500 {
                             1
                         } else if overcharge > 400 {
@@ -590,17 +578,73 @@ impl Game {
                         
                         //OFFER WINDOW SELL BUTTON
                         if ui.button(str_to_imstr("Sell\0"), [40.0, 20.0]) {
+                            self.active_save.inventory.cases.remove(pc_builder.current_case as usize - 1);
+                            self.active_save.inventory.motherboards.remove(pc_builder.current_motherboard as usize - 1);
+                            self.active_save.inventory.cpus.remove(pc_builder.current_cpu as usize - 1);
+                            self.active_save.inventory.cpu_coolers.remove(pc_builder.current_case as usize - 1);
+                            
+                            let mut prev_ram = 0;
+                            let mut offset = 0;
+                            for ram in &pc_builder.current_rams {
+                                if *ram > 0 {
+                                    
+                                    if prev_ram == 0 {
+                                        prev_ram = *ram;
+                                    } else {
+                                        if *ram >= prev_ram {
+                                            offset += 1;
+                                        } else if *ram < prev_ram {
+                                            offset = 0;
+                                        }
+                                    }
+                                    self.active_save.inventory.rams.remove(*ram as usize - 1 - offset);
+                                }
+                            }
+
+                            self.active_save.inventory.gpus.remove(pc_builder.current_gpu as usize - 1);
+                            
+                           let mut prev_storage = 0; 
+                           let mut offset = 0;
+                            for storage in &pc_builder.current_storages {
+                                if *storage > 0 {
+                                    
+                                    if prev_storage == 0 {
+                                        prev_storage = *storage;
+                                    } else {
+                                        if *storage >= prev_ram {
+                                            offset += 1;
+                                        } else if *storage < prev_ram {
+                                            offset = 0;
+                                        }
+                                    }
+
+                                    self.active_save.inventory.storages.remove(*storage as usize - 1 - offset);
+                                }
+                            }
+
+                            let mut prev_fan = 0;
+                            let mut offset = 0;
+                            for fan in &pc_builder.current_fans {
+                                if *fan > 0 {
+                                    
+                                    if prev_fan == 0 {
+                                        prev_fan = *fan;
+                                    } else {
+                                        if *fan >= prev_ram {
+                                            offset += 1;
+                                        } else if *fan < prev_ram {
+                                            offset = 0;
+                                        }
+                                    }
+                                    self.active_save.inventory.fans.remove(*fan as usize - 1 - offset);
+                                }
+                            }
+                            self.active_save.inventory.power_supplys.remove(pc_builder.current_power_supply as usize - 1);
+
                             self.active_save.money += pc_builder.offers[pc_builder.offers_index as usize] as i32;
                             self.game_state = GameState::InGame;
                             self.background = Rect::new(0, 0, 1920, 1080, "textures/ingame-background.png");
                             delete_pc_builder_instance = true;
-                        }
-                        
-                        ui.same_line(60.0);
-
-                        //OFFER WINDOW EXIT BUTTON
-                        if ui.button(str_to_imstr("Exit\0"), [40.0, 20.0]) {
-                            pc_builder.offer_window = false;
                         }
                     });
                 }
@@ -619,6 +663,36 @@ impl Game {
         }
     }
 
+    fn inventory(&mut self, ui: &Ui, window: &Window) {
+        if !self.show_inventory {
+            return;
+        }
+
+        self.show_inventory = show_inventory(&self.active_save.inventory, window, ui);
+    }
+
+    fn market(&mut self, ui: &Ui, window: &Window) {
+        if !self.show_market {
+            return;
+        }
+
+        self.show_market = market(&mut self.active_save, ui, window);
+    }
+
+    fn contract(&mut self, ui: &Ui) {
+        if !self.show_contracts {
+            return;
+        }
+
+        ui.window(str_to_imstr("Coming soon\0"))
+        .build(|| {
+            ui.text("Coming Soon!");
+            if ui.button(str_to_imstr("Back\0"), [40.0, 20.0]) {
+                self.show_contracts = false;
+            }
+        });
+    }
+
     pub fn run(&mut self, window: &mut Window, ui: &Ui) {
         self.background.draw();
         
@@ -629,6 +703,9 @@ impl Game {
         self.main_menu(window, ui);
         self.ingame(ui);
         self.pc_builder(window, ui);
+        self.inventory(ui, window);
+        self.market(ui, window);
+        self.contract(ui);
     }
 }
 

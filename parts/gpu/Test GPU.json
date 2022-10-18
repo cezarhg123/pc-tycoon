@@ -1,0 +1,13 @@
+{
+  "name": "Test GPU",
+  "alias": "test_gpu",
+  "cores": 412,
+  "rt_cores": 26,
+  "speed": 2800,
+  "vram": 8,
+  "length": 160,
+  "width": 100,
+  "cooling": 1.0,
+  "power_usage": 100,
+  "price": 100
+}

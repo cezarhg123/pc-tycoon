@@ -1,9 +1,10 @@
 {
-  "name": "Test A100",
+  "name": "Test MB",
+  "alias": "test_mb",
   "size": "Atx",
   "socket_type": "Am4",
-  "max_cpu_speed": 4000,
-  "max_ram_speed": 3600,
+  "max_cpu_speed": 5000,
+  "max_ram_speed": 5000,
   "ram_slots": 4,
   "m2_slots": 2,
   "max_storage_devices": 6,

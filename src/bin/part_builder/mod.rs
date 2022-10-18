@@ -111,7 +111,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let case = Case {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 size,
                 max_fans,
                 max_cpu_cooler_height,
@@ -211,7 +212,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let motherboard = MotherBoard {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 size,
                 socket_type,
                 max_cpu_speed,
@@ -291,7 +293,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let cpu = Cpu {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 socket_type,
                 base_multiplier,
                 cores,
@@ -357,7 +360,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let cpu_cooler = CpuCooler {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 socket_type,
                 height,
                 base,
@@ -398,7 +402,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let ram = Ram {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 size,
                 speed,
                 price
@@ -473,7 +478,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let gpu = Gpu {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 cores,
                 rt_cores,
                 speed,
@@ -533,7 +539,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let storage = StorageDevice {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 storage_device_type,
                 size,
                 price
@@ -583,7 +590,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let fan = Fan {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 large,
                 effectiveness,
                 price
@@ -624,7 +632,8 @@ fn main() {
             let price: u32 = input.trim().parse().unwrap();
 
             let power_supply = PowerSupply {
-                name,
+                name: name.clone(),
+                alias: change_name_to_alias(&name),
                 form_factor,
                 length,
                 wattage,
@@ -637,4 +646,11 @@ fn main() {
         }
         _ => {}
     }
+}
+
+fn change_name_to_alias(name: &String) -> String {
+    let name = name.clone();
+    let name = name.trim().to_ascii_lowercase();
+    let name = name.replace(" ", "_");
+    name
 }

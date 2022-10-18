@@ -1,5 +1,6 @@
 {
-  "name": "Test M.2",
+  "name": "Test Storage",
+  "alias": "test_storage",
   "storage_device_type": "M2",
   "size": 1000,
   "price": 100

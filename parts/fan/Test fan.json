@@ -1,6 +1,7 @@
 {
-  "name": "Test fan",
+  "name": "Test Fan",
+  "alias": "test_fan",
   "large": false,
   "effectiveness": 1.0,
-  "price": 100
+  "price": 20
 }

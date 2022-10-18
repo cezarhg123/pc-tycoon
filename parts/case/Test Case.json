@@ -1,10 +1,11 @@
 {
-  "name": "Test 1",
+  "name": "Test Case",
+  "alias": "test_case",
   "size": "Atx",
   "max_fans": 6,
   "max_cpu_cooler_height": 280,
   "max_gpu_length": 300,
-  "max_gpu_width": 150,
+  "max_gpu_width": 140,
   "max_power_supply_length": 150,
   "power_supply_form_factor": "Atx",
   "max_drives_2_5": 2,
