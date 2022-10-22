@@ -1,9 +1,11 @@
 pub mod gl;
 pub mod gfx;
+pub mod ui;
 
-use gfx::{color_rect, vectors, image_rect::ImageRect, texture::Texture};
+use gfx::{color_rect, vectors::{self, vec2::vec2}, image_rect::ImageRect, texture::Texture, text::Text};
 use color_rect::ColorRect;
 use glfw::{Context, Key, Action};
+use rusttype::Font;
 use vectors::vec3::vec3;
 
 pub const WINDOW_WIDTH: u32 = 1920;
@@ -28,8 +30,8 @@ fn main() {
         gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
     }
 
-    let test = ColorRect::new(vec3(0.0, 1.0, 1.0), 0.0, 0.0, 100.0, 200.0);
-    let test2 = ImageRect::new(Texture::from_path("textures/nigward.png"), 100.0, 0.0, 100.0, 100.0);
+    let font = Font::try_from_vec(std::fs::read("fonts/font.ttf").unwrap()).unwrap();
+    let text = Text::new("yes", &font, 24.0, vec3(255, 255, 255), vec2(0.0, 0.0));
 
     while !window.should_close() {
         unsafe {
@@ -41,8 +43,7 @@ fn main() {
             window.set_should_close(true);
         }
 
-        test.draw();
-        test2.draw();
+        text.draw();
 
         window.swap_buffers();
         glfw.poll_events();

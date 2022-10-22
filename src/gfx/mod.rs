@@ -3,3 +3,4 @@ pub mod image_rect;
 pub mod vertexs;
 pub mod vectors;
 pub mod texture;
+pub mod text;

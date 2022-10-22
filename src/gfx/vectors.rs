@@ -16,9 +16,9 @@ pub mod vec2 {
 pub mod vec3 {
     #[derive(Debug, Clone, Copy)]
     pub struct Vec3<T: Copy> {
-        x: T,
-        y: T,
-        z: T
+        pub x: T,
+        pub y: T,
+        pub z: T
     }
 
     pub fn vec3<T: Copy>(x: T, y: T, z: T) -> Vec3<T> {

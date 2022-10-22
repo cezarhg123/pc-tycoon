@@ -6,7 +6,6 @@ use super::{vertexs::{UvVertex, uv_vertex}, texture::Texture, vectors::vec2::vec
 
 #[derive(Debug, Clone)]
 pub struct ImageRect {
-    vertices: Vec<UvVertex>,
     texture: Texture,
     left: f32,
     top: f32,
@@ -93,7 +92,6 @@ impl ImageRect {
         }
 
         ImageRect {
-            vertices,
             texture,
             left,
             top,
@@ -113,7 +111,168 @@ impl ImageRect {
             gl::UseProgram(self.program);
             gl::BindVertexArray(self.vao);
             gl::BindTexture(gl::TEXTURE_2D, self.texture_id);
-            gl::DrawArrays(gl::TRIANGLES, 0, self.vertices.len() as i32);
+            gl::DrawArrays(gl::TRIANGLES, 0, 6);
+        }
+    }
+
+    pub fn get_left(&self) -> f32 {
+        self.left
+    }
+
+    pub fn set_left(&mut self, left: f32) {
+        self.left = left;
+        self.right = left + self.width;
+
+        let vertices = vec![
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.left, self.top), vec2(0.0, 1.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+            uv_vertex(vec2(self.right, self.bottom), vec2(1.0, 0.0))
+        ];
+
+        unsafe {
+            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, size_of_val(vertices.as_slice()) as isize, vertices.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        }
+    }
+
+    pub fn get_top(&self) -> f32 {
+        self.top
+    }
+
+    pub fn set_top(&mut self, top: f32) {
+        self.top = top;
+        self.bottom = top + self.height;
+
+        let vertices = vec![
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.left, self.top), vec2(0.0, 1.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+            uv_vertex(vec2(self.right, self.bottom), vec2(1.0, 0.0))
+        ];
+
+        unsafe {
+            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, size_of_val(vertices.as_slice()) as isize, vertices.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        }
+    }
+
+    pub fn get_right(&self) -> f32 {
+        self.right
+    }
+
+    pub fn set_right(&mut self, right: f32) {
+        self.right = right;
+        self.left = right - self.width;
+
+        let vertices = vec![
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.left, self.top), vec2(0.0, 1.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+            uv_vertex(vec2(self.right, self.bottom), vec2(1.0, 0.0))
+        ];
+
+        unsafe {
+            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, size_of_val(vertices.as_slice()) as isize, vertices.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        }
+    }
+
+    pub fn get_bottom(&self) -> f32 {
+        self.bottom
+    }
+
+    pub fn set_bottom(&mut self, bottom: f32) {
+        self.bottom = bottom;
+        self.top = bottom - self.height;
+
+        let vertices = vec![
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.left, self.top), vec2(0.0, 1.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+            uv_vertex(vec2(self.right, self.bottom), vec2(1.0, 0.0))
+        ];
+
+        unsafe {
+            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, size_of_val(vertices.as_slice()) as isize, vertices.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        }
+    }
+
+    pub fn get_width(&self) -> f32 {
+        self.width
+    }
+
+    pub fn set_width(&mut self, width: f32) {
+        self.width = width;
+        self.right = self.left + width;
+
+        let vertices = vec![
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.left, self.top), vec2(0.0, 1.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+            uv_vertex(vec2(self.right, self.bottom), vec2(1.0, 0.0))
+        ];
+
+        unsafe {
+            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, size_of_val(vertices.as_slice()) as isize, vertices.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        }
+    }
+
+    pub fn get_height(&self) -> f32 {
+        self.height
+    }
+
+    pub fn set_height(&mut self, height: f32) {
+        self.height = height;
+        self.bottom = self.top + height;
+
+        let vertices = vec![
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.left, self.top), vec2(0.0, 1.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+
+            uv_vertex(vec2(self.left, self.bottom), vec2(0.0, 0.0)),
+            uv_vertex(vec2(self.right, self.top), vec2(1.0, 1.0)),
+            uv_vertex(vec2(self.right, self.bottom), vec2(1.0, 0.0))
+        ];
+
+        unsafe {
+            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            gl::BufferData(gl::ARRAY_BUFFER, size_of_val(vertices.as_slice()) as isize, vertices.as_ptr().cast(), gl::STATIC_DRAW);
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        }
+    }
+
+    pub fn set_texture(&mut self, texture: Texture) {
+        self.texture = texture.clone();
+
+        unsafe {
+            gl::BindTexture(gl::TEXTURE_2D, self.texture_id);
+            gl::TexImage2D(gl::TEXTURE_2D, 0, gl::RGBA as i32, texture.width as i32, texture.height as i32, 0, gl::RGBA, gl::UNSIGNED_BYTE, texture.buffer.into_raw().as_ptr().cast());
+            gl::GenerateMipmap(gl::TEXTURE_2D);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
         }
     }
 }
