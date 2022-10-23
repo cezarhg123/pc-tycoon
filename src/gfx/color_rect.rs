@@ -1,7 +1,8 @@
 use std::mem::{size_of_val, size_of};
-use crate::gl;
+use glfw::Window;
 
-use super::{vertexs::{ColorVertex, color_vertex}, vectors::{vec3::Vec3, vec2::vec2}};
+use crate::gl;
+use super::{vertexs::{ColorVertex, color_vertex}, vectors::{vec3::Vec3, vec2::{vec2, Vec2}}};
 
 
 #[derive(Debug, Clone)]
@@ -249,6 +250,20 @@ impl ColorRect {
         self.color
     }
 
+    pub fn get_center(&self) -> Vec2<f32> {
+        let x = self.left + (self.width / 2.0);
+        let y = self.top + (self.height / 2.0);
+        vec2(x, y)
+    }
+
+    pub fn set_center(&mut self, center: Vec2<f32>) {
+        let left = center.x - (self.width / 2.0);
+        let top = center.y - (self.height / 2.0);
+
+        self.set_left(left);
+        self.set_top(top);
+    }
+
     pub fn set_color(&mut self, color: Vec3<f32>) {
         self.color = color;
 
@@ -267,6 +282,16 @@ impl ColorRect {
             gl::BufferData(gl::ARRAY_BUFFER, size_of_val(vertices.as_slice()) as isize, vertices.as_ptr().cast(), gl::STATIC_DRAW);
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
         }
+    }
+
+    pub fn contains(&self, pos: Vec2<f32>) -> bool {
+        if pos.x >= self.left && pos.x <= self.right {
+            if pos.y >= self.top && pos.y <= self.bottom {
+                return true;
+            }
+        }
+
+        false
     }
 }
 

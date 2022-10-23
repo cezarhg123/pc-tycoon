@@ -1,3 +1,4 @@
+use glfw::Window;
 use image::{DynamicImage, Rgba};
 use rusttype::{Font, Scale, point};
 
@@ -20,8 +21,8 @@ impl<'a> Text<'a> {
             .layout(text, scale, point(0.0, v_metrics.ascent))
             .collect();
         
-        let width = (v_metrics.ascent - v_metrics.descent).ceil() as u32;
-        let height = {
+        let height = (v_metrics.ascent - v_metrics.descent).ceil() as u32;
+        let width = {
             let min_x = glyphs
                 .first()
                 .map(|g| g.pixel_bounding_box().unwrap().min.x)
@@ -35,7 +36,7 @@ impl<'a> Text<'a> {
             (max_x - min_x) as u32
         };
 
-        let mut bitmap = DynamicImage::new_rgba8(width + (size / 2.0) as u32, height + (size / 2.0) as u32).into_rgba8();
+        let mut bitmap = DynamicImage::new_rgba8(width as u32 + 2, height as u32 + 2).into_rgba8();
         
         for glyph in &glyphs {
             if let Some(bounding_box) = glyph.pixel_bounding_box() {
@@ -59,8 +60,40 @@ impl<'a> Text<'a> {
             font,
             size,
             color,
-            rect: ImageRect::new(Texture::from_memory(bitmap), position.x, position.y, width as f32 + (size / 2.0), height as f32 + (size / 2.0))
+            rect: ImageRect::new(Texture::from_memory(bitmap), position.x, position.y, width as f32 + 2.0, height as f32 + 2.0)
         }
+    }
+
+    pub fn get_left(&self) -> f32 {
+        self.rect.get_left()
+    }
+
+    pub fn set_left(&mut self, left: f32) {
+        self.rect.set_left(left);
+    }
+
+    pub fn get_top(&self) -> f32 {
+        self.rect.get_top()
+    }
+
+    pub fn set_top(&mut self, top: f32) {
+        self.rect.set_top(top);
+    }
+
+    pub fn get_width(&self) -> f32 {
+        self.rect.get_width()
+    }
+
+    pub fn get_height(&self) -> f32 {
+        self.rect.get_height()
+    }
+
+    pub fn get_center(&self) -> Vec2<f32> {
+        self.rect.get_center()
+    }
+
+    pub fn set_center(&mut self, center: Vec2<f32>) {
+        self.rect.set_center(center);
     }
 
     pub fn draw(&self) {

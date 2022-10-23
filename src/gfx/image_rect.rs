@@ -1,8 +1,10 @@
 use std::mem::{size_of_val, size_of};
 
+use glfw::Window;
+
 use crate::gl;
 
-use super::{vertexs::{UvVertex, uv_vertex}, texture::Texture, vectors::vec2::vec2};
+use super::{vertexs::{UvVertex, uv_vertex}, texture::Texture, vectors::vec2::{vec2, Vec2}};
 
 #[derive(Debug, Clone)]
 pub struct ImageRect {
@@ -242,6 +244,30 @@ impl ImageRect {
 
     pub fn get_height(&self) -> f32 {
         self.height
+    }
+
+    pub fn get_center(&self) -> Vec2<f32> {
+        let x = self.left + (self.width / 2.0);
+        let y = self.top + (self.height / 2.0);
+        vec2(x, y)
+    }
+
+    pub fn set_center(&mut self, center: Vec2<f32>) {
+        let left = center.x - (self.width / 2.0);
+        let top = center.y - (self.height / 2.0);
+
+        self.set_left(left);
+        self.set_top(top);
+    }
+
+    pub fn contains(&self, pos: Vec2<f32>) -> bool {
+        if pos.x >= self.left && pos.x <= self.right {
+            if pos.y >= self.top && pos.y <= self.bottom {
+                return true;
+            }
+        }
+
+        false
     }
 
     pub fn set_height(&mut self, height: f32) {

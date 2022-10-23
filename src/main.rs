@@ -6,6 +6,7 @@ use gfx::{color_rect, vectors::{self, vec2::vec2}, image_rect::ImageRect, textur
 use color_rect::ColorRect;
 use glfw::{Context, Key, Action};
 use rusttype::Font;
+use ui::Ui;
 use vectors::vec3::vec3;
 
 pub const WINDOW_WIDTH: u32 = 1920;
@@ -31,7 +32,9 @@ fn main() {
     }
 
     let font = Font::try_from_vec(std::fs::read("fonts/font.ttf").unwrap()).unwrap();
-    let text = Text::new("yes", &font, 24.0, vec3(255, 255, 255), vec2(0.0, 0.0));
+
+    let ui = Ui::new(font);
+    let mut test = ui.button(ui.text("yes", 28.0, vec3(255, 255, 255), None), vec2(250.0, 250.0), vec2(100.0, 50.0));
 
     while !window.should_close() {
         unsafe {
@@ -43,7 +46,10 @@ fn main() {
             window.set_should_close(true);
         }
 
-        text.draw();
+        if test.clicked(&window) {
+            println!("yes");
+        }
+        test.draw();
 
         window.swap_buffers();
         glfw.poll_events();
