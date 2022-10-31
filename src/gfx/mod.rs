@@ -4,3 +4,4 @@ pub mod vertexs;
 pub mod vectors;
 pub mod texture;
 pub mod text;
+pub mod rect;

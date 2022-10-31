@@ -1,7 +1,9 @@
 pub mod gl;
 pub mod gfx;
 pub mod ui;
+pub mod game;
 
+use game::Game;
 use gfx::{color_rect, vectors::{self, vec2::vec2}, image_rect::ImageRect, texture::Texture, text::Text};
 use color_rect::ColorRect;
 use glfw::{Context, Key, Action};
@@ -34,7 +36,8 @@ fn main() {
     let font = Font::try_from_vec(std::fs::read("fonts/font.ttf").unwrap()).unwrap();
 
     let ui = Ui::new(font);
-    let mut test = ui.button(ui.text("yes", 28.0, vec3(255, 255, 255), None), vec2(250.0, 250.0), vec2(100.0, 50.0));
+
+    let mut game = Game::new(&ui);
 
     while !window.should_close() {
         unsafe {
@@ -46,10 +49,8 @@ fn main() {
             window.set_should_close(true);
         }
 
-        if test.clicked(&window) {
-            println!("yes");
-        }
-        test.draw();
+        game.run(&mut window);
+        game.draw();
 
         window.swap_buffers();
         glfw.poll_events();

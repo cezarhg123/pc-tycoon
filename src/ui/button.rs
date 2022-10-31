@@ -1,33 +1,35 @@
 use glfw::{Window, Action};
-use crate::gfx::{text::Text, vectors::{vec2::Vec2, vec3::vec3}, color_rect::ColorRect};
+use rusttype::Font;
+
+use crate::gfx::{text::Text, rect::Rect, color_rect::ColorRect, vectors::{vec2::Vec2, vec3::vec3}};
+
+use super::Ui;
+
 
 #[derive(Debug, Clone)]
 pub struct Button<'a> {
     text: Text<'a>,
-    position: Vec2<f32>,
-    size: Vec2<f32>,
     rect: ColorRect
 }
 
 impl<'a> Button<'a> {
-    pub fn new(mut text: Text<'a>, position: Vec2<f32>, size: Vec2<f32>) -> Button<'a> {
-        let rect = ColorRect::new(vec3(0.3, 0.3, 0.3), position.x, position.y, size.x, size.y);
+    pub fn new(text: &str, pos: Vec2<f32>, size: Vec2<f32>, ui: &'a Ui) -> Button<'a> {
+        let mut text = ui.text(text, size.y / 2.0, vec3(255, 255, 255), None);
+        let rect = ColorRect::new(vec3(0.3, 0.3, 0.3), pos.x, pos.y, size.x, size.y);
         text.set_center(rect.get_center());
-        
+
         Button {
             text,
-            position,
-            size,
             rect
         }
     }
 
     pub fn clicked(&mut self, window: &Window) -> bool {
         if self.rect.contains(window.get_cursor_pos().try_into().unwrap()) {
-            self.rect.set_color(vec3(0.35, 0.35, 0.35));
-            
+            self.rect.set_color(vec3(0.37, 0.37, 0.37));
+
             if window.get_mouse_button(glfw::MouseButton::Button1) == Action::Press {
-                self.rect.set_color(vec3(0.4, 0.4, 0.4));
+                self.rect.set_color(vec3(0.44, 0.44, 0.44));
                 return true;
             }
         } else {
@@ -37,48 +39,15 @@ impl<'a> Button<'a> {
         false
     }
 
+    pub fn get_rects(&self) -> Vec<Rect> {
+        vec![
+            Rect::Color(self.rect.clone()),
+            self.text.get_rect()
+        ]
+    }
+
     pub fn draw(&self) {
         self.rect.draw();
         self.text.draw();
-    }
-
-    pub fn get_left(&self) -> f32 {
-        self.rect.get_left()
-    }
-
-    pub fn set_left(&mut self, left: f32) {
-        self.rect.set_left(left);
-    }
-
-    pub fn get_top(&self) -> f32 {
-        self.rect.get_top()
-    }
-
-    pub fn set_top(&mut self, top: f32) {
-        self.rect.set_top(top);
-    }
-
-    pub fn get_width(&self) -> f32 {
-        self.rect.get_width()
-    }
-
-    pub fn set_width(&mut self, width: f32) {
-        self.rect.set_width(width);
-    }
-
-    pub fn get_height(&self) -> f32 {
-        self.rect.get_height()
-    }
-
-    pub fn set_height(&mut self, height: f32) {
-        self.rect.set_height(height);
-    }
-
-    pub fn get_center(&self) -> Vec2<f32> {
-        self.rect.get_center()
-    }
-    
-    pub fn set_center(&mut self, center: Vec2<f32>) {
-        self.rect.set_center(center);
     }
 }

@@ -1,9 +1,10 @@
 pub mod button;
 
-use std::{fmt::Debug, os::windows};
+use std::{fmt::Debug, os::windows, any::Any};
 use glfw::{Window, WindowEvent, MouseButton};
 use rusttype::Font;
 use crate::gfx::{color_rect::ColorRect, image_rect::ImageRect, vectors::{vec2::{Vec2, vec2}, vec3::Vec3}, text::Text};
+
 use self::button::Button;
 
 #[derive(Debug)]
@@ -32,7 +33,7 @@ impl<'a> Ui<'a> {
         }
     }
 
-    pub fn button(&self, text: Text<'a>, position: Vec2<f32>, size: Vec2<f32>) -> Button {
-        Button::new(text, position, size)
+    pub fn button(&self, text: &str, position: Vec2<f32>, size: Vec2<f32>) -> Button {
+        Button::new(text, position, size, self)
     }
 }

@@ -1,11 +1,13 @@
 use glfw::Window;
 use image::{DynamicImage, Rgba};
 use rusttype::{Font, Scale, point};
+use crate::ui::{button::Button};
 
-use super::{vectors::{vec3::Vec3, vec2::Vec2}, image_rect::ImageRect, texture::Texture};
+use super::{vectors::{vec3::Vec3, vec2::Vec2}, image_rect::ImageRect, texture::Texture, rect::Rect};
 
 #[derive(Debug, Clone)]
 pub struct Text<'a> {
+    id: String,
     font: &'a Font<'a>,
     size: f32,
     color: Vec3<u8>,
@@ -36,7 +38,7 @@ impl<'a> Text<'a> {
             (max_x - min_x) as u32
         };
 
-        let mut bitmap = DynamicImage::new_rgba8(width as u32 + 2, height as u32 + 2).into_rgba8();
+        let mut bitmap = DynamicImage::new_rgba8(width as u32 + (size / 15.0) as u32, height as u32 + (size / 15.0) as u32).into_rgba8();
         
         for glyph in &glyphs {
             if let Some(bounding_box) = glyph.pixel_bounding_box() {
@@ -57,10 +59,11 @@ impl<'a> Text<'a> {
         let bitmap = DynamicImage::ImageRgba8(bitmap).flipv().into_rgba8();
 
         Text {
+            id: text.to_string(),
             font,
             size,
             color,
-            rect: ImageRect::new(Texture::from_memory(bitmap), position.x, position.y, width as f32 + 2.0, height as f32 + 2.0)
+            rect: ImageRect::new(Texture::from_memory(bitmap), position.x, position.y, width as f32 + (size / 15.0), height as f32 + (size / 15.0))
         }
     }
 
@@ -94,6 +97,10 @@ impl<'a> Text<'a> {
 
     pub fn set_center(&mut self, center: Vec2<f32>) {
         self.rect.set_center(center);
+    }
+
+    pub fn get_rect(&self) -> Rect {
+        Rect::Image(self.rect.clone())
     }
 
     pub fn draw(&self) {
