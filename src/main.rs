@@ -8,7 +8,7 @@ use gfx::{color_rect, vectors::{self, vec2::vec2}, image_rect::ImageRect, textur
 use color_rect::ColorRect;
 use glfw::{Context, Key, Action};
 use rusttype::Font;
-use ui::Ui;
+use ui::{Ui, listbox::ListBox};
 use vectors::vec3::vec3;
 
 pub const WINDOW_WIDTH: u32 = 1920;
@@ -39,6 +39,16 @@ fn main() {
 
     let mut game = Game::new(&ui);
 
+    let texts = vec![
+        "1".to_string(),
+        "2".to_string(),
+        "3".to_string(),
+        "4".to_string(),
+        "5".to_string(),
+        "6".to_string()
+    ];
+    let mut test = ListBox::new(vec2(1000.0, 500.0), vec2(150.0, 60.0), texts.as_slice(), 20.0, &ui);
+    
     while !window.should_close() {
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
@@ -52,8 +62,13 @@ fn main() {
         game.run(&mut window);
         game.draw();
 
+        test.run(&window, &mut game.scrolls);
+        test.draw();
+
         window.swap_buffers();
         glfw.poll_events();
-        for (_, _) in glfw::flush_messages(&events) {}
+        for (_, event) in glfw::flush_messages(&events) {
+            game.scroll(event);
+        }
     }
 }
