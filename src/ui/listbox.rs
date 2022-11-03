@@ -4,6 +4,7 @@ use crate::{gfx::{vectors::{vec2::{Vec2, vec2}, vec3::vec3}, color_rect::ColorRe
 
 use super::Ui;
 
+#[derive(Debug, Clone)]
 pub struct ListBox<'a> {
     pos: Vec2<f32>,
     size: Vec2<f32>,
@@ -11,7 +12,7 @@ pub struct ListBox<'a> {
     scroll_bar: ColorRect,
     scroll_cursor: ColorRect,
     box_rect: ColorRect,
-    texts: Vec<Text<'a>>,
+    pub texts: Vec<Text<'a>>,
     current_item: i32,
     max_items: i32
 }
@@ -31,12 +32,15 @@ impl<'a> ListBox<'a> {
         }
         
         let cursor_pos_y = pos.y;
-        let cursor_size_y = size.y * (max_items as f32 / texts.len() as f32);
-
+        let cursor_size_y = if max_items <= texts.len() as i32 {
+            size.y * (max_items as f32 / texts.len() as f32)
+        } else {
+            size.y
+        };
         let mut texts2 = Vec::new();
         let mut offset = 0;
         for text in texts {
-            texts2.push(ui.text(text.as_str(), text_size, vec3(255, 255, 255), Some(vec2(pos.x, pos.y + (offset as f32 * text_size)))));
+            texts2.push(ui.text(text.as_str(), text_size, vec3(255, 255, 255), Some(vec2(pos.x + (text_size / 2.0), pos.y + (offset as f32 * text_size)))));
             
             if offset == max_items - 1 {
                 offset = 0;
@@ -96,7 +100,24 @@ impl<'a> ListBox<'a> {
         self.scroll_bar.draw();
         self.scroll_cursor.draw();
         for i in self.current_item..(self.current_item + self.max_items) {
-            self.texts[i as usize].draw();
+            match self.texts.get(i as usize) {
+                Some(text) => {
+                    text.draw();
+                }
+                None => {}
+            }
         }
+    }
+
+    pub fn get_left(&self) -> f32 {
+        self.box_rect.get_left()
+    }
+
+    pub fn get_top(&self) -> f32 {
+        self.box_rect.get_top()
+    }
+
+    pub fn get_center(&self) -> Vec2<f32> {
+        self.box_rect.get_center()
     }
 }

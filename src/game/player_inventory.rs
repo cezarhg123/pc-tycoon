@@ -4,16 +4,15 @@ use super::pc::PC;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayerInventory {
-    cases: Vec<String>,
-    mbs: Vec<String>,
-    cpus: Vec<String>,
-    cpu_coolers: Vec<String>,
-    rams: Vec<String>,
-    gpus: Vec<String>,
-    storages: Vec<String>,
-    fans: Vec<String>,
-    psus: Vec<String>,
-    pcs: Vec<PC>
+    pub cases: Vec<String>,
+    pub mbs: Vec<String>,
+    pub cpus: Vec<String>,
+    pub cpu_coolers: Vec<String>,
+    pub rams: Vec<String>,
+    pub gpus: Vec<String>,
+    pub storages: Vec<String>,
+    pub fans: Vec<String>,
+    pub psus: Vec<String>
 }
 
 impl PlayerInventory {
@@ -27,8 +26,7 @@ impl PlayerInventory {
             gpus: Vec::new(),
             storages: Vec::new(),
             fans: Vec::new(),
-            psus: Vec::new(),
-            pcs: Vec::new()
+            psus: Vec::new()
         }
     }
 }

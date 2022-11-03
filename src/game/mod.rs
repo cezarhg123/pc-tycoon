@@ -87,7 +87,7 @@ impl<'a> Game<'a> {
                     GameState::PcBuilder => {}
                     GameState::Inventory => {
                         self.game_state = GameState::Inventory;
-                        self.inventory = Some(Inventory::new(self.ui));
+                        self.inventory = Some(Inventory::new(&self.active_save, self.ui));
                         delete_ingame = true;
                     }
                     _ => {}
@@ -110,7 +110,7 @@ impl<'a> Game<'a> {
 
         match &mut self.inventory {
             Some(inventory) => {
-                if inventory.run(window) {
+                if inventory.run(window, &mut self.scrolls, self.ui) {
                     self.game_state = GameState::InGame;
                     self.ingame = Some(InGame::new(&self.active_save, self.ui));
                     delete_inventory = true;

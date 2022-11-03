@@ -103,6 +103,14 @@ impl<'a> Text<'a> {
         Rect::Image(self.rect.clone())
     }
 
+    pub fn get_str(&self) -> String {
+        self.id.clone()
+    }
+
+    pub fn contains(&self, pos: Vec2<f32>) -> bool {
+        self.rect.contains(pos)
+    }
+
     pub fn draw(&self) {
         self.rect.draw();
     }

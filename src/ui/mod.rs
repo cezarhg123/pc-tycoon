@@ -1,12 +1,13 @@
 pub mod button;
 pub mod listbox;
+pub mod info_popup;
 
 use std::{fmt::Debug, os::windows, any::Any};
 use glfw::{Window, WindowEvent, MouseButton};
 use rusttype::Font;
 use crate::gfx::{color_rect::ColorRect, image_rect::ImageRect, vectors::{vec2::{Vec2, vec2}, vec3::Vec3}, text::Text};
 
-use self::button::Button;
+use self::{button::Button, listbox::ListBox, info_popup::InfoPopup};
 
 #[derive(Debug)]
 pub struct Ui<'a> {
@@ -36,5 +37,13 @@ impl<'a> Ui<'a> {
 
     pub fn button(&self, text: &str, position: Vec2<f32>, size: Vec2<f32>) -> Button {
         Button::new(text, position, size, self)
+    }
+
+    pub fn listbox(&self, pos: Vec2<f32>, size: Vec2<f32>, texts: &[String], text_size: f32) -> ListBox {
+        ListBox::new(pos, size, texts, text_size, self)
+    }
+
+    pub fn info_popup(&self, id: &str, texts: &[String], pos: Vec2<f32>, text_size: f32) -> InfoPopup {
+        InfoPopup::new(id, texts, pos, text_size, self)
     }
 }
