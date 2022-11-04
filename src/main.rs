@@ -1,12 +1,16 @@
+#![allow(non_upper_case_globals)]
+
 pub mod gl;
 pub mod gfx;
 pub mod ui;
 pub mod game;
+pub mod part_loader;
 
 use game::Game;
 use gfx::{color_rect, vectors::{self, vec2::vec2}, image_rect::ImageRect, texture::Texture, text::Text};
 use color_rect::ColorRect;
 use glfw::{Context, Key, Action};
+use part_loader::load_parts;
 use rusttype::Font;
 use ui::{Ui, listbox::ListBox};
 use vectors::vec3::vec3;
@@ -35,8 +39,8 @@ fn main() {
 
     let font = Font::try_from_vec(std::fs::read("fonts/font.ttf").unwrap()).unwrap();
 
+    load_parts();
     let ui = Ui::new(font);
-
     let mut game = Game::new(&ui);
     
     while !window.should_close() {

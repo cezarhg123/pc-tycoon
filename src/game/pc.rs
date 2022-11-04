@@ -90,7 +90,7 @@ impl PC {
     pub fn can_set_ram(&self, ram: &RAM) -> bool {
         if ram.ram_type == self.mb.as_ref().unwrap().ram_type && ram.speed <= self.mb.as_ref().unwrap().max_ram_speed && self.ram.len() as u32 <= self.mb.as_ref().unwrap().ram_slots {
             for installed_ram in &self.ram {
-                if installed_ram.alias == ram.alias {
+                if installed_ram.name == ram.name {
                     return true;
                 }
             }

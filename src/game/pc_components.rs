@@ -35,7 +35,6 @@ pub enum StorageType {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Case {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub case_form_factor: CaseFormFactor,
     pub mb_form_factor: MBFormFactor,
@@ -51,7 +50,6 @@ pub struct Case {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MB {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub power_usage: u32,
     pub mb_form_factor: MBFormFactor,
@@ -67,7 +65,6 @@ pub struct MB {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CPU {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub power_usage: u32,
     pub socket_type: SocketType,
@@ -80,7 +77,6 @@ pub struct CPU {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CPUCooler {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub power_usage: u32,
     pub socket_type: SocketType,
@@ -91,7 +87,6 @@ pub struct CPUCooler {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RAM {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub power_usage: u32,
     pub ram_type: RamType,
@@ -102,7 +97,6 @@ pub struct RAM {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GPU {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub power_usage: u32,
     pub length: u32,
@@ -116,7 +110,6 @@ pub struct GPU {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Storage {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub power_usage: u32,
     pub storage_type: StorageType,
@@ -127,7 +120,6 @@ pub struct Storage {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Fan {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub power_usage: u32,
     pub large: bool,
@@ -137,7 +129,6 @@ pub struct Fan {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PSU {
     pub name: String,
-    pub alias: String,
     pub price: u32,
     pub wattage: u32,
     pub length: u32

@@ -43,8 +43,11 @@ impl<'a> Inventory<'a> {
             // CASE INFO POPUP
             if text.contains(cursor_pos) {
                 let mut info = Vec::new();
-                info.push("just some info".to_string());
-                info.push("more info".to_string());
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    
+                }
 
                 let popup = ui.info_popup("case info", info.as_slice(), cursor_pos, 24.0);
 

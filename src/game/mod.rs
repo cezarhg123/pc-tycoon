@@ -3,7 +3,7 @@ mod ingame;
 mod save;
 mod player_inventory;
 mod pc;
-mod pc_components;
+pub mod pc_components;
 mod inventory;
 
 use glfw::{Window, WindowEvent};
