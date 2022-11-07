@@ -1,12 +1,29 @@
 {
-  "cases": [],
-  "mbs": [],
-  "cpus": [],
-  "cpu_coolers": [],
-  "rams": [],
-  "gpus": [],
-  "storages": [],
-  "fans": [],
-  "psus": [],
-  "pcs": []
+  "cases": [
+    "Test Case"
+  ],
+  "mbs": [
+    "Test MB"
+  ],
+  "cpus": [
+    "Test CPU"
+  ],
+  "cpu_coolers": [
+    "Test Cooler"
+  ],
+  "rams": [
+    "Test RAM"
+  ],
+  "gpus": [
+    "Test GPU"
+  ],
+  "storages": [
+    "Test Storage"
+  ],
+  "fans": [
+    "Test Fan"
+  ],
+  "psus": [
+    "Test PSU"
+  ]
 }

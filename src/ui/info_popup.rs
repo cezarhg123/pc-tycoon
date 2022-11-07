@@ -20,8 +20,8 @@ impl<'a> InfoPopup<'a> {
             let current_pos = vec2(pos.x + (text_size / 4.0), pos.y + (text_size * i as f32));
             let text = ui.text(text.as_str(), text_size, vec3(255, 255, 255), Some(current_pos));
             
-            if text.get_width() > biggest_text.x || text.get_height() > biggest_text.y {
-                biggest_text = vec2(text.get_width() + (text_size / 2.0), text.get_height());
+            if text.get_width() > biggest_text.x {
+                biggest_text = vec2(text.get_width() + (text_size / 2.0), 0.0);
             }
             
             texts_ui.push(text);

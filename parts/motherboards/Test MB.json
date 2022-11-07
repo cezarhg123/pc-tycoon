@@ -1,0 +1,13 @@
+{
+  "name": "Test MB",
+  "price": 150,
+  "power_usage": 25,
+  "mb_form_factor": "ATX",
+  "socket_type": "AM4",
+  "ram_type": "DDR4",
+  "ram_slots": 4,
+  "m2_slots": 2,
+  "sata_slots": 6,
+  "max_cpu_speed": 4600,
+  "max_ram_speed": 3600
+}

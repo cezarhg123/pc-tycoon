@@ -371,3 +371,9 @@ pub fn get_psu_names<'a>() -> &'a [String] {
         unsafe_psu_list.as_ref().unwrap().part_names.as_slice()
     }
 }
+
+pub fn get_psu(name: &str) -> PSU {
+    unsafe {
+        unsafe_psu_list.as_ref().unwrap().part_map.get(name).unwrap().clone()
+    }
+}
