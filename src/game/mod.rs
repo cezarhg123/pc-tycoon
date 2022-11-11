@@ -1,14 +1,15 @@
+pub mod pc_components;
 mod mainmenu;
 mod ingame;
 mod save;
 mod player_inventory;
 mod pc;
-pub mod pc_components;
 mod inventory;
+mod market;
 
 use glfw::{Window, WindowEvent};
 use crate::{gfx::{color_rect::ColorRect, image_rect::ImageRect, vectors::{vec2::vec2, vec3::vec3}, text::Text, rect::Rect}, ui::Ui};
-use self::{mainmenu::MainMenu, ingame::InGame, save::{Save, load_save, save_game}, player_inventory::PlayerInventory, inventory::Inventory};
+use self::{mainmenu::MainMenu, ingame::InGame, save::{Save, load_save, save_game}, player_inventory::PlayerInventory, inventory::Inventory, market::Market};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum GameState {
@@ -34,7 +35,8 @@ pub struct Game<'a> {
     pub scrolls: Vec<Scroll>,
     mainmenu: Option<MainMenu<'a>>,
     ingame: Option<InGame<'a>>,
-    inventory: Option<Inventory<'a>>
+    inventory: Option<Inventory<'a>>,
+    market: Option<Market<'a>>
 }
 
 impl<'a> Game<'a> {
@@ -46,7 +48,8 @@ impl<'a> Game<'a> {
             scrolls: Vec::new(),
             mainmenu: Some(MainMenu::new(ui)),
             ingame: None,
-            inventory: None
+            inventory: None,
+            market: None
         }
     }
 
@@ -90,6 +93,11 @@ impl<'a> Game<'a> {
                         self.inventory = Some(Inventory::new(&self.active_save, self.ui));
                         delete_ingame = true;
                     }
+                    GameState::Market => {
+                        self.game_state = GameState::Market;
+                        self.market= Some(Market::new(self.ui));
+                        delete_ingame = true;
+                    }
                     _ => {}
                 }
             }
@@ -124,6 +132,29 @@ impl<'a> Game<'a> {
         }
     }
 
+    fn market(&mut self, window: &Window) {
+        if self.game_state != GameState::Market {
+            return;
+        }
+
+        let mut delete_inventory = false;
+
+        match &mut self.market {
+            Some(market) => {
+                if market.run(window, &mut self.active_save, self.ui) {
+                    self.game_state = GameState::InGame;
+                    self.ingame = Some(InGame::new(&self.active_save, self.ui));
+                    delete_inventory = true;
+                }
+            }
+            None => {}
+        }
+
+        if delete_inventory {
+            self.market = None;
+        }
+    }
+
     pub fn scroll(&mut self, event: WindowEvent) {
         match event {
             WindowEvent::Scroll(_, y) => {
@@ -143,6 +174,7 @@ impl<'a> Game<'a> {
         self.mainmenu(window);
         self.ingame(window);
         self.inventory(window);
+        self.market(window);
     }
 
     pub fn draw(&self) {
@@ -166,5 +198,16 @@ impl<'a> Game<'a> {
             }
             None => {}
         }
+
+        match &self.market {
+            Some(market) => {
+                market.draw();
+            }
+            None => {}
+        }
+    }
+
+    pub fn save(&self) {
+        save_game(&self.active_save);
     }
 }

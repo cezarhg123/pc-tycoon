@@ -9,7 +9,8 @@ use super::Ui;
 #[derive(Debug, Clone)]
 pub struct Button<'a> {
     text: Text<'a>,
-    rect: ColorRect
+    rect: ColorRect,
+    prev_click: bool
 }
 
 impl<'a> Button<'a> {
@@ -20,7 +21,8 @@ impl<'a> Button<'a> {
 
         Button {
             text,
-            rect
+            rect,
+            prev_click: false
         }
     }
 
@@ -28,9 +30,12 @@ impl<'a> Button<'a> {
         if self.rect.contains(window.get_cursor_pos().try_into().unwrap()) {
             self.rect.set_color(vec3(0.37, 0.37, 0.37));
 
-            if window.get_mouse_button(glfw::MouseButton::Button1) == Action::Press {
+            if window.get_mouse_button(glfw::MouseButton::Button1) == Action::Press && !self.prev_click {
                 self.rect.set_color(vec3(0.44, 0.44, 0.44));
+                self.prev_click = true;
                 return true;
+            } else if window.get_mouse_button(glfw::MouseButton::Button1) == Action::Release {
+                self.prev_click = false;
             }
         } else {
             self.rect.set_color(vec3(0.3, 0.3, 0.3));
@@ -46,6 +51,10 @@ impl<'a> Button<'a> {
         ]
     }
 
+    pub fn get_str(&self) -> String {
+        self.text.get_str()
+    }
+    
     pub fn draw(&self) {
         self.rect.draw();
         self.text.draw();

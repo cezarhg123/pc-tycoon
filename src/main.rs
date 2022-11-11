@@ -62,4 +62,6 @@ fn main() {
             game.scroll(event);
         }
     }
+
+    game.save();
 }
