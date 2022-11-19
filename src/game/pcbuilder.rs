@@ -15,7 +15,8 @@ pub struct PCBuilder<'a> {
     total_price: Text<'a>,
     sell_button: Option<Button<'a>>,
     sell_window: Option<(ColorRect, [Text<'a>; 5]/*value, compute score, graphic score, total score, offer*/, [Button<'a>; 3] /*left, right, sell*/)>,
-    offers: (usize, Vec<u32>)
+    offers: (usize, Vec<u32>),
+    parts_text: Vec<Text<'a>>
 }
 
 const BUTTON_POPUP_POS: Vec2<f32> = vec2((WINDOW_WIDTH as f32 / 2.0) - 200.0, (WINDOW_HEIGHT as f32 / 2.0) - 300.0);
@@ -45,7 +46,8 @@ impl<'a> PCBuilder<'a> {
             total_price: ui.text("0", 40.0, vec3(255, 255, 255), Some(vec2(0.0, 0.0))),
             sell_button: None,
             sell_window: None,
-            offers: (0, Vec::new())
+            offers: (0, Vec::new()),
+            parts_text: Vec::new()
         }
     }
 
@@ -398,13 +400,17 @@ impl<'a> PCBuilder<'a> {
                     match select_window.3.as_str() {
                         "case" => {
                             let case = get_case(&select_window.1[0].get_str());
+                            //1510 110
+                            self.parts_text.push(ui.text(format!("{} - ${}", &case.name, case.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 110.0))));
 
                             self.pc.set_case(case);
                             self.buttons_window = None;
                             self.select_window = None;
+
                         }
                         "mb" => {
                             let mb = get_mb(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &mb.name, mb.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 160.0))));
 
                             if self.pc.can_set_mb(&mb) {
                                 self.pc.set_mb(mb);
@@ -414,6 +420,7 @@ impl<'a> PCBuilder<'a> {
                         }
                         "cpu" => {
                             let cpu = get_cpu(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &cpu.name, cpu.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 210.0))));
 
                             if self.pc.can_set_cpu(&cpu) {
                                 self.pc.set_cpu(cpu);
@@ -423,6 +430,7 @@ impl<'a> PCBuilder<'a> {
                         }
                         "cpu cooler" => {
                             let cpu_cooler = get_cpu_cooler(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &cpu_cooler.name, cpu_cooler.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 260.0))));
 
                             if self.pc.can_set_cpu_cooler(&cpu_cooler) {
                                 self.pc.set_cpu_cooler(cpu_cooler);
@@ -432,6 +440,7 @@ impl<'a> PCBuilder<'a> {
                         }
                         "ram" => {
                             let ram = get_ram(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &ram.name, ram.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 310.0))));
 
                             if self.pc.can_set_ram(&ram) {
                                 self.pc.set_ram(ram);
@@ -441,6 +450,7 @@ impl<'a> PCBuilder<'a> {
                         }
                         "gpu" => {
                             let gpu = get_gpu(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &gpu.name, gpu.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 360.0))));
 
                             if self.pc.can_set_gpu(&gpu) {
                                 self.pc.set_gpu(gpu);
@@ -450,6 +460,7 @@ impl<'a> PCBuilder<'a> {
                         }
                         "storage" => {
                             let storage = get_storage(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &storage.name, storage.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 410.0))));
 
                             if self.pc.can_set_storage(&storage) {
                                 self.pc.set_storage(storage);
@@ -459,6 +470,7 @@ impl<'a> PCBuilder<'a> {
                         }
                         "fan" => {
                             let fan = get_fan(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &fan.name, fan.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 460.0))));
 
                             if self.pc.can_set_fan(&fan) {
                                 self.pc.set_fan(fan);
@@ -468,6 +480,7 @@ impl<'a> PCBuilder<'a> {
                         }
                         "psu" => {
                             let psu = get_psu(&select_window.1[0].get_str());
+                            self.parts_text.push(ui.text(format!("{} - ${}", &psu.name, psu.price).as_str(), 40.0, vec3(0, 0, 0), Some(vec2(1510.0, 510.0))));
 
                             if self.pc.can_set_psu(&psu) {
                                 self.pc.set_psu(psu);
@@ -603,6 +616,10 @@ impl<'a> PCBuilder<'a> {
     pub fn draw(&self) {
         self.background.draw();
         self.total_price.draw();
+
+        for text in &self.parts_text {
+            text.draw();
+        }
 
         match &self.sell_button {
             Some(button) => {

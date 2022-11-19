@@ -1,4 +1,5 @@
 #![allow(non_upper_case_globals)]
+#![windows_subsystem = "windows"]
 
 pub mod gl;
 pub mod gfx;
