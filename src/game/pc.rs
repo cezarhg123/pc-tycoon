@@ -30,7 +30,122 @@ impl PC {
         }
     }
 
-    pub fn set_case(&mut self, case: Case) {
+    pub fn get_price(&self) -> u32 {
+        let mut price = 0;
+
+        match &self.case {
+            Some(case) => {
+                price += case.price;
+            }
+            None => {}
+        }
+
+        match &self.mb {
+            Some(mb) => {
+                price += mb.price;
+            }
+            None => {}
+        }
+
+        match &self.cpu {
+            Some(cpu) => {
+                price += cpu.price;
+            }
+            None => {}
+        }
+
+        match &self.cpu_cooler {
+            Some(cpu_cooler) => {
+                price += cpu_cooler.price;
+            }
+            None => {}
+        }
+
+        for ram in &self.ram {
+            price += ram.price;
+        }
+
+        match &self.gpu {
+            Some(gpu) => {
+                price += gpu.price;
+            }
+            None => {}
+        }
+
+        for storage in &self.storage {
+            price += storage.price;
+        }
+
+        for fan in &self.fans {
+            price += fan.price;
+        }
+
+        match &self.psu {
+            Some(psu) => {
+                price += psu.price;
+            }
+            None => {}
+        }
+
+        price
+    }
+
+    #[allow(unused_assignments)]
+    pub fn works(&self) -> bool {
+        let mut out;
+
+        out = self.case.is_some();
+        out = self.mb.is_some();
+        out = self.cpu.is_some();
+        out = self.cpu_cooler.is_some();
+        out = self.ram.len() > 0;
+        out = self.gpu.is_some();
+        out = self.storage.len() > 0;
+        out = self.psu.is_some();
+
+        out
+    }
+
+    pub fn get_compute_score(&self) -> u32 {
+        let mut global_cooling = 0.0;
+        for fan in &self.fans {
+            global_cooling += fan.cooling;
+        }
+
+        let cpu = self.cpu.as_ref().unwrap();
+        let cpu_cooler = self.cpu_cooler.as_ref().unwrap();
+        let mut ram_total = 0;
+        let ram_speed = self.ram[0].speed;
+        for ram in &self.ram {
+            ram_total += ram.size;
+        }
+
+        let score = (cpu.threads / cpu.cores) * cpu.speed;
+        let score = score + (cpu_cooler.cooling + (global_cooling / 10.0)) as u32;
+        let score = score + (ram_total * (ram_speed / 10));
+
+        score
+    }
+
+    pub fn get_graphic_score(&self) -> u32 {
+        let mut global_cooling = 0.0;
+        for fan in &self.fans {
+            global_cooling += fan.cooling;
+        }
+
+        let gpu = self.gpu.as_ref().unwrap();
+
+        let score = ((gpu.cores + (gpu.rt_cores * 20)) * (gpu.speed / 10)) + (gpu.vram * 10);
+        let score = score + (global_cooling / 5.0) as u32;
+
+        score
+    }
+
+    pub fn get_total_score(&self) -> u32 {
+        self.get_compute_score() + self.get_graphic_score()
+    }
+
+    pub fn set_case(&mut self, case: Case) {        
         self.case = Some(case);
         self.mb = None;
         self.cpu = None;
@@ -89,10 +204,14 @@ impl PC {
 
     pub fn can_set_ram(&self, ram: &RAM) -> bool {
         if ram.ram_type == self.mb.as_ref().unwrap().ram_type && ram.speed <= self.mb.as_ref().unwrap().max_ram_speed && self.ram.len() as u32 <= self.mb.as_ref().unwrap().ram_slots {
-            for installed_ram in &self.ram {
-                if installed_ram.name == ram.name {
-                    return true;
+            if self.ram.len() > 0 {
+                for installed_ram in &self.ram {
+                    if installed_ram.name == ram.name {
+                        return true;
+                    }
                 }
+            } else {
+                return true
             }
 
             //return false if ram is compatible with motherboard but isn't the same ram model as the other RAMs already installed
@@ -120,7 +239,7 @@ impl PC {
         self.psu = None;
     }
 
-    pub fn can_set_storage(&self, storage: Storage) -> bool {
+    pub fn can_set_storage(&self, storage: &Storage) -> bool {
         if storage.storage_type == StorageType::M2 {
             let mut m2s_drives = 0;
             for storage in &self.storage {
@@ -200,5 +319,41 @@ impl PC {
 
     pub fn set_psu(&mut self, psu: PSU) {
         self.psu = Some(psu);
+    }
+
+    pub fn case(&self) -> Option<&Case> {
+        self.case.as_ref()
+    }
+
+    pub fn mb(&self) -> Option<&MB> {
+        self.mb.as_ref()
+    }
+
+    pub fn cpu(&self) -> Option<&CPU> {
+        self.cpu.as_ref()
+    }
+
+    pub fn cpu_cooler(&self) -> Option<&CPUCooler> {
+        self.cpu_cooler.as_ref()
+    }
+
+    pub fn ram(&self) -> &[RAM] {
+        self.ram.as_ref()
+    }
+
+    pub fn gpu(&self) -> Option<&GPU> {
+        self.gpu.as_ref()
+    }
+
+    pub fn storage(&self) -> &[Storage] {
+        self.storage.as_ref()
+    }
+
+    pub fn fans(&self) -> &[Fan] {
+        self.fans.as_ref()
+    }
+
+    pub fn psu(&self) -> Option<&PSU> {
+        self.psu.as_ref()
     }
 }

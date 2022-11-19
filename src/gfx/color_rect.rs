@@ -1,6 +1,4 @@
 use std::mem::{size_of_val, size_of};
-use glfw::Window;
-
 use crate::gl;
 use super::{vertexs::{ColorVertex, color_vertex}, vectors::{vec3::Vec3, vec2::{vec2, Vec2}}};
 

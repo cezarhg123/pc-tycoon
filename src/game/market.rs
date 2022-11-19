@@ -2,7 +2,7 @@ use glfw::Window;
 
 use crate::{gfx::{image_rect::ImageRect, color_rect::ColorRect, texture::Texture, vectors::{vec2::vec2, vec3::vec3}, text::Text}, ui::{button::Button, Ui}, WINDOW_WIDTH, WINDOW_HEIGHT, part_loader::{get_case_names, get_case, get_mb_names, get_mb, get_cpu_names, get_cpu, get_cpu_cooler_names, get_cpu_cooler, get_ram_names, get_ram, get_gpu_names, get_gpu, get_storage_names, get_storage, get_fan_names, get_fan, get_psu_names, get_psu}};
 
-use super::{player_inventory::PlayerInventory, save::Save};
+use super::save::Save;
 
 #[derive(Debug, Clone)]
 pub struct Market<'a> {
@@ -527,27 +527,88 @@ impl<'a> Market<'a> {
             }
         }
 
-        for content in &mut self.contents {
-            if content.2.clicked(window) {
-                match content.3 {
-                    "case" => {
-                        let case = get_case(&content.1[0].get_str());
-
-                        if save.money >= case.price {
-                            save.money -= case.price;
-                            save.inventory.cases.push(case.name);
+        for i in self.current_item..(self.current_item + 8) {
+            match self.contents.get_mut(i as usize) {
+                Some(content) => {
+                    if content.2.clicked(window) {
+                        match content.3 {
+                            "case" => {
+                                let case = get_case(&content.1[0].get_str());
+                                
+                                if save.money >= case.price {
+                                    save.money -= case.price;
+                                    save.inventory.cases.push(case.name);
+                                }
+                            }
+                            "mb" => {
+                                let mb = get_mb(&content.1[0].get_str());
+                                
+                                if save.money >= mb.price {
+                                    save.money -= mb.price;
+                                    save.inventory.mbs.push(mb.name);
+                                }
+                            }
+                            "cpu" => {
+                                let cpu = get_cpu(&content.1[0].get_str());
+                                
+                                if save.money >= cpu.price {
+                                    save.money -= cpu.price;
+                                    save.inventory.cpus.push(cpu.name);
+                                }
+                            }
+                            "cpu cooler" => {
+                                let cpu_cooler = get_cpu_cooler(&content.1[0].get_str());
+                                
+                                if save.money >= cpu_cooler.price {
+                                    save.money -= cpu_cooler.price;
+                                    save.inventory.cpu_coolers.push(cpu_cooler.name);
+                                }
+                            }
+                            "ram" => {
+                                let ram = get_ram(&content.1[0].get_str());
+                                
+                                if save.money >= ram.price {
+                                    save.money -= ram.price;
+                                    save.inventory.rams.push(ram.name);
+                                }
+                            }
+                            "gpu" => {
+                                let gpu = get_gpu(&content.1[0].get_str());
+                                
+                                if save.money >= gpu.price {
+                                    save.money -= gpu.price;
+                                    save.inventory.gpus.push(gpu.name);
+                                }
+                            }
+                            "storage" => {
+                                let storage = get_storage(&content.1[0].get_str());
+                                
+                                if save.money >= storage.price {
+                                    save.money -= storage.price;
+                                    save.inventory.storages.push(storage.name);
+                                }
+                            }
+                            "fan" => {
+                                let fan = get_fan(&content.1[0].get_str());
+                                
+                                if save.money >= fan.price {
+                                    save.money -= fan.price;
+                                    save.inventory.fans.push(fan.name);
+                                }
+                            }
+                            "psu" => {
+                                let psu = get_psu(&content.1[0].get_str());
+                                
+                                if save.money >= psu.price {
+                                    save.money -= psu.price;
+                                    save.inventory.psus.push(psu.name);
+                                }
+                            }
+                            _ => {}
                         }
                     }
-                    "mb" => {}
-                    "cpu" => {}
-                    "cpu cooler" => {}
-                    "ram" => {}
-                    "gpu" => {}
-                    "storage" => {}
-                    "fan" => {}
-                    "psu" => {}
-                    _ => {}
                 }
+                None => {}
             }
         }
 

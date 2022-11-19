@@ -1,4 +1,4 @@
-use glfw::{Window, Action};
+use glfw::Window;
 
 use crate::{gfx::{image_rect::ImageRect, texture::Texture, text::Text, vectors::{vec3::vec3, vec2::vec2}}, WINDOW_WIDTH, WINDOW_HEIGHT, ui::{Ui, button::Button}};
 

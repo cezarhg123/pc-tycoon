@@ -1,8 +1,5 @@
 use glfw::{Window, Action};
-use rusttype::Font;
-
 use crate::gfx::{text::Text, rect::Rect, color_rect::ColorRect, vectors::{vec2::Vec2, vec3::vec3}};
-
 use super::Ui;
 
 
@@ -15,7 +12,7 @@ pub struct Button<'a> {
 
 impl<'a> Button<'a> {
     pub fn new(text: &str, pos: Vec2<f32>, size: Vec2<f32>, ui: &'a Ui) -> Button<'a> {
-        let mut text = ui.text(text, size.y / 2.0, vec3(255, 255, 255), None);
+        let mut text = ui.text(text, size.y / 1.5, vec3(255, 255, 255), None);
         let rect = ColorRect::new(vec3(0.3, 0.3, 0.3), pos.x, pos.y, size.x, size.y);
         text.set_center(rect.get_center());
 

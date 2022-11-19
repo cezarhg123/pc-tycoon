@@ -2,10 +2,9 @@ pub mod button;
 pub mod listbox;
 pub mod info_popup;
 
-use std::{fmt::Debug, os::windows, any::Any};
-use glfw::{Window, WindowEvent, MouseButton};
+use std::fmt::Debug;
 use rusttype::Font;
-use crate::gfx::{color_rect::ColorRect, image_rect::ImageRect, vectors::{vec2::{Vec2, vec2}, vec3::Vec3}, text::Text};
+use crate::gfx::{vectors::{vec2::{Vec2, vec2}, vec3::Vec3}, text::Text};
 
 use self::{button::Button, listbox::ListBox, info_popup::InfoPopup};
 

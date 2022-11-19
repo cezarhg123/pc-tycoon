@@ -1,7 +1,5 @@
-use glfw::{Window, CursorMode};
-
+use glfw::Window;
 use crate::{gfx::{vectors::{vec2::{Vec2, vec2}, vec3::vec3}, color_rect::ColorRect, text::Text}, game::Scroll};
-
 use super::Ui;
 
 #[derive(Debug, Clone)]

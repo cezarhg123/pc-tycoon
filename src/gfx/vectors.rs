@@ -5,7 +5,7 @@ pub mod vec2 {
         pub y: T
     }
 
-    pub fn vec2<T: Copy>(x: T, y: T) -> Vec2<T> {
+    pub const fn vec2<T: Copy>(x: T, y: T) -> Vec2<T> {
         Vec2 {
             x,
             y
@@ -30,7 +30,7 @@ pub mod vec3 {
         pub z: T
     }
 
-    pub fn vec3<T: Copy>(x: T, y: T, z: T) -> Vec3<T> {
+    pub const fn vec3<T: Copy>(x: T, y: T, z: T) -> Vec3<T> {
         Vec3 {
             x,
             y,

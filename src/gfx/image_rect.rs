@@ -1,9 +1,5 @@
 use std::mem::{size_of_val, size_of};
-
-use glfw::Window;
-
 use crate::gl;
-
 use super::{vertexs::{UvVertex, uv_vertex}, texture::Texture, vectors::vec2::{vec2, Vec2}};
 
 #[derive(Debug, Clone)]

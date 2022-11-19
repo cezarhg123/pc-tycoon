@@ -1,8 +1,5 @@
-use glfw::Window;
 use image::{DynamicImage, Rgba};
 use rusttype::{Font, Scale, point};
-use crate::ui::{button::Button};
-
 use super::{vectors::{vec3::Vec3, vec2::Vec2}, image_rect::ImageRect, texture::Texture, rect::Rect};
 
 #[derive(Debug, Clone)]

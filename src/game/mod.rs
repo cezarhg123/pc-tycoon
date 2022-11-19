@@ -6,10 +6,11 @@ mod player_inventory;
 mod pc;
 mod inventory;
 mod market;
+mod pcbuilder;
 
 use glfw::{Window, WindowEvent};
-use crate::{gfx::{color_rect::ColorRect, image_rect::ImageRect, vectors::{vec2::vec2, vec3::vec3}, text::Text, rect::Rect}, ui::Ui};
-use self::{mainmenu::MainMenu, ingame::InGame, save::{Save, load_save, save_game}, player_inventory::PlayerInventory, inventory::Inventory, market::Market};
+use crate::ui::Ui;
+use self::{mainmenu::MainMenu, ingame::InGame, save::{Save, load_save, save_game}, inventory::Inventory, market::Market, pcbuilder::PCBuilder};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum GameState {
@@ -35,6 +36,7 @@ pub struct Game<'a> {
     pub scrolls: Vec<Scroll>,
     mainmenu: Option<MainMenu<'a>>,
     ingame: Option<InGame<'a>>,
+    pc_builder: Option<PCBuilder<'a>>,
     inventory: Option<Inventory<'a>>,
     market: Option<Market<'a>>
 }
@@ -48,6 +50,7 @@ impl<'a> Game<'a> {
             scrolls: Vec::new(),
             mainmenu: Some(MainMenu::new(ui)),
             ingame: None,
+            pc_builder: None,
             inventory: None,
             market: None
         }
@@ -87,7 +90,11 @@ impl<'a> Game<'a> {
         match &mut self.ingame {
             Some(ingame) => {
                 match ingame.run(window) {
-                    GameState::PcBuilder => {}
+                    GameState::PcBuilder => {
+                        self.game_state = GameState::PcBuilder;
+                        self.pc_builder = Some(PCBuilder::new(self.ui));
+                        delete_ingame = true;
+                    }
                     GameState::Inventory => {
                         self.game_state = GameState::Inventory;
                         self.inventory = Some(Inventory::new(&self.active_save, self.ui));
@@ -106,6 +113,29 @@ impl<'a> Game<'a> {
 
         if delete_ingame {
             self.ingame = None;
+        }
+    }
+
+    fn pc_builder(&mut self, window: &Window) {
+        if self.game_state != GameState::PcBuilder {
+            return;
+        }
+
+        let mut delete_pcbuilder = false;
+
+        match &mut self.pc_builder {
+            Some(pc_builder) => {
+                if pc_builder.run(window, &mut self.active_save, self.ui) {
+                    self.game_state = GameState::InGame;
+                    self.ingame = Some(InGame::new(&self.active_save, self.ui));
+                    delete_pcbuilder = true;
+                }
+            }
+            None => {}
+        }
+
+        if delete_pcbuilder {
+            self.pc_builder = None;
         }
     }
 
@@ -173,6 +203,7 @@ impl<'a> Game<'a> {
     pub fn run(&mut self, window: &mut Window) {
         self.mainmenu(window);
         self.ingame(window);
+        self.pc_builder(window);
         self.inventory(window);
         self.market(window);
     }
@@ -188,6 +219,13 @@ impl<'a> Game<'a> {
         match &self.ingame {
             Some(ingame) => {
                 ingame.draw();
+            }
+            None => {}
+        }
+
+        match &self.pc_builder {
+            Some(pc_builder) => {
+                pc_builder.draw();
             }
             None => {}
         }

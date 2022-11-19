@@ -1,7 +1,5 @@
 use serde::{Serialize, Deserialize};
 
-use super::pc::PC;
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayerInventory {
     pub cases: Vec<String>,

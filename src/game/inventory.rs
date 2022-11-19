@@ -1,6 +1,6 @@
 use glfw::Window;
 
-use crate::{gfx::{image_rect::ImageRect, color_rect::ColorRect, texture::Texture, vectors::{vec2::vec2, vec3::vec3}, text::Text}, ui::{Ui, button::Button, listbox::ListBox, info_popup::InfoPopup}, WINDOW_WIDTH, WINDOW_HEIGHT, part_loader::{get_case, get_mb, get_cpu, get_cpu_cooler, get_ram, get_gpu, get_storage, get_fan, get_psu}};
+use crate::{gfx::{image_rect::ImageRect, texture::Texture, vectors::{vec2::vec2, vec3::vec3}, text::Text}, ui::{Ui, button::Button, listbox::ListBox, info_popup::InfoPopup}, WINDOW_WIDTH, WINDOW_HEIGHT, part_loader::{get_case, get_mb, get_cpu, get_cpu_cooler, get_ram, get_gpu, get_storage, get_fan, get_psu}};
 
 use super::{save::Save, Scroll};
 

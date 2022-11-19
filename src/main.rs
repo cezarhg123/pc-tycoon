@@ -5,14 +5,15 @@ pub mod gfx;
 pub mod ui;
 pub mod game;
 pub mod part_loader;
+pub mod timer;
 
 use game::Game;
-use gfx::{color_rect, vectors::{self, vec2::vec2}, image_rect::ImageRect, texture::Texture, text::Text};
-use color_rect::ColorRect;
+use gfx::vectors::{self, vec2::vec2};
 use glfw::{Context, Key, Action};
 use part_loader::load_parts;
 use rusttype::Font;
-use ui::{Ui, listbox::ListBox};
+use timer::Timer;
+use ui::Ui;
 use vectors::vec3::vec3;
 
 pub const WINDOW_WIDTH: u32 = 1920;
@@ -42,11 +43,24 @@ fn main() {
     load_parts();
     let ui = Ui::new(font);
     let mut game = Game::new(&ui);
-    
+
+    let mut fps_text = ui.text("0", 20.0, vec3(0, 255, 0), Some(vec2(0.0, 0.0)));
+    let mut fps = 0;
+    let mut fps_timer = Timer::new();
+
     while !window.should_close() {
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+
+        if fps_timer.elapsed() >= 1.0 {
+            fps_text = ui.text(fps.to_string().as_str(), 20.0, vec3(0, 255, 0), Some(vec2(0.0, 0.0)));
+            fps = 0;
+            fps_timer.reset();
+        } else {
+            fps += 1;
+            fps_timer.tick();
         }
 
         if window.get_key(Key::Escape) == Action::Press {
@@ -55,6 +69,7 @@ fn main() {
 
         game.run(&mut window);
         game.draw();
+        fps_text.draw();
 
         window.swap_buffers();
         glfw.poll_events();
