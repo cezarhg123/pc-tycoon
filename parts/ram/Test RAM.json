@@ -1,7 +1,0 @@
-{
-  "name": "Test RAM",
-  "alias": "test_ram",
-  "size": 8,
-  "speed": 3200,
-  "price": 100
-}

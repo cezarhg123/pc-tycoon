@@ -1,0 +1,13 @@
+{
+  "name": "Test Case",
+  "price": 120,
+  "case_form_factor": "FullTower",
+  "mb_form_factor": "ATX",
+  "max_fans": 8,
+  "max_ssd": 4,
+  "max_hdd": 4,
+  "max_cpu_cooler_height": 200,
+  "max_gpu_length": 380,
+  "max_gpu_width": 200,
+  "max_power_supply_length": 180
+}

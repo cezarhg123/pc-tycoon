@@ -1,0 +1,8 @@
+{
+  "name": "Test Cooler",
+  "price": 40,
+  "power_usage": 10,
+  "socket_type": "AM4",
+  "height": 120,
+  "cooling": 1.5
+}

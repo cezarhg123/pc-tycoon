@@ -1,9 +1,29 @@
+use std::str::FromStr;
+
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum MBFormFactor {
     ATX,
     MicroATX
+}
+
+impl FromStr for MBFormFactor {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "atx" => {
+                Ok(Self::ATX)
+            }
+            "micro atx" => {
+                Ok(Self::MicroATX)
+            }
+            _ => {
+                Err("input is not 'atx' or 'micro atx'".to_string())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -13,10 +33,49 @@ pub enum SocketType {
     LGA1200
 }
 
+impl FromStr for SocketType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "am4" => {
+                Ok(Self::AM4)
+            }
+            "lga1151" => {
+                Ok(Self::LGA1151)
+            }
+            "lga1200" => {
+                Ok(Self::LGA1200)
+            }
+            _ => {
+                Err("input is not 'am4', 'lga1151' or 'lga1200'".to_string())
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum CaseFormFactor {
     FullTower,
     MidTower
+}
+
+impl FromStr for CaseFormFactor {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "full tower" => {
+                Ok(Self::FullTower)
+            }
+            "mid tower" => {
+                Ok(Self::MidTower)
+            }
+            _ => {
+                Err("input not 'full tower' or 'mid tower'".to_string())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -25,11 +84,50 @@ pub enum RamType {
     DDR4
 }
 
+impl FromStr for RamType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "ddr3" => {
+                Ok(Self::DDR3)
+            }
+            "ddr4" => {
+                Ok(Self::DDR4)
+            }
+            _ => {
+                Err("input not 'ddr3' or 'ddr4'".to_string())
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum StorageType {
     M2,
     SSD,
     HDD
+}
+
+impl FromStr for StorageType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "m2" => {
+                Ok(Self::M2)
+            }
+            "ssd" => {
+                Ok(Self::SSD)
+            }
+            "hdd" => {
+                Ok(Self::HDD)
+            }
+            _ => {
+                Err("input not 'm2', 'ssd' or 'hdd'".to_string())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

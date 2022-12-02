@@ -1,287 +1,541 @@
-use imgui_glfw_rs::glfw::Action;
-use imgui_glfw_rs::glfw::Window;
-use imgui_glfw_rs::imgui::Ui;
-use serde::{Serialize, Deserialize};
-use crate::components_list::*;
-use crate::str_to_imstr;
-use super::GameState;
+use glfw::Window;
 
+use crate::{gfx::{image_rect::ImageRect, texture::Texture, vectors::{vec2::vec2, vec3::vec3}, text::Text}, ui::{Ui, button::Button, listbox::ListBox, info_popup::InfoPopup}, WINDOW_WIDTH, WINDOW_HEIGHT, part_loader::{get_case, get_mb, get_cpu, get_cpu_cooler, get_ram, get_gpu, get_storage, get_fan, get_psu}};
 
+use super::{save::Save, Scroll};
 
-///INVENTORY STORES ITEM ALIASES
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Inventory {
-    pub cases: Vec<String>,
-    pub motherboards: Vec<String>,
-    pub cpus: Vec<String>,
-    pub cpu_coolers: Vec<String>,
-    pub rams: Vec<String>,
-    pub gpus: Vec<String>,
-    pub storages: Vec<String>,
-    pub fans: Vec<String>,
-    pub power_supplys: Vec<String>
+#[derive(Debug, Clone)]
+pub struct Inventory<'a> {
+    background: ImageRect,
+    back_button: Button<'a>,
+    popups: Vec<InfoPopup<'a>>,
+    case_list: ListBox<'a>,
+    mb_list: ListBox<'a>,
+    cpu_list: ListBox<'a>,
+    cpu_cooler_list: ListBox<'a>,
+    ram_list: ListBox<'a>,
+    gpu_list: ListBox<'a>,
+    storage_list: ListBox<'a>,
+    fan_list: ListBox<'a>,
+    psu_list: ListBox<'a>,
+    label_texts: Vec<Text<'a>>
 }
 
-impl Inventory {
-    pub fn new() -> Self {
+impl<'a> Inventory<'a> {
+    pub fn new(save: &Save, ui: &'a Ui) -> Inventory<'a> {
+        // y + 220
+
+        let case_list = if save.inventory.cases.as_slice().len() > 0 {
+            ListBox::new(vec2(20.0, 140.0), vec2(600.0, 140.0), save.inventory.cases.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(20.0, 140.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut case_label = ui.text("Cases", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        case_label.set_center(case_list.get_center());
+        case_label.set_top(case_list.get_top() - 30.0);
+
+        let mb_list = if save.inventory.mbs.as_slice().len() > 0 {
+            ListBox::new(vec2(660.0, 140.0), vec2(600.0, 140.0), save.inventory.mbs.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(660.0, 140.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut mb_label = ui.text("Motherboards", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        mb_label.set_center(mb_list.get_center());
+        mb_label.set_top(mb_list.get_top() - 30.0);
+
+        let cpu_list = if save.inventory.cpus.as_slice().len() > 0 {
+            ListBox::new(vec2(1300.0, 140.0), vec2(600.0, 140.0), save.inventory.cpus.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(1300.0, 140.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut cpu_label = ui.text("CPUs", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        cpu_label.set_center(cpu_list.get_center());
+        cpu_label.set_top(cpu_list.get_top() - 30.0);
+
+        let cpu_cooler_list = if save.inventory.cpu_coolers.as_slice().len() > 0 {
+            ListBox::new(vec2(20.0, 360.0), vec2(600.0, 140.0), save.inventory.cpu_coolers.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(20.0, 360.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut cpu_cooler_label = ui.text("CPU Coolers", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        cpu_cooler_label.set_center(cpu_cooler_list.get_center());
+        cpu_cooler_label.set_top(cpu_cooler_list.get_top() - 30.0);
+
+        let ram_list = if save.inventory.rams.as_slice().len() > 0 {
+            ListBox::new(vec2(660.0, 360.0), vec2(600.0, 140.0), save.inventory.rams.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(660.0, 360.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut ram_label = ui.text("RAMs", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        ram_label.set_center(ram_list.get_center());
+        ram_label.set_top(ram_list.get_top() - 30.0);
+
+        let gpu_list = if save.inventory.gpus.as_slice().len() > 0 {
+            ListBox::new(vec2(1300.0, 360.0), vec2(600.0, 140.0), save.inventory.gpus.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(1300.0, 360.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut gpu_label = ui.text("GPUs", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        gpu_label.set_center(gpu_list.get_center());
+        gpu_label.set_top(gpu_list.get_top() - 30.0);
+
+        let storage_list = if save.inventory.storages.as_slice().len() > 0 {
+            ListBox::new(vec2(20.0, 580.0), vec2(600.0, 140.0), save.inventory.storages.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(20.0, 580.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut storage_label = ui.text("Storages", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        storage_label.set_center(storage_list.get_center());
+        storage_label.set_top(storage_list.get_top() - 30.0);
+
+        let fan_list = if save.inventory.fans.as_slice().len() > 0 {
+            ListBox::new(vec2(660.0, 580.0), vec2(600.0, 140.0), save.inventory.fans.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(660.0, 580.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut fan_label = ui.text("Fans", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        fan_label.set_center(fan_list.get_center());
+        fan_label.set_top(fan_list.get_top() - 30.0);
+
+        let psu_list = if save.inventory.psus.as_slice().len() > 0 {
+            ListBox::new(vec2(1300.0, 580.0), vec2(600.0, 140.0), save.inventory.psus.as_slice(), 24.0, ui)
+        } else {
+            ListBox::new(vec2(1300.0, 580.0), vec2(600.0, 140.0), ["None".to_string()].as_slice(), 24.0, ui)
+        };
+
+        let mut psu_label = ui.text("Power Supplies", 30.0, vec3(0, 0, 0), Some(vec2(40.0, 100.0)));
+        psu_label.set_center(psu_list.get_center());
+        psu_label.set_top(psu_list.get_top() - 30.0);
+
         Inventory {
-            cases: Vec::new(),
-            motherboards: Vec::new(),
-            cpus: Vec::new(),
-            cpu_coolers: Vec::new(),
-            rams: Vec::new(),
-            gpus: Vec::new(),
-            storages: Vec::new(),
-            fans: Vec::new(),
-            power_supplys: Vec::new(),
+            background: ImageRect::new(Texture::from_path("textures/inventory-background.png"), 0.0, 0.0, WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32),
+            back_button: ui.button("a", vec2(1750.0, 0.0), vec2(170.0, 85.0)),
+            popups: Vec::new(),
+            case_list,
+            mb_list,
+            cpu_list,
+            cpu_cooler_list,
+            ram_list,
+            gpu_list,
+            storage_list,
+            fan_list,
+            psu_list,
+            label_texts: vec![
+                case_label,
+                mb_label,
+                cpu_label,
+                cpu_cooler_label,
+                ram_label,
+                gpu_label,
+                storage_label,
+                fan_label,
+                psu_label
+            ]
         }
     }
-}
 
-pub fn show_inventory(inventory: &Inventory, window: &Window, ui: &Ui) -> bool {
-    let mut show_inventory = true;
+    pub fn run(&mut self, window: &Window, scrolls: &mut Vec<Scroll>, ui: &'a Ui) -> bool {
+        self.case_list.run(window, scrolls);
+        self.mb_list.run(window, scrolls);
 
-    ui.window(str_to_imstr("Inventory\0"))
-    .collapsible(false)
-    .build(|| {
-        if ui.collapsing_header(str_to_imstr("Cases\0")).build() {
-            for case in &inventory.cases {
-                ui.indent();
-                let mut case = get_case_list().iter().find(|f| f.alias == *case).unwrap().clone();
-                case.name.pop();
-                                
-                ui.text(&case.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("Case Info\0"), || {
-                    ui.text(format!("Size - {:#?}", case.size));
-                    ui.text(format!("Max fans - {}", case.max_fans));
-                    ui.text(format!("Max CPU Cooler Height - {}", case.max_cpu_cooler_height));
-                    ui.text(format!("Max GPU Length - {}", case.max_gpu_length));
-                    ui.text(format!("Max GPU Width - {}", case.max_gpu_width));
-                    ui.text(format!("Max PSU Length - {}", case.max_power_supply_length));
-                    ui.text(format!("Max 2.5 Drives - {}", case.max_drives_2_5));
-                    ui.text(format!("Max 3.5 Drives - {}", case.max_drives_3_5));
-                    ui.text(format!("Price - {}", case.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("Case Info\0"));
+        let cursor_pos = window.get_cursor_pos().try_into().unwrap();
+        let mut info = Vec::new();
+        let mut info_type = String::new();
+
+        // CASE INFO POPUP
+        for text in &self.case_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "case info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let case = get_case(text.get_str().as_str());
+                    info.append(&mut vec![
+                        case.name,
+                        format!("Price - {}", case.price),
+                        format!("Case Form Factor - {:#?}", case.case_form_factor),
+                        format!("Motherboard Form Factor - {:#?}", case.mb_form_factor),
+                        format!("Max Fans - {}", case.max_fans),
+                        format!("Max SSD - {}", case.max_ssd),
+                        format!("Max HDD - {}", case.max_hdd),
+                        format!("Max CPU Cooler Height - {}", case.max_cpu_cooler_height),
+                        format!("Max GPU Length - {}", case.max_gpu_length),
+                        format!("Max GPU Width - {}", case.max_gpu_width),
+                        format!("Max Power Supply Length - {}", case.max_power_supply_length)    
+                    ]);
                 }
 
-                ui.unindent();
-            }
-        }
-
-        if ui.collapsing_header(str_to_imstr("Motherboards\0")).build() {
-            for motherboard in &inventory.motherboards {
-                ui.indent();
-                let mut motherboard = get_motherboard_list().iter().find(|f| f.alias == *motherboard).unwrap().clone();
-                motherboard.name.pop();
-                                
-                ui.text(&motherboard.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("Motherboard Info\0"), || {
-                    ui.text(format!("Size - {:#?}", motherboard.size));
-                    ui.text(format!("Socket Type - {:#?}", motherboard.socket_type));
-                    ui.text(format!("Max CPU Speed - {}", motherboard.max_cpu_speed));
-                    ui.text(format!("Max RAM Speed - {}", motherboard.max_ram_speed));
-                    ui.text(format!("Ram Slots - {}", motherboard.ram_slots));
-                    ui.text(format!("M.2 Slots - {}", motherboard.m2_slots));
-                    ui.text(format!("Max Sata Slots - {} (doesn't matter for now)", motherboard.max_storage_devices));
-                    ui.text(format!("Price - {}", motherboard.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("Motherboard Info\0"));
-                }
-
-                ui.unindent();
-            }
-        }
-
-        if ui.collapsing_header(str_to_imstr("CPUs\0")).build() {
-            for cpu in &inventory.cpus {
-                ui.indent();
-                let mut cpu = get_cpu_list().iter().find(|f| f.alias == *cpu).unwrap().clone();
-                cpu.name.pop();
-                                
-                ui.text(&cpu.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("CPU Info\0"), || {
-                    ui.text(format!("Socket Type - {:#?}", cpu.socket_type));
-                    ui.text(format!("Cores - {}", cpu.cores));
-                    ui.text(format!("Threads - {}", cpu.threads));
-                    ui.text(format!("Speed - {}MHz", cpu.speed));
-                    ui.text(format!("{}W Usage", cpu.power_usage));
-                    ui.text(format!("Price - {}", cpu.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("CPU Info\0"));
-                }
-
-                ui.unindent();
-            }
-        }
-
-        if ui.collapsing_header(str_to_imstr("CPU Coolers\0")).build() {
-            for cpu_cooler in &inventory.cpu_coolers {
-                ui.indent();
-                let mut cpu_cooler = get_cpu_cooler_list().iter().find(|f| f.alias == *cpu_cooler).unwrap().clone();
-                cpu_cooler.name.pop();
-                                
-                ui.text(&cpu_cooler.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("CPU Cooler Info\0"), || {
-                    ui.text(format!("Socket Type - {:#?}", cpu_cooler.socket_type));
-                    ui.text(format!("Height - {}mm", cpu_cooler.height));
-                    ui.text(format!("Effectiveness - {}", cpu_cooler.base));
-                    ui.text(format!("{}W Usage", cpu_cooler.power_usage));
-                    ui.text(format!("Price - {}", cpu_cooler.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("CPU Cooler Info\0"));
-                }
-
-                ui.unindent();
-            }
-        }
-
-        if ui.collapsing_header(str_to_imstr("RAMs\0")).build() {
-            for ram in &inventory.rams {
-                ui.indent();
-                let mut ram = get_ram_list().iter().find(|f| f.alias == *ram).unwrap().clone();
-                ram.name.pop();
-                                
-                ui.text(&ram.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("RAM Info\0"), || {
-                    ui.text(format!("{}GB", ram.size));
-                    ui.text(format!("{}MHz", ram.speed));
-                    ui.text(format!("Price - {}", ram.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("RAM Info\0"));
-                }
-
-                ui.unindent();
-            }
-        }
-
-        if ui.collapsing_header(str_to_imstr("GPUs\0")).build() {
-            for gpu in &inventory.gpus {
-                ui.indent();
-                let mut gpu = get_gpu_list().iter().find(|f| f.alias == *gpu).unwrap().clone();
-                gpu.name.pop();
-                                
-                ui.text(&gpu.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("GPU Info\0"), || {
-                    ui.text(format!("{} Cores", gpu.cores));
-                    ui.text(format!("{} Ray Tracing Cores", gpu.rt_cores));
-                    ui.text(format!("{}MHz GPU Clock", gpu.speed));
-                    ui.text(format!("{}GB Vram", gpu.vram));
-                    ui.text(format!("{}mm Length", gpu.length));
-                    ui.text(format!("{}mm Width", gpu.width));
-                    ui.text(format!("Cooling - {}", gpu.cooling));
-                    ui.text(format!("{}W Usage", gpu.power_usage));
-                    ui.text(format!("Price - {}", gpu.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("GPU Info\0"));
-                }
-
-                ui.unindent();
-            }
-        }
-
-        if ui.collapsing_header(str_to_imstr("Storage Devices\0")).build() {
-            for storage in &inventory.storages {
-                ui.indent();
-                let mut storage = get_storage_list().iter().find(|f| f.alias == *storage).unwrap().clone();
-                storage.name.pop();
-                                
-                ui.text(&storage.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("Storage Device Info\0"), || {
-                    ui.text(format!("Type - {:#?}", storage.storage_device_type));
-                    ui.text(format!("{}GB", storage.size));
-                    ui.text(format!("Price - {}", storage.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("Storage Device Info\0"));
-                }
-
-                ui.unindent();
-            }
-        }
-
-        if ui.collapsing_header(str_to_imstr("Fans\0")).build() {
-            for fan in &inventory.fans {
-                ui.indent();
-                let mut fan = get_fan_list().iter().find(|f| f.alias == *fan).unwrap().clone();
-                fan.name.pop();
-                                
-                ui.text(&fan.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("Fan Info\0"), || {
-                    if fan.large {
-                        ui.text("140mm");
-                    } else {
-                        ui.text("120mm");
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
                     }
-                    ui.text(format!("Cooling - {}", fan.effectiveness));
-                    ui.text(format!("Price - {}", fan.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("Fan Info\0"));
+                    None => {}
                 }
-
-                ui.unindent();
             }
         }
 
-        if ui.collapsing_header(str_to_imstr("Power Supplys\0")).build() {
-            for power_supply in &inventory.power_supplys {
-                ui.indent();
-                let mut power_supply = get_power_supply_list().iter().find(|f| f.alias == *power_supply).unwrap().clone();
-                power_supply.name.pop();
-                                
-                ui.text(&power_supply.name);
-                let hovered = ui.is_item_hovered();
-                let clicked = window.get_mouse_button(imgui_glfw_rs::glfw::MouseButton::Button2) == Action::Press;
-                ui.popup(str_to_imstr("Power Supply Info\0"), || {
-                    ui.text(format!("Form Factor - {:#?}", power_supply.form_factor));
-                    ui.text(format!("{}mm Length", power_supply.length));
-                    ui.text(format!("{}W", power_supply.wattage));
-                    ui.text(format!("Price - {}", power_supply.price));
-                });
-                
-                if hovered && clicked {
-                    ui.open_popup(str_to_imstr("Power Supply Info\0"));
+        // MB INFO POPUP
+        for text in &self.mb_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "mb info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let mb = get_mb(text.get_str().as_str());
+                    info.append(&mut vec![
+                        mb.name,
+                        format!("Price - {}", mb.price),
+                        format!("Power Usage - {}", mb.power_usage),
+                        format!("Motherboard Form Factor - {:#?}", mb.mb_form_factor),
+                        format!("Socket Type - {:#?}", mb.socket_type),
+                        format!("Ram Type - {:#?}", mb.ram_type),
+                        format!("Ram Slots - {}", mb.ram_slots),
+                        format!("M.2 Slots - {}", mb.m2_slots),
+                        format!("Sata Slots - {}", mb.sata_slots),
+                        format!("Max CPU Speed - {}MHz", mb.max_cpu_speed),
+                        format!("Max RAM Speed - {}MHz", mb.max_ram_speed)
+                    ]);
                 }
 
-                ui.unindent();
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
             }
         }
 
-        if ui.button(str_to_imstr("Exit\0"), [60.0, 30.0]) {
-            show_inventory = false;
-        }
-    });
+        // CPU INFO POPUP
+        for text in &self.cpu_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
 
-    show_inventory
+            if text.contains(cursor_pos) {
+                info_type = "cpu info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let cpu = get_cpu(text.get_str().as_str());
+                    info.append(&mut vec![
+                        cpu.name,
+                        format!("Price - {}", cpu.price),
+                        format!("Power Usage - {}", cpu.power_usage),
+                        format!("Socket Type - {:#?}", cpu.socket_type),
+                        format!("Cores - {}", cpu.cores),
+                        format!("Threads - {}", cpu.threads),
+                        format!("Speed - {}MHz", cpu.speed)
+                    ]);
+                }
+
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        // CPU COOLER INFO POPUP
+        for text in &self.cpu_cooler_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "cpu cooler info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let cpu_cooler = get_cpu_cooler(text.get_str().as_str());
+                    info.append(&mut vec![
+                        cpu_cooler.name,
+                        format!("Price - {}", cpu_cooler.price),
+                        format!("Power Usage - {}", cpu_cooler.power_usage),
+                        format!("Socket Type - {:#?}", cpu_cooler.socket_type),
+                        format!("Height - {}", cpu_cooler.height),
+                        format!("Cooling - {}", cpu_cooler.cooling)
+                    ]);
+                }
+
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        // RAM INFO POPUP
+        for text in &self.ram_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "ram info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let ram = get_ram(text.get_str().as_str());
+                    info.append(&mut vec![
+                        ram.name,
+                        format!("Price - {}", ram.price),
+                        format!("Power Usage - {}", ram.power_usage),
+                        format!("Ram Type - {:#?}", ram.ram_type),
+                        format!("Size - {}GB", ram.size),
+                        format!("Speed - {}MHz", ram.speed)
+                    ]);
+                }
+
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        // GPU INFO POPUP
+        for text in &self.gpu_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "gpu info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let gpu = get_gpu(text.get_str().as_str());
+                    info.append(&mut vec![
+                        gpu.name,
+                        format!("Price - {}", gpu.price),
+                        format!("Power Usage - {}", gpu.power_usage),
+                        format!("Length - {}", gpu.length),
+                        format!("Width - {}", gpu.width),
+                        format!("Cores - {}", gpu.cores),
+                        format!("Ray Tracing Cores - {}", gpu.rt_cores),
+                        format!("Speed - {}MHz", gpu.speed),
+                        format!("VRAM - {}GB", gpu.vram)
+                    ]);
+                }
+
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        // STORAGE INFO POPUP
+        for text in &self.storage_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "storage info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let storage = get_storage(text.get_str().as_str());
+                    info.append(&mut vec![
+                        storage.name,
+                        format!("Price - {}", storage.price),
+                        format!("Power Usage - {}", storage.power_usage),
+                        format!("Storage Type - {:#?}", storage.storage_type),
+                        format!("Size - {}GB", storage.size),
+                        format!("Speed - {}MB/S", storage.speed)
+                    ]);
+                }
+
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        // FAN INFO POPUP
+        for text in &self.fan_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "fan info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let fan = get_fan(text.get_str().as_str());
+                    info.append(&mut vec![
+                        fan.name,
+                        format!("Price - {}", fan.price),
+                        format!("Power Usage - {}", fan.power_usage),
+                        if fan.large {
+                            format!("Size - 140MM")
+                        } else {
+                            format!("Size - 120MM4")
+                        },
+                        format!("Cooling - {}", fan.cooling)
+                    ]);
+                }
+
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        // PSU INFO POPUP
+        for text in &self.psu_list.texts {
+            if info_type.len() != 0 {
+                break;
+            }
+
+            if text.contains(cursor_pos) {
+                info_type = "psu info".to_string();
+
+                if text.get_str() == "None".to_string() {
+                    info.push("None".to_string());
+                } else {
+                    let psu = get_psu(text.get_str().as_str());
+                    info.append(&mut vec![
+                        psu.name,
+                        format!("Price - {}", psu.price),
+                        format!("Wattage - {}W", psu.wattage),
+                        format!("Length - {}MM", psu.length)
+                    ]);
+                }
+
+                break;
+            } else {
+                info_type.clear();
+                let out = self.popups.iter().position(|s| s.id == info_type);
+                match out {
+                    Some(i) => {
+                        self.popups.remove(i);
+                    }
+                    None => {}
+                }
+            }
+        }
+        
+        // using 'info_type' to check if any popups should be created
+        // if not then just pop from the 'popups' vector
+        if info_type.len() > 0 {
+            let popup = ui.info_popup(info_type.as_str(), info.as_slice(), cursor_pos, 24.0);
+            
+            // just push the current popup if there are no popups
+            if self.popups.len() > 0 {
+                for i in 0..self.popups.len() {
+                    // if the current popup already exists then update it in the vector and break
+                    // if not then just push the popup to the list and break
+                    if self.popups[i].id == info_type.as_str() {
+                        self.popups[i] = popup;
+                        break;
+                    } else {
+                        self.popups.push(popup);
+                        break;
+                    }
+                }
+            } else {
+                self.popups.push(popup);
+            }
+        } else {
+            self.popups.pop();
+        }
+            
+        self.back_button.clicked(window)
+    }
+
+    pub fn draw(&self) {
+        self.background.draw();
+
+        for text in &self.label_texts {
+            text.draw();
+        }
+
+        self.case_list.draw();
+        self.mb_list.draw();
+        self.cpu_list.draw();
+        self.cpu_cooler_list.draw();
+        self.ram_list.draw();
+        self.gpu_list.draw();
+        self.storage_list.draw();
+        self.fan_list.draw();
+        self.psu_list.draw();
+
+        for popup in &self.popups {
+            popup.draw();
+        }
+    }
 }
