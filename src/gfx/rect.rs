@@ -15,6 +15,7 @@ pub struct Rect {
 }
 
 impl Rect {
+    /// `position` is the centre of the rect
     pub fn new(position: Vec2<f32>, size: Vec2<f32>, display: &Display) -> Rect {
         let vbo = VertexBuffer::new(display, create_color_vertices(size).as_slice()).unwrap();
         let ebo = IndexBuffer::new(display, glium::index::PrimitiveType::TrianglesList, &[0, 2, 1, 0, 3, 2]).unwrap();

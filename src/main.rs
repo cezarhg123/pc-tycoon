@@ -2,8 +2,9 @@
 // #![windows_subsystem = "windows"]
 
 use std::io::Cursor;
-
+use game::Game;
 use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::LogicalSize, ContextBuilder, event::{WindowEvent, Event}}, Display, Surface};
+use log::{save_log, log};
 use math::vec2::vec2;
 
 pub mod game;
@@ -11,6 +12,8 @@ pub mod part_loader;
 pub mod timer;
 pub mod gfx;
 pub mod math;
+pub mod ui;
+pub mod log;
 
 fn main() {
     let mut event_loop = EventLoop::new();
@@ -21,20 +24,15 @@ fn main() {
     let cb = ContextBuilder::new();
 
     let display = Display::new(wb, cb, &event_loop).unwrap();
-    
-    let image = image::load(Cursor::new(std::fs::read("textures/background.png").unwrap()), image::ImageFormat::Png).unwrap();
-    let mut rect = gfx::Rect::new(vec2(0.0, 0.0), vec2(100.0, 100.0), &display);
-    rect.set_texture(image, &display);
-    rect.set_left(0.0);
-    rect.set_top(300.0);
-    rect.set_width(500.0, &display);
+
+    let game = Game::new(&display);
 
     // main loop
     event_loop.run(move |ev, _, control_flow| {
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 0.0);
         //drawing
-        rect.draw(&mut target);
+        game.draw(&mut target);
         //finish drawing
         target.finish().unwrap();
         
@@ -46,6 +44,7 @@ fn main() {
             } => match event {
                 WindowEvent::CloseRequested => {
                     *control_flow = ControlFlow::Exit;
+                    save_log();
                     return;
                 }
                 _ => return
