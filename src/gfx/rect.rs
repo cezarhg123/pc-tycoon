@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use glium::{vertex::VertexBufferAny, Program, VertexBuffer, Display, IndexBuffer, Frame, Surface, uniforms::EmptyUniforms, uniform, DrawParameters, Blend, texture::{SrgbTexture2d, RawImage2d}};
 use image::{DynamicImage, GenericImageView};
 use crate::{math::{vec2::{Vec2, vec2}, vec4::{vec4, Vec4}}, get_window_width, get_window_height, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT};
@@ -40,7 +41,7 @@ impl Rect {
         self.color = color;
     }
 
-    pub fn set_texture(&mut self, texture: DynamicImage, display: &Display) {
+    pub fn set_texture(&mut self, texture: &DynamicImage, display: &Display) {
         self.shader = Program::from_source(display, &IMAGE_VERTEX_SRC, &IMAGE_FRAG_SRC, None).unwrap();
         let vbo = VertexBuffer::new(display, create_uv_vertices(self.size).as_slice()).unwrap();
         self.vbo = VertexBufferAny::from(vbo);
@@ -48,6 +49,11 @@ impl Rect {
         let texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
         let texture = SrgbTexture2d::new(display, texture).unwrap();
         self.texture = Some(texture);
+        self.color = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+
+    pub fn remove_texture(&mut self) {
+        self.texture = None;
     }
 
     pub fn left(&self) -> f32 {
@@ -131,7 +137,8 @@ impl Rect {
             Some(texture) => {
                 let uniforms = uniform! {
                     offset: position,
-                    tex: texture
+                    tex: texture,
+                    color: self.color.as_raw()
                 };
 
                 target.draw(&self.vbo, &self.ebo, &self.shader, &uniforms, &DrawParameters {
@@ -157,8 +164,8 @@ impl Rect {
 }
 
 fn create_color_vertices(size: Vec2<f32>) -> [ColorVertex; 4] {
-    let x = ((size.x / 2.0) / get_window_width() as f32);
-    let y = ((size.y / 2.0) / get_window_height() as f32);
+    let x = (size.x / get_window_width() as f32);
+    let y = (size.y / get_window_height() as f32);
     [
         color_vertex(vec2(0.0 - x, 0.0 - y)),
         color_vertex(vec2(0.0 - x, 0.0 + y)),
@@ -168,8 +175,8 @@ fn create_color_vertices(size: Vec2<f32>) -> [ColorVertex; 4] {
 }
 
 fn create_uv_vertices(size: Vec2<f32>) -> [UVertex; 4] {
-    let x = ((size.x / 2.0) / get_window_width() as f32);
-    let y = ((size.y / 2.0) / get_window_height() as f32);
+    let x = (size.x / get_window_width() as f32);
+    let y = (size.y / get_window_height() as f32);
     [
         uv_vertex(vec2(0.0 - x, 0.0 - y), vec2(0.0, 0.0)),
         uv_vertex(vec2(0.0 - x, 0.0 + y), vec2(0.0, 1.0)),

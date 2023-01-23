@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::game::pc_components::*;
+use crate::{game::pc_components::*, log::log};
 
 #[derive(Debug, Clone)]
 struct PartList<T> {
@@ -31,6 +31,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", case.name));
                 case_list.part_names.push(case.name.clone());
                 case_list.part_map.insert(case.name.clone(), case);
             }
@@ -55,6 +56,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", mb.name));
                 mb_list.part_names.push(mb.name.clone());
                 mb_list.part_map.insert(mb.name.clone(), mb);
             }
@@ -79,6 +81,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", cpu.name));
                 cpu_list.part_names.push(cpu.name.clone());
                 cpu_list.part_map.insert(cpu.name.clone(), cpu);
             }
@@ -103,6 +106,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", cpu_cooler.name));
                 cpu_cooler_list.part_names.push(cpu_cooler.name.clone());
                 cpu_cooler_list.part_map.insert(cpu_cooler.name.clone(), cpu_cooler);
             }
@@ -127,6 +131,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", ram.name));
                 ram_list.part_names.push(ram.name.clone());
                 ram_list.part_map.insert(ram.name.clone(), ram);
             }
@@ -150,7 +155,8 @@ pub fn load_parts() {
                 let gpu: GPU = serde_json::from_slice(
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
-
+                
+                log(format!("loaded '{}'", gpu.name));
                 gpu_list.part_names.push(gpu.name.clone());
                 gpu_list.part_map.insert(gpu.name.clone(), gpu);
             }
@@ -175,6 +181,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", storage.name));
                 storage_list.part_names.push(storage.name.clone());
                 storage_list.part_map.insert(storage.name.clone(), storage);
             }
@@ -199,6 +206,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", fan.name));
                 fan_list.part_names.push(fan.name.clone());
                 fan_list.part_map.insert(fan.name.clone(), fan);
             }
@@ -223,6 +231,7 @@ pub fn load_parts() {
                     std::fs::read(entry.path()).unwrap().as_slice()
                 ).unwrap();
 
+                log(format!("loaded '{}'", power_supply.name));
                 power_supply_list.part_names.push(power_supply.name.clone());
                 power_supply_list.part_map.insert(power_supply.name.clone(), power_supply);
             }
@@ -234,42 +243,39 @@ pub fn load_parts() {
         unsafe_psu_list = Some(power_supply_list);
     }
 
-    #[cfg(debug_assertions)]
-    {
-        let case_num;
-        let mb_num;
-        let cpu_num;
-        let cpu_cooler_num;
-        let ram_num;
-        let gpu_num;
-        let storage_num;
-        let fan_num;
-        let psu_num;
-        
-        unsafe {
-            case_num = unsafe_case_list.as_ref().unwrap().part_names.len();
-            mb_num = unsafe_mb_list.as_ref().unwrap().part_names.len();
-            cpu_num = unsafe_cpu_list.as_ref().unwrap().part_names.len();
-            cpu_cooler_num = unsafe_cpu_cooler_list.as_ref().unwrap().part_names.len();
-            ram_num = unsafe_ram_list.as_ref().unwrap().part_names.len();
-            gpu_num = unsafe_gpu_list.as_ref().unwrap().part_names.len();
-            storage_num = unsafe_storage_list.as_ref().unwrap().part_names.len();
-            fan_num = unsafe_fan_list.as_ref().unwrap().part_names.len();
-            psu_num = unsafe_psu_list.as_ref().unwrap().part_names.len();
-        }
-        
-        let total = case_num + mb_num + cpu_num + cpu_cooler_num + ram_num + gpu_num + storage_num + fan_num + psu_num;
-        println!("info: Loaded {} Cases", case_num);
-        println!("info: Loaded {} Motherboards", mb_num);
-        println!("info: Loaded {} CPUs", cpu_num);
-        println!("info: Loaded {} CPU Coolers", cpu_cooler_num);
-        println!("info: Loaded {} RAMs", ram_num);
-        println!("info: Loaded {} GPUs", gpu_num);
-        println!("info: Loaded {} Storages", storage_num);
-        println!("info: Loaded {} Fans", fan_num);
-        println!("info: Loaded {} PSUs", psu_num);
-        println!("info: Loaded {} Total Parts", total);
+    let case_num;
+    let mb_num;
+    let cpu_num;
+    let cpu_cooler_num;
+    let ram_num;
+    let gpu_num;
+    let storage_num;
+    let fan_num;
+    let psu_num;
+    
+    unsafe {
+        case_num = unsafe_case_list.as_ref().unwrap().part_names.len();
+        mb_num = unsafe_mb_list.as_ref().unwrap().part_names.len();
+        cpu_num = unsafe_cpu_list.as_ref().unwrap().part_names.len();
+        cpu_cooler_num = unsafe_cpu_cooler_list.as_ref().unwrap().part_names.len();
+        ram_num = unsafe_ram_list.as_ref().unwrap().part_names.len();
+        gpu_num = unsafe_gpu_list.as_ref().unwrap().part_names.len();
+        storage_num = unsafe_storage_list.as_ref().unwrap().part_names.len();
+        fan_num = unsafe_fan_list.as_ref().unwrap().part_names.len();
+        psu_num = unsafe_psu_list.as_ref().unwrap().part_names.len();
     }
+    
+    let total = case_num + mb_num + cpu_num + cpu_cooler_num + ram_num + gpu_num + storage_num + fan_num + psu_num;
+    log(format!("Loaded {} Cases", case_num));
+    log(format!("Loaded {} Motherboards", mb_num));
+    log(format!("Loaded {} CPUs", cpu_num));
+    log(format!("Loaded {} CPU Coolers", cpu_cooler_num));
+    log(format!("Loaded {} RAMs", ram_num));
+    log(format!("Loaded {} GPUs", gpu_num));
+    log(format!("Loaded {} Storages", storage_num));
+    log(format!("Loaded {} Fans", fan_num));
+    log(format!("Loaded {} PSUs", psu_num));
+    log(format!("Loaded {} Total Parts", total));
 }
 
 pub fn get_case_names<'a>() -> &'a [String] {

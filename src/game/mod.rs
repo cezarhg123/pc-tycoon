@@ -1,5 +1,7 @@
 use glium::{Display, Frame};
 
+use crate::log::log;
+
 use self::mainmenu::MainMenu;
 
 pub mod pc_components;
@@ -11,8 +13,10 @@ pub struct Game {
 
 impl Game {
     pub fn new(display: &Display) -> Game {
+        log("loading main menu");
+        let main_menu = Some(MainMenu::new(display));
         Game {
-            main_menu: Some(MainMenu::new(display))
+            main_menu
         }
     }
 

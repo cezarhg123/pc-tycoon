@@ -108,8 +108,9 @@ const IMAGE_FRAG_SRC: &str = r#"
     out vec4 out_color;
 
     uniform sampler2D tex;
+    uniform vec4 color;
 
     void main() {
-        out_color = texture(tex, uv);
+        out_color = texture(tex, uv) * color;
     }
 "#;

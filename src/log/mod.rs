@@ -4,7 +4,10 @@ use chrono::{NaiveDateTime, NaiveDate, Utc};
 
 static mut LOGS: Vec<String> = Vec::new();
 
-pub fn log(log: String) {
+pub fn log(log: impl ToString) {
+    let mut log = log.to_string();
+    let current_time = Utc::now();
+    log.insert_str(0, current_time.format("[%H:%M:%S] ").to_string().as_str());
     unsafe {
         LOGS.push(log);
     }
@@ -17,7 +20,7 @@ pub fn save_log() {
     }
 
     let current_time = Utc::now();
-    let path = format!("logs/{}.txt", current_time.format("%Y-%m-%d-%H-%M").to_string());
+    let path = format!("logs/{}.txt", current_time.format("%d-%m-%Y").to_string());
     let mut log_file = std::fs::File::create(path).unwrap();
 
     unsafe {

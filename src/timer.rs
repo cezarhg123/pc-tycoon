@@ -22,6 +22,7 @@ impl Timer {
         self.prev_time = self.crnt_time;
     }
 
+    /// Returns elapsed time in seconds
     pub fn elapsed(&self) -> f32 {
         (self.crnt_time - self.prev_time).as_secs_f32()
     }
