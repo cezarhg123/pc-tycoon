@@ -11,6 +11,7 @@ pub enum TextAlignment {
     Right
 }
 
+#[derive(Debug)]
 pub struct MultiTextLine {
     text_lines: Vec<TextLine>,
     text_alignment: TextAlignment,
@@ -89,6 +90,69 @@ impl MultiTextLine {
             position,
             size
         }
+    }
+
+    pub fn left(&self) -> f32 {
+        self.position.x - self.size.x
+    }
+
+    pub fn set_left(&mut self, left: f32) {
+        let diff = left - self.left();
+        self.position.x = left + (self.size.x / 2.0);
+
+        self.text_lines.iter_mut().for_each(|textline| textline.set_left(textline.left() + diff));
+    }
+
+    pub fn top(&self) -> f32 {
+        self.position.y + (self.size.y / 2.0)
+    }
+
+    pub fn set_top(&mut self, top: f32) {
+        let diff = top - self.top();
+        self.position.y = top - (self.size.y / 2.0);
+
+        self.text_lines.iter_mut().for_each(|textline| textline.set_top(textline.top() + diff));
+    }
+
+    pub fn right(&self) -> f32 {
+        self.position.x + (self.size.x / 2.0)
+    }
+
+    pub fn set_right(&mut self, right: f32) {
+        let diff = right - self.right();
+        self.position.x = right - (self.size.x / 2.0);
+
+        self.text_lines.iter_mut().for_each(|textline| textline.set_right(textline.right() + diff));
+    }
+
+    pub fn bottom(&self) -> f32 {
+        self.position.y - (self.size.y / 2.0)
+    }
+
+    pub fn set_bottom(&mut self, bottom: f32) {
+        let diff = bottom - self.bottom();
+        self.position.y = bottom + (self.size.y / 2.0);
+
+        self.text_lines.iter_mut().for_each(|textline| textline.set_bottom(textline.bottom() + diff));
+    }
+
+    pub fn centre(&self) -> Vec2<f32> {
+        self.position
+    }
+
+    pub fn set_centre(&mut self, centre: Vec2<f32>) {
+        let diff = centre - self.centre();
+        self.position = centre;
+
+        self.text_lines.iter_mut().for_each(|textline| textline.set_centre(textline.centre() + diff));
+    }
+
+    pub fn width(&self) -> f32 {
+        self.size.x
+    }
+
+    pub fn height(&self) -> f32 {
+        self.size.y
     }
 
     pub fn draw(&mut self, target: &mut Frame, display: &Display) {

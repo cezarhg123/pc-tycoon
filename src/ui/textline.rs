@@ -1,5 +1,5 @@
 use glium::{Frame, Display};
-use image::{DynamicImage, Rgba};
+use image::{DynamicImage, Rgba, ImageBuffer, imageops::FilterType};
 use rusttype::{Scale, point};
 
 use crate::{gfx::Rect, math::{vec4::{Vec4, vec4}, vec2::{Vec2, vec2}, vec3::{vec3, Vec3}}};
@@ -130,7 +130,7 @@ impl TextLine {
                 let color = self.color * 255.0;
                 let v_metrics = font.v_metrics(scale);
                 let glyphs: Vec<_> = font
-                    .layout(&self.text, scale, point((self.font_size / 2.0) - 1.0, 2.0 + v_metrics.ascent))
+                    .layout(&self.text, scale, point(0.0, v_metrics.ascent))
                     .collect();
                 
                 let glyphs_height = (v_metrics.ascent - v_metrics.descent).ceil() as u32;
@@ -164,7 +164,7 @@ impl TextLine {
                     }
                 }
 
-                let mut bitmap = DynamicImage::new_rgba8(biggest_x + 1, biggest_y + 1).into_rgba8();
+                let mut bitmap = DynamicImage::new_rgba8(biggest_x + 1, glyphs_height + 1).into_rgba8();
                 
                 for glyph in glyphs {
                     if let Some(bounding_box) = glyph.pixel_bounding_box() {
@@ -172,8 +172,8 @@ impl TextLine {
                         glyph.draw(|x, y, v| {
                             bitmap.put_pixel(
                                 // Offset the position by the glyph bounding box
-                                x + bounding_box.min.x as u32 - 1,
-                                y + bounding_box.min.y as u32 - 1,
+                                x + bounding_box.min.x as u32,
+                                y + bounding_box.min.y as u32,
                                 // Turn the coverage into an alpha value
                                 Rgba([color.x as u8, color.y as u8, color.z as u8, (v * 255.0) as u8]),
                             )
@@ -181,7 +181,7 @@ impl TextLine {
                     }
                 }
 
-                let bitmap = DynamicImage::ImageRgba8(bitmap);
+                let mut bitmap = DynamicImage::ImageRgba8(bitmap);
 
                 let mut rect = Rect::new(self.position, vec2(bitmap.width() as f32, bitmap.height() as f32), display);
                 rect.set_texture(&bitmap, display);

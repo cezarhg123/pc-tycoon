@@ -41,6 +41,10 @@ impl Rect {
         self.color = color;
     }
 
+    pub fn set_color_uniform(&mut self, color: Vec4<f32>) {
+        self.color = color;
+    }
+
     pub fn set_texture(&mut self, texture: &DynamicImage, display: &Display) {
         self.shader = Program::from_source(display, &IMAGE_VERTEX_SRC, &IMAGE_FRAG_SRC, None).unwrap();
         let vbo = VertexBuffer::new(display, create_uv_vertices(self.size).as_slice()).unwrap();
@@ -57,35 +61,35 @@ impl Rect {
     }
 
     pub fn left(&self) -> f32 {
-        self.position.x - self.size.x
+        self.position.x - (self.size.x / 2.0)
     }
 
     pub fn set_left(&mut self, left: f32) {
-        self.position.x = left + self.size.x;
+        self.position.x = left + (self.size.x / 2.0);
     }
 
     pub fn top(&self) -> f32 {
-        self.position.y + self.size.y
+        self.position.y + (self.size.y / 2.0)
     }
 
     pub fn set_top(&mut self, top: f32) {
-        self.position.y = top - self.size.y;
+        self.position.y = top - (self.size.y / 2.0);
     }
 
     pub fn right(&self) -> f32 {
-        self.position.x + self.size.x
+        self.position.x + (self.size.x / 2.0)
     }
 
     pub fn set_right(&mut self, right: f32) {
-        self.position.x = right - self.size.x;
+        self.position.x = right - (self.size.x / 2.0);
     }
 
     pub fn bottom(&self) -> f32 {
-        self.position.y - self.size.y
+        self.position.y - (self.size.y / 2.0)
     }
 
     pub fn set_bottom(&mut self, bottom: f32) {
-        self.position.y = bottom + self.size.y;
+        self.position.y = bottom + (self.size.y / 2.0);
     }
 
     pub fn width(&self) -> f32 {
@@ -128,6 +132,19 @@ impl Rect {
 
     pub fn set_centre(&mut self, centre: Vec2<f32>) {
         self.position = centre;
+    }
+
+    /// returns true if `position` is inside rect
+    pub fn contains(&self, position: Vec2<f32>) -> bool {
+        if self.left() < position.x && self.right() > position.x {
+            if self.top() > position.y && self.bottom() < position.y {
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        }
     }
 
     pub fn draw(&self, target: &mut Frame) {

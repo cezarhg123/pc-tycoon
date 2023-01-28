@@ -3,12 +3,12 @@
 
 use std::io::Cursor;
 use game::Game;
-use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::LogicalSize, ContextBuilder, event::{WindowEvent, Event}}, Display, Surface};
+use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{WindowEvent, Event}}, Display, Surface};
 use log::{save_log, log};
 use math::{vec2::vec2, vec3::vec3};
 use part_loader::load_parts;
 use timer::Timer;
-use ui::{set_global_font, textline::TextLine, set_global_bold_font, multitextline::{MultiTextLine, TextAlignment}};
+use ui::{set_global_font, textline::TextLine, set_global_bold_font, multitextline::{MultiTextLine, TextAlignment}, button::ButtonBuilder};
 use glium::backend::glutin::DisplayCreationError::*;
 
 pub mod game;
@@ -27,6 +27,8 @@ fn main() {
     let mut event_loop = EventLoop::new();
     let wb = WindowBuilder::new()
         .with_inner_size(LogicalSize::new(get_window_width(), get_window_height()))
+        .with_decorations(false)
+        .with_position(PhysicalPosition::new(0, 0))
         .with_title("PC Tycoon");
 
     let cb = ContextBuilder::new();
@@ -44,10 +46,8 @@ fn main() {
         }
     };
 
-    let game = Game::new(&display);
+    let mut game = Game::new(&display);
     
-    let mut test = MultiTextLine::new("cheese\nyes\n123123\nlol", vec2(500.0, 500.0), TextAlignment::Middle, &display, None, Some(30.0), true);
-
     let mut fps_timer = Timer::new();
     let mut fps_counter = 0;
     let mut fps_text = TextLine::new("0", vec2(15.0, 6.0));
@@ -69,9 +69,8 @@ fn main() {
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
         //drawing
-        game.draw(&mut target);
+        game.draw(&mut target, &display);
         fps_text.draw(Some(&mut target), &display);
-        test.draw(&mut target, &display);
         //finish drawing
         target.finish().unwrap();
         
@@ -80,13 +79,15 @@ fn main() {
             Event::WindowEvent {
                 event,
                 ..
-            } => match event {
-                WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit;
-                    save_log();
-                    return;
+            } => if !game.handle_event(&event, &display) {
+                match event {
+                    WindowEvent::CloseRequested => {
+                        *control_flow = ControlFlow::Exit;
+                        save_log();
+                        return;
+                    }
+                    _ => return
                 }
-                _ => return
             }
             _ => {}
         }
@@ -104,20 +105,8 @@ pub fn get_window_width() -> u32 {
     }
 }
 
-pub fn set_window_width(width: i32) {
-    unsafe {
-        WINDOW_WIDTH = width;
-    }
-}
-
 pub fn get_window_height() -> u32 {
     unsafe {
         WINDOW_HEIGHT.try_into().unwrap()
-    }
-}
-
-pub fn set_window_height(height: i32) {
-    unsafe {
-        WINDOW_HEIGHT = height;
     }
 }
