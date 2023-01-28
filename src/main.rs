@@ -1,8 +1,8 @@
 #![allow(non_upper_case_globals, unused)]
 // #![windows_subsystem = "windows"]
 
-use std::io::Cursor;
-use game::Game;
+use std::{io::Cursor, ptr::{null, null_mut}};
+use game::{Game, profile::Profile};
 use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{WindowEvent, Event}}, Display, Surface};
 use log::{save_log, log};
 use math::{vec2::vec2, vec3::vec3};
@@ -66,6 +66,8 @@ fn main() {
             fps_timer.reset();
         }
         
+        game.run();
+
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
         //drawing
@@ -74,18 +76,19 @@ fn main() {
         //finish drawing
         target.finish().unwrap();
         
-        *control_flow = ControlFlow::Poll;
+        if is_closed() {
+            *control_flow = ControlFlow::Exit;
+            save_log();
+        } else {
+            *control_flow = ControlFlow::Poll;
+        }
         match ev {
             Event::WindowEvent {
                 event,
                 ..
             } => if !game.handle_event(&event, &display) {
                 match event {
-                    WindowEvent::CloseRequested => {
-                        *control_flow = ControlFlow::Exit;
-                        save_log();
-                        return;
-                    }
+                    WindowEvent::CloseRequested => close(),
                     _ => return
                 }
             }
@@ -108,5 +111,18 @@ pub fn get_window_width() -> u32 {
 pub fn get_window_height() -> u32 {
     unsafe {
         WINDOW_HEIGHT.try_into().unwrap()
+    }
+}
+
+static mut close_window: bool = false;
+pub fn close() {
+    unsafe {
+        close_window = true;
+    }
+}
+
+pub fn is_closed() -> bool {
+    unsafe {
+        close_window
     }
 }
