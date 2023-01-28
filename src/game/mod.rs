@@ -41,10 +41,13 @@ impl Game {
         false
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self, display: &Display) {
         if let Some(main_menu) = &mut self.main_menu {
             if main_menu.run() == MainMenuOutput::Play {
-                
+                self.main_menu = None;
+                log("loading select save");
+                self.select_save = Some(SelectSave::new(display));
+                log("loaded select save")
             }
         }
     }

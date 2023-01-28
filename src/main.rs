@@ -66,7 +66,7 @@ fn main() {
             fps_timer.reset();
         }
         
-        game.run();
+        game.run(&display);
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
