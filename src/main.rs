@@ -1,15 +1,12 @@
 #![allow(non_upper_case_globals, unused)]
 // #![windows_subsystem = "windows"]
 
-use std::{io::Cursor, ptr::{null, null_mut}};
-use game::{Game, profile::Profile};
-use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{WindowEvent, Event}}, Display, Surface};
-use log::{save_log, log};
+use gfx::rect::RectBuilder;
+use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{Event, WindowEvent}}, Display, Surface};
 use math::{vec2::vec2, vec3::vec3};
 use part_loader::load_parts;
-use timer::Timer;
-use ui::{set_global_font, textline::TextLine, set_global_bold_font, multitextline::{MultiTextLine, TextAlignment}, button::ButtonBuilder};
-use glium::backend::glutin::DisplayCreationError::*;
+use ui::{set_global_font, set_global_bold_font, textline::TextLineBuilder, uielement::UiElement};
+use log::{log, save_log};
 
 pub mod game;
 pub mod part_loader;
@@ -29,6 +26,7 @@ fn main() {
         .with_inner_size(LogicalSize::new(get_window_width(), get_window_height()))
         .with_decorations(false)
         .with_position(PhysicalPosition::new(0, 0))
+        .with_resizable(false)
         .with_title("PC Tycoon");
 
     let cb = ContextBuilder::new();
@@ -46,34 +44,29 @@ fn main() {
         }
     };
 
-    let mut game = Game::new(&display);
-    
-    let mut fps_timer = Timer::new();
-    let mut fps_counter = 0;
-    let mut fps_text = TextLine::new("0", vec2(15.0, 6.0));
-    fps_text.set_font_size(18.0);
-    fps_text.set_color(vec3(0.0, 0.0, 0.0));
-    fps_text.set_bold(true);
+    let mut test = RectBuilder {
+        position: vec2(960.0, 540.0),
+        size: vec2(100.0, 100.0),
+        ..Default::default()
+    }.build(&display);
 
+    let textline = TextLineBuilder {
+        text: "te .st=12 !?".to_string(),
+        font_size: 36.0,
+        color: vec3(1.0, 1.0, 1.0),
+        bold: false,
+        position: vec2(400.0, 300.0)
+    }.build(&display);
+    
     // main loop
     event_loop.run(move |ev, _, control_flow| {
         //timings
-        fps_timer.tick();
-        fps_counter += 1;
-        if fps_timer.elapsed() >= 1.0 {
-            fps_text.set_text(fps_counter);
-            fps_counter = 0;
-            fps_timer.reset();
-        }
-        
-        game.run(&display);
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
         //drawing
-        game.draw(&mut target, &display);
-        fps_text.draw(Some(&mut target), &display);
-        //finish drawing
+        test.draw(&mut target);
+        textline.draw(&mut target);
         target.finish().unwrap();
         
         if is_closed() {
@@ -86,7 +79,7 @@ fn main() {
             Event::WindowEvent {
                 event,
                 ..
-            } => if !game.handle_event(&event, &display) {
+            } => {
                 match event {
                     WindowEvent::CloseRequested => close(),
                     _ => return
@@ -115,6 +108,7 @@ pub fn get_window_height() -> u32 {
 }
 
 static mut close_window: bool = false;
+/// exists so i can close safely from anywhere in the project
 pub fn close() {
     unsafe {
         close_window = true;

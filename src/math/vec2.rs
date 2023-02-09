@@ -7,7 +7,7 @@ pub struct Vec2<T> {
 }
 
 impl<T: Copy> Vec2<T> {
-    pub fn as_raw(&self) -> [T; 2] {
+    pub const fn as_raw(&self) -> [T; 2] {
         [
             self.x,
             self.y

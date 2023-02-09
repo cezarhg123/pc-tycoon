@@ -1,63 +1,31 @@
-use std::rc::Rc;
-use glium::{vertex::VertexBufferAny, Program, VertexBuffer, Display, IndexBuffer, Frame, Surface, uniforms::EmptyUniforms, uniform, DrawParameters, Blend, texture::{SrgbTexture2d, RawImage2d}};
+use glium::{texture::{SrgbTexture2d, RawImage2d}, VertexBuffer, IndexBuffer, Program, Display, Frame, uniform, Surface, DrawParameters, Blend};
 use image::{DynamicImage, GenericImageView};
-use crate::{math::{vec2::{Vec2, vec2}, vec4::{vec4, Vec4}}, get_window_width, get_window_height, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT};
-use super::{ColorVertex, COLOR_VERTEX_SRC, COLOR_FRAG_SRC, color_vertex, UVertex, uv_vertex, IMAGE_VERTEX_SRC, IMAGE_FRAG_SRC};
+
+use crate::{math::{vec2::{Vec2, vec2}, vec4::{Vec4, vec4}}, get_window_width, get_window_height};
+
+use super::{Vertex, vertex, WHITE_SQUARE_BYTES, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC};
 
 #[derive(Debug)]
 pub struct Rect {
     position: Vec2<f32>,
     size: Vec2<f32>,
     color: Vec4<f32>,
-    texture: Option<SrgbTexture2d>,
-    vbo: VertexBufferAny,
+    texture: SrgbTexture2d,
+    vbo: VertexBuffer<Vertex>,
     ebo: IndexBuffer<u32>,
     shader: Program
 }
 
 impl Rect {
-    /// `position` is the centre of the rect
-    pub fn new(position: Vec2<f32>, size: Vec2<f32>, display: &Display) -> Rect {
-        let vbo = VertexBuffer::new(display, create_color_vertices(size).as_slice()).unwrap();
-        let ebo = IndexBuffer::new(display, glium::index::PrimitiveType::TrianglesList, &[0, 2, 1, 0, 3, 2]).unwrap();
-        let shader = Program::from_source(display, COLOR_VERTEX_SRC, COLOR_FRAG_SRC, None).unwrap();
-
-        Rect {
-            position,
-            size,
-            color: vec4(1.0, 1.0, 1.0, 1.0),
-            texture: None,
-            vbo: VertexBufferAny::from(vbo),
-            ebo,
-            shader
-        }
-    }
-
-    pub fn set_color(&mut self, color: Vec4<f32>, display: &Display) {
-        self.shader = Program::from_source(display, &COLOR_VERTEX_SRC, &COLOR_FRAG_SRC, None).unwrap();
-        let vbo = VertexBuffer::new(display, create_color_vertices(self.size).as_slice()).unwrap();
-        self.vbo = VertexBufferAny::from(vbo);
-        
+    pub fn set_color(&mut self, color: Vec4<f32>) {
         self.color = color;
     }
 
-    pub fn set_color_uniform(&mut self, color: Vec4<f32>) {
-        self.color = color;
-    }
+    pub fn set_texture(&mut self, texture: DynamicImage, display: &Display) {
+        let raw_texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
+        let texture = SrgbTexture2d::new(display, raw_texture).unwrap();
 
-    pub fn set_texture(&mut self, texture: &DynamicImage, display: &Display) {
-        self.shader = Program::from_source(display, &IMAGE_VERTEX_SRC, &IMAGE_FRAG_SRC, None).unwrap();
-        let vbo = VertexBuffer::new(display, create_uv_vertices(self.size).as_slice()).unwrap();
-        self.vbo = VertexBufferAny::from(vbo);
-
-        let texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
-        let texture = SrgbTexture2d::new(display, texture).unwrap();
-        self.texture = Some(texture);
-        self.color = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-
-    pub fn remove_texture(&mut self) {
-        self.texture = None;
+        self.texture = texture;
     }
 
     pub fn left(&self) -> f32 {
@@ -96,34 +64,16 @@ impl Rect {
         self.size.x
     }
 
-    pub fn set_width(&mut self, width: f32, display: &Display) {
+    pub fn set_width(&mut self, width: f32) {
         self.size.x = width;
-
-        match &self.texture {
-            Some(_) => {
-                self.vbo = VertexBufferAny::from(VertexBuffer::new(display, create_uv_vertices(self.size).as_slice()).unwrap());
-            }
-            None => {
-                self.vbo = VertexBufferAny::from(VertexBuffer::new(display, create_color_vertices(self.size).as_slice()).unwrap());
-            }
-        }
     }
 
     pub fn height(&self) -> f32 {
         self.size.y
     }
 
-    pub fn set_height(&mut self, height: f32, display: &Display) {
+    pub fn set_height(&mut self, height: f32) {
         self.size.y = height;
-
-        match &self.texture {
-            Some(_) => {
-                self.vbo = VertexBufferAny::from(VertexBuffer::new(display, create_uv_vertices(self.size).as_slice()).unwrap());
-            }
-            None => {
-                self.vbo = VertexBufferAny::from(VertexBuffer::new(display, create_color_vertices(self.size).as_slice()).unwrap());
-            }
-        }
     }
 
     pub fn centre(&self) -> Vec2<f32> {
@@ -134,70 +84,84 @@ impl Rect {
         self.position = centre;
     }
 
-    /// returns true if `position` is inside rect
-    pub fn contains(&self, position: Vec2<f32>) -> bool {
-        if self.left() < position.x && self.right() > position.x {
-            if self.top() > position.y && self.bottom() < position.y {
-                true
-            } else {
-                false
+    pub fn contains(&self, pos: Vec2<f32>) -> bool {
+        if self.left() < pos.x && self.right() > pos.x {
+            if self.top() > pos.y && self.bottom() < pos.y {
+                return true;
             }
-        } else {
-            false
         }
+
+        false
     }
 
     pub fn draw(&self, target: &mut Frame) {
-        let position = [self.position.x / (DEFAULT_WINDOW_WIDTH as f32 / 2.0), self.position.y / (DEFAULT_WINDOW_HEIGHT as f32 / 2.0)];
-
-        match &self.texture {
-            Some(texture) => {
-                let uniforms = uniform! {
-                    offset: position,
-                    tex: texture,
-                    color: self.color.as_raw()
-                };
-
-                target.draw(&self.vbo, &self.ebo, &self.shader, &uniforms, &DrawParameters {
-                    blend: Blend::alpha_blending(),
-                    ..Default::default()
-                });
-            },
-            None => {
-                let uniforms = uniform! {
-                    offset: position,
-                    color: self.color.as_raw()
-                };
-
-                target.draw(&self.vbo, &self.ebo, &self.shader, &uniforms, &DrawParameters {
-                    blend: Blend::alpha_blending(),
-                    ..Default::default()
-                });
-            }
+        let uniforms = uniform! {
+            offset: ((self.position * 2.0) / vec2(get_window_width() as f32, get_window_height() as f32)).as_raw(),
+            tex: &self.texture,
+            color: self.color.as_raw(),
+            size: (self.size / vec2(get_window_width() as f32, get_window_height() as f32)).as_raw()
         };
 
-        
+        target.draw(&self.vbo, &self.ebo, &self.shader, &uniforms, &DrawParameters {
+            blend: Blend::alpha_blending(),
+            ..Default::default()
+        }).unwrap();
     }
 }
 
-fn create_color_vertices(size: Vec2<f32>) -> [ColorVertex; 4] {
-    let x = (size.x / get_window_width() as f32);
-    let y = (size.y / get_window_height() as f32);
-    [
-        color_vertex(vec2(0.0 - x, 0.0 - y)),
-        color_vertex(vec2(0.0 - x, 0.0 + y)),
-        color_vertex(vec2(0.0 + x, 0.0 + y)),
-        color_vertex(vec2(0.0 + x, 0.0 - y)),
-    ]
+#[derive(Debug)]
+pub struct RectBuilder {
+    pub position: Vec2<f32>,
+    pub size: Vec2<f32>,
+    pub color: Vec4<f32>,
+    pub texture: Option<DynamicImage>
 }
 
-fn create_uv_vertices(size: Vec2<f32>) -> [UVertex; 4] {
-    let x = (size.x / get_window_width() as f32);
-    let y = (size.y / get_window_height() as f32);
+impl Default for RectBuilder {
+    fn default() -> RectBuilder {
+        RectBuilder {
+            position: vec2(0.0, 0.0),
+            size: vec2(100.0, 100.0),
+            color: vec4(1.0, 1.0, 1.0, 1.0),
+            texture: None
+        }
+    }
+}
+
+impl RectBuilder {
+    pub fn build(self, display: &Display) -> Rect {
+        Rect {
+            position: self.position,
+            size: self.size,
+            color: self.color,
+            texture: match self.texture { // if texture is Some then use that texture, if not then it loads a pure white image
+                Some(texture) => {
+                    let raw_texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
+                    SrgbTexture2d::new(display, raw_texture).unwrap()
+                }
+                None => {
+                    let image = image::load_from_memory(WHITE_SQUARE_BYTES.as_slice()).unwrap();
+                    let raw_texture = RawImage2d::from_raw_rgba_reversed(image.as_bytes(), image.dimensions());
+                    SrgbTexture2d::new(display, raw_texture).unwrap()
+                }
+            },
+            vbo: VertexBuffer::new(display, create_vertices(self.size).as_slice()).unwrap(),
+            ebo: IndexBuffer::new(display, glium::index::PrimitiveType::TrianglesList, &[0, 2, 1, 0, 3, 2]).unwrap(),
+            shader: Program::from_source(display, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC, None).unwrap()
+        }
+    }
+}
+
+fn create_vertices(size: Vec2<f32>) -> [Vertex; 4] {
+    // let x = (size.x / 2.0) / get_window_width() as f32;
+    // let y = (size.y / 2.0) / get_window_height() as f32;
+    let x = 1.0;
+    let y = 1.0;
+
     [
-        uv_vertex(vec2(0.0 - x, 0.0 - y), vec2(0.0, 0.0)),
-        uv_vertex(vec2(0.0 - x, 0.0 + y), vec2(0.0, 1.0)),
-        uv_vertex(vec2(0.0 + x, 0.0 + y), vec2(1.0, 1.0)),
-        uv_vertex(vec2(0.0 + x, 0.0 - y), vec2(1.0, 0.0)),
+        vertex(vec2(0.0 - x, 0.0 - y), vec2(0.0, 0.0)),
+        vertex(vec2(0.0 - x, 0.0 + y), vec2(0.0, 1.0)),
+        vertex(vec2(0.0 + x, 0.0 + y), vec2(1.0, 1.0)),
+        vertex(vec2(0.0 + x, 0.0 - y), vec2(1.0, 0.0))
     ]
 }
