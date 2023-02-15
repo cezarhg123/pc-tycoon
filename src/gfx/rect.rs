@@ -22,6 +22,7 @@ impl Rect {
     }
 
     pub fn set_texture(&mut self, texture: DynamicImage, display: &Display) {
+        // funny texture shit until so i can get final texture type
         let raw_texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
         let texture = SrgbTexture2d::new(display, raw_texture).unwrap();
 
@@ -85,8 +86,8 @@ impl Rect {
     }
 
     pub fn contains(&self, pos: Vec2<f32>) -> bool {
-        if self.left() < pos.x && self.right() > pos.x {
-            if self.top() > pos.y && self.bottom() < pos.y {
+        if self.left() < pos.x && self.right() > pos.x { //if pos.x is within the rect
+            if self.top() > pos.y && self.bottom() < pos.y { //if pos.y is within the rect
                 return true;
             }
         }
@@ -100,7 +101,7 @@ impl Rect {
             tex: &self.texture,
             color: self.color.as_raw(),
             size: (self.size / vec2(get_window_width() as f32, get_window_height() as f32)).as_raw()
-        };
+        }; //create uniforms
 
         target.draw(&self.vbo, &self.ebo, &self.shader, &uniforms, &DrawParameters {
             blend: Blend::alpha_blending(),

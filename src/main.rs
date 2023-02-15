@@ -5,7 +5,7 @@ use gfx::rect::RectBuilder;
 use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{Event, WindowEvent}}, Display, Surface};
 use math::{vec2::vec2, vec3::vec3};
 use part_loader::load_parts;
-use ui::{set_global_font, set_global_bold_font, textline::TextLineBuilder, uielement::UiElement};
+use ui::{set_global_font, set_global_bold_font, textline::TextLineBuilder, uielement::UiElement, multitextline::MultiTextLineBuilder};
 use log::{log, save_log};
 
 pub mod game;
@@ -58,6 +58,15 @@ fn main() {
         position: vec2(400.0, 300.0)
     }.build(&display);
     
+    let multitextline = MultiTextLineBuilder {
+        text: "Waffle\nCheese123??ASDasd\n123".to_string(),
+        layout: ui::multitextline::TextLayout::Middle,
+        font_size: 40.0,
+        color: vec3(1.0, 1.0, 1.0),
+        bold: false,
+        position: vec2(800.0, 500.0)
+    }.build(&display);
+
     // main loop
     event_loop.run(move |ev, _, control_flow| {
         //timings
@@ -67,6 +76,7 @@ fn main() {
         //drawing
         test.draw(&mut target);
         textline.draw(&mut target);
+        multitextline.draw(&mut target);
         target.finish().unwrap();
         
         if is_closed() {

@@ -16,7 +16,7 @@ pub struct TextLine {
 }
 
 impl UiElement for TextLine {
-    fn handle_event(&mut self, event: &glium::glutin::event::WindowEvent) -> bool {false}
+    fn handle_event(&mut self, event: &glium::glutin::event::WindowEvent, cursor_pos: Vec2<f32>) -> bool {false}
     
     fn output(&self) -> super::uielement::UiOutput {
         self.output
@@ -61,6 +61,18 @@ impl UiElement for TextLine {
     fn set_centre(&mut self, centre: Vec2<f32>) {
         self.rect.set_centre(centre);
     }
+
+    fn width(&self) -> f32 {
+        self.rect.width()
+    }
+
+    fn set_width(&mut self, width: f32) {}
+
+    fn height(&self) -> f32 {
+        self.rect.height()
+    }
+
+    fn set_height(&mut self, height: f32) {}
 
     fn draw(&self, target: &mut glium::Frame) {
         self.rect.draw(target);
@@ -140,7 +152,7 @@ impl TextLineBuilder {
                 glyph.draw(|x, y, v| {
                     bitmap.put_pixel(
                         // Offset the position by the glyph bounding box
-                        x + bounding_box.min.x as u32 - 1,
+                        x + bounding_box.min.x as u32,
                         y + bounding_box.min.y as u32,
                         // Turn the coverage into an alpha value
                         Rgba([color.x as u8, color.y as u8, color.z as u8, (v * 255.0) as u8]),

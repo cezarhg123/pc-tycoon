@@ -1,5 +1,7 @@
 pub mod uielement;
 pub mod textline;
+pub mod multitextline;
+pub mod button;
 
 use glium::glutin::event::WindowEvent;
 use rusttype::Font;
@@ -53,14 +55,14 @@ pub fn set_global_bold_font(font_path: &str) {
 
 pub struct Ui {
     elements: Vec<Box<dyn UiElement>>,
-    mouse_pos: Vec2<f32>
+    cursor_pos: Vec2<f32>
 }
 
 impl Ui {
     pub fn new() -> Ui {
         Ui {
             elements: Vec::new(),
-            mouse_pos: vec2(0.0, 0.0)
+            cursor_pos: vec2(0.0, 0.0)
         }
     }
 
@@ -71,14 +73,14 @@ impl Ui {
                 // gotta do this because the fucking cursor y position starts at the top instead of bottom
                 let y = get_window_height() as f32 - position.y as f32;
 
-                self.mouse_pos = vec2(x, y);
+                self.cursor_pos = vec2(x, y);
 
                 return true;
             },
             _ => {
                 // go over elements and handle event
                 for element in self.elements.iter_mut() {
-                    if element.handle_event(event) {
+                    if element.handle_event(event, self.cursor_pos) {
                         return true;
                     }
                 }
