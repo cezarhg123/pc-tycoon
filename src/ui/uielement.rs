@@ -1,10 +1,11 @@
 use std::{cell::{Ref, RefCell}, rc::Rc};
-use glium::{Frame, glutin::event::WindowEvent};
+use glium::{Frame, glutin::event::WindowEvent, Display};
 use crate::math::vec2::Vec2;
 
 pub trait UiElement {
-    fn handle_event(&mut self, event: &WindowEvent, cursor_pos: Vec2<f32>) -> bool;
+    fn handle_event(&mut self, event: &WindowEvent, cursor_pos: Vec2<f32>, display: &Display) -> bool;
     fn output(&self) -> UiOutput;
+    fn id(&self) -> &str;
 
     fn left(&self) -> f32;
     fn set_left(&mut self, left: f32);

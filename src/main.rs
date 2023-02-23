@@ -1,11 +1,13 @@
 #![allow(non_upper_case_globals, unused)]
 // #![windows_subsystem = "windows"]
 
+use std::{rc::Rc, cell::RefCell};
+
 use gfx::rect::RectBuilder;
 use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{Event, WindowEvent}}, Display, Surface};
-use math::{vec2::vec2, vec3::vec3};
+use math::{vec2::vec2, vec3::vec3, vec4::vec4};
 use part_loader::load_parts;
-use ui::{set_global_font, set_global_bold_font, textline::TextLineBuilder, uielement::UiElement, multitextline::MultiTextLineBuilder};
+use ui::{set_global_font, set_global_bold_font, textline::TextLineBuilder, uielement::UiElement, multitextline::MultiTextLineBuilder, Ui, button::{ButtonBuilder, ButtonFace}};
 use log::{log, save_log};
 
 pub mod game;
@@ -15,6 +17,7 @@ pub mod gfx;
 pub mod math;
 pub mod ui;
 pub mod log;
+pub mod ptrcell;
 
 fn main() {
     load_parts();
@@ -50,7 +53,7 @@ fn main() {
         ..Default::default()
     }.build(&display);
 
-    let textline = TextLineBuilder {
+    let mut textline = TextLineBuilder {
         text: "te .st=12 !?".to_string(),
         font_size: 36.0,
         color: vec3(1.0, 1.0, 1.0),
@@ -59,6 +62,7 @@ fn main() {
     }.build(&display);
     
     let multitextline = MultiTextLineBuilder {
+        id: "test multiline".to_string(),
         text: "Waffle\nCheese123??ASDasd\n123".to_string(),
         layout: ui::multitextline::TextLayout::Middle,
         font_size: 40.0,
@@ -66,6 +70,20 @@ fn main() {
         bold: false,
         position: vec2(800.0, 500.0)
     }.build(&display);
+
+    let button = ButtonBuilder {
+        id: "test button".to_string(),
+        position: vec2(1400.0, 300.0),
+        size: vec2(400.0, 150.0),
+        text: None,
+        normal_face: ButtonFace::Color(vec4(1.0, 1.0, 1.0, 1.0)),
+        hovered_face: Some(ButtonFace::Color(vec4(0.8, 0.8, 0.8, 1.0))),
+        clicked_face: Some(ButtonFace::Color(vec4(0.6, 0.6, 0.6, 1.0)))
+    }.build(&display);
+
+    let mut ui: Ui = Ui::new();
+    let textline = ui.add_element(textline);
+    let button = ui.add_element(button);
 
     // main loop
     event_loop.run(move |ev, _, control_flow| {
@@ -77,6 +95,7 @@ fn main() {
         test.draw(&mut target);
         textline.draw(&mut target);
         multitextline.draw(&mut target);
+        button.draw(&mut target);
         target.finish().unwrap();
         
         if is_closed() {
@@ -89,7 +108,7 @@ fn main() {
             Event::WindowEvent {
                 event,
                 ..
-            } => {
+            } => if !ui.handle_event(&event, &display) {
                 match event {
                     WindowEvent::CloseRequested => close(),
                     _ => return
@@ -118,7 +137,7 @@ pub fn get_window_height() -> u32 {
 }
 
 static mut close_window: bool = false;
-/// exists so i can close safely from anywhere in the project
+/// exists so i can close safely and save log from anywhere in the project
 pub fn close() {
     unsafe {
         close_window = true;
@@ -130,3 +149,17 @@ pub fn is_closed() -> bool {
         close_window
     }
 }
+
+
+
+// pub fn get_ui_mut() -> &'static mut Ui {
+//     unsafe {
+//        &mut ui
+//     }
+// }
+
+// pub fn get_ui() -> &'static Ui {
+//     unsafe {
+//         &ui
+//     }
+// }

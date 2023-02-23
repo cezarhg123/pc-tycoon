@@ -9,6 +9,7 @@ default-run = "pc_tycoon"
 [dependencies]
 chrono = "0.4.23"
 crypt = { version = "3.1.12", package = "magic-crypt" }
+delegate = "0.9.0"
 glium = "0.32.1"
 image = "0.24.4"
 rand = "0.8.5"

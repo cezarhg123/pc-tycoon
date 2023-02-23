@@ -1,5 +1,5 @@
 use std::{borrow::BorrowMut, cell::{Ref, RefCell}, rc::Rc};
-use glium::{texture::{SrgbTexture2d, RawImage2d}, Display};
+use glium::{texture::{SrgbTexture2d, RawImage2d}, Display, glutin::event::{MouseButton, ElementState}};
 use image::{DynamicImage, Rgba, GenericImageView};
 use rusttype::{Scale, point};
 use crate::{math::{vec3::{Vec3, vec3}, vec2::{Vec2, vec2}, vec4::vec4}, gfx::rect::{Rect, RectBuilder}};
@@ -16,10 +16,39 @@ pub struct TextLine {
 }
 
 impl UiElement for TextLine {
-    fn handle_event(&mut self, event: &glium::glutin::event::WindowEvent, cursor_pos: Vec2<f32>) -> bool {false}
+    fn handle_event(&mut self, event: &glium::glutin::event::WindowEvent, cursor_pos: Vec2<f32>, display: &Display) -> bool {
+        use glium::glutin::event::WindowEvent;
+        if self.rect.contains(cursor_pos) {
+            self.output = UiOutput::Hovered;
+
+            match event {
+                WindowEvent::MouseInput {button, state, ..} => {
+                    match (button, state) {
+                        (MouseButton::Left, ElementState::Pressed) => {
+                            self.output = UiOutput::LeftClicked;
+                            true
+                        },
+                        (MouseButton::Right, ElementState::Pressed) => {
+                            self.output = UiOutput::RightClicked;
+                            true
+                        },
+                        _ => {false}
+                    }
+                }
+                _ => {false}
+            }
+        } else {
+            self.output = UiOutput::None;
+            false
+        }
+    }
     
     fn output(&self) -> super::uielement::UiOutput {
         self.output
+    }
+
+    fn id(&self) -> &str {
+        self.text.as_str()
     }
 
     fn left(&self) -> f32 {
@@ -151,8 +180,12 @@ impl TextLineBuilder {
                 // Draw the glyph into the image per-pixel by using the draw closure
                 glyph.draw(|x, y, v| {
                     bitmap.put_pixel(
-                        // Offset the position by the glyph bounding box
-                        x + bounding_box.min.x as u32,
+                        // Offset the position by the glyph bounding box <- not my comment
+                        if x as i32 + bounding_box.min.x as i32 - 1 > 0 {
+                            x + bounding_box.min.x as u32 - 1
+                        } else { // idk why im doing this but it works
+                            x + bounding_box.min.x as u32
+                        },
                         y + bounding_box.min.y as u32,
                         // Turn the coverage into an alpha value
                         Rgba([color.x as u8, color.y as u8, color.z as u8, (v * 255.0) as u8]),

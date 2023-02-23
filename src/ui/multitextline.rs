@@ -1,4 +1,4 @@
-use glium::Display;
+use glium::{Display, glutin::event::{MouseButton, ElementState}};
 
 use crate::{gfx::rect::{Rect, RectBuilder}, math::{vec2::{Vec2, vec2}, vec3::{Vec3, vec3}, vec4::vec4}};
 use super::{textline::{TextLine, TextLineBuilder}, uielement::{UiOutput, UiElement}};
@@ -11,18 +11,46 @@ pub enum TextLayout {
 
 pub struct MultiTextLine {
     output: UiOutput,
+    id: String,
     textlines: Vec<TextLine>,
     layout: TextLayout,
     rect: Rect
 }
 
 impl UiElement for MultiTextLine {
-    fn handle_event(&mut self, event: &glium::glutin::event::WindowEvent, cursor_pos: crate::math::vec2::Vec2<f32>) -> bool {
-        false
+    fn handle_event(&mut self, event: &glium::glutin::event::WindowEvent, cursor_pos: crate::math::vec2::Vec2<f32>, display: &Display) -> bool {
+        use glium::glutin::event::WindowEvent;
+        if self.rect.contains(cursor_pos) {
+            self.output = UiOutput::Hovered;
+
+            match event {
+                WindowEvent::MouseInput {button, state, ..} => {
+                    match (button, state) {
+                        (MouseButton::Left, ElementState::Pressed) => {
+                            self.output = UiOutput::LeftClicked;
+                            true
+                        },
+                        (MouseButton::Right, ElementState::Pressed) => {
+                            self.output = UiOutput::RightClicked;
+                            true
+                        },
+                        _ => {false}
+                    }
+                }
+                _ => {false}
+            }
+        } else {
+            self.output = UiOutput::None;
+            false
+        }
     }
 
     fn output(&self) -> UiOutput {
         self.output
+    }
+
+    fn id(&self) -> &str {
+        self.id.as_str()
     }
 
     fn left(&self) -> f32 {
@@ -113,6 +141,7 @@ impl UiElement for MultiTextLine {
 
 /// Split text with \n to actually make it multiline
 pub struct MultiTextLineBuilder {
+    pub id: String,
     pub text: String,
     pub layout: TextLayout,
     pub font_size: f32,
@@ -124,6 +153,7 @@ pub struct MultiTextLineBuilder {
 impl Default for MultiTextLineBuilder {
     fn default() -> Self {
         MultiTextLineBuilder {
+            id: "Default".to_string(),
             text: "Default\nDefault".to_string(),
             layout: TextLayout::Middle,
             font_size: 12.0,
@@ -190,6 +220,7 @@ impl MultiTextLineBuilder {
         };
 
         MultiTextLine {
+            id: self.id,
             output: UiOutput::None,
             textlines,
             layout: self.layout,

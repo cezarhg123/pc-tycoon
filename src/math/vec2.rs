@@ -85,4 +85,4 @@ impl<T: Div<Output = T> + Copy> Div<T> for Vec2<T> {
             y: self.y / rhs
         }
     }
-}
+} 
