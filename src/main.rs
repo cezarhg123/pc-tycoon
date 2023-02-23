@@ -81,9 +81,8 @@ fn main() {
         clicked_face: Some(ButtonFace::Color(vec4(0.6, 0.6, 0.6, 1.0)))
     }.build(&display);
 
-    let mut ui: Ui = Ui::new();
-    let textline = ui.add_element(textline);
-    let button = ui.add_element(button);
+    let textline = get_ui_mut().add_element(textline);
+    let button = get_ui_mut().add_element(button);
 
     // main loop
     event_loop.run(move |ev, _, control_flow| {
@@ -108,7 +107,7 @@ fn main() {
             Event::WindowEvent {
                 event,
                 ..
-            } => if !ui.handle_event(&event, &display) {
+            } => if !get_ui_mut().handle_event(&event, &display) {
                 match event {
                     WindowEvent::CloseRequested => close(),
                     _ => return
@@ -150,16 +149,16 @@ pub fn is_closed() -> bool {
     }
 }
 
+static mut ui: Ui = Ui::new();
 
+pub fn get_ui_mut() -> &'static mut Ui {
+    unsafe {
+       &mut ui
+    }
+}
 
-// pub fn get_ui_mut() -> &'static mut Ui {
-//     unsafe {
-//        &mut ui
-//     }
-// }
-
-// pub fn get_ui() -> &'static Ui {
-//     unsafe {
-//         &ui
-//     }
-// }
+pub fn get_ui() -> &'static Ui {
+    unsafe {
+        &ui
+    }
+}
