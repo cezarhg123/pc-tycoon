@@ -1,7 +1,7 @@
 use glium::{texture::{SrgbTexture2d, RawImage2d}, VertexBuffer, IndexBuffer, Program, Display, Frame, uniform, Surface, DrawParameters, Blend};
 use image::{DynamicImage, GenericImageView};
 
-use crate::{math::{vec2::{Vec2, vec2}, vec4::{Vec4, vec4}}, get_window_width, get_window_height};
+use crate::{math::{vec2::{Vec2, vec2}, vec4::{Vec4, vec4}}, get_window_width, get_window_height, log::{save_log, log}};
 
 use super::{Vertex, vertex, WHITE_SQUARE_BYTES, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC};
 
@@ -24,7 +24,11 @@ impl Rect {
     pub fn set_texture(&mut self, texture: DynamicImage, display: &Display) {
         // funny texture shit until so i can get final texture type
         let raw_texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
-        let texture = SrgbTexture2d::new(display, raw_texture).unwrap();
+        let texture = SrgbTexture2d::new(display, raw_texture).unwrap_or_else(|e| {
+            log(format!("NH Err: {}", e.to_string()));
+            save_log();
+            panic!();
+        });
 
         self.texture = texture;
     }
@@ -106,7 +110,11 @@ impl Rect {
         target.draw(&self.vbo, &self.ebo, &self.shader, &uniforms, &DrawParameters {
             blend: Blend::alpha_blending(),
             ..Default::default()
-        }).unwrap();
+        }).unwrap_or_else(|e| {
+            log(format!("NH Err: {}", e.to_string()));
+            save_log();
+            panic!();
+        });
     }
 }
 
@@ -138,17 +146,41 @@ impl RectBuilder {
             texture: match self.texture { // if texture is Some then use that texture, if not then it loads a pure white image
                 Some(texture) => {
                     let raw_texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
-                    SrgbTexture2d::new(display, raw_texture).unwrap()
+                    SrgbTexture2d::new(display, raw_texture).unwrap_or_else(|e| {
+                        log(format!("NH Err: {}", e.to_string()));
+                        save_log();
+                        panic!();
+                    })
                 }
                 None => {
-                    let image = image::load_from_memory(WHITE_SQUARE_BYTES.as_slice()).unwrap();
+                    let image = image::load_from_memory(WHITE_SQUARE_BYTES.as_slice()).unwrap_or_else(|e| {
+                        log(format!("NH Err: {}", e.to_string()));
+                        save_log();
+                        panic!();
+                    });
                     let raw_texture = RawImage2d::from_raw_rgba_reversed(image.as_bytes(), image.dimensions());
-                    SrgbTexture2d::new(display, raw_texture).unwrap()
+                    SrgbTexture2d::new(display, raw_texture).unwrap_or_else(|e| {
+                        log(format!("NH Err: {}", e.to_string()));
+                        save_log();
+                        panic!();
+                    })
                 }
             },
-            vbo: VertexBuffer::new(display, create_vertices(self.size).as_slice()).unwrap(),
-            ebo: IndexBuffer::new(display, glium::index::PrimitiveType::TrianglesList, &[0, 2, 1, 0, 3, 2]).unwrap(),
-            shader: Program::from_source(display, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC, None).unwrap()
+            vbo: VertexBuffer::new(display, create_vertices(self.size).as_slice()).unwrap_or_else(|e| {
+                log(format!("NH Err: {}", e.to_string()));
+                save_log();
+                panic!();
+            }),
+            ebo: IndexBuffer::new(display, glium::index::PrimitiveType::TrianglesList, &[0, 2, 1, 0, 3, 2]).unwrap_or_else(|e| {
+                log(format!("NH Err: {}", e.to_string()));
+                save_log();
+                panic!();
+            }),
+            shader: Program::from_source(display, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC, None).unwrap_or_else(|e| {
+                log(format!("NH Err: {}", e.to_string()));
+                save_log();
+                panic!();
+            })
         }
     }
 }

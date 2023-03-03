@@ -120,6 +120,17 @@ impl Ui {
         }
     }
 
+    pub fn get_element(&self, id: &str) -> Option<PtrCell<dyn UiElement>> {
+        match self.elements.iter().find(|e| e.id() == id) {
+            Some(element) => {
+                Some(PtrCell::new_raw((element.as_ref() as *const dyn UiElement).cast_mut()))
+            }
+            None => {
+                None
+            }
+        }
+    }
+
     pub fn remove_element(&mut self, id: &str) {
         let index = self.elements.iter().position(|e| e.id() == id);
         

@@ -3,6 +3,7 @@
 
 use std::{rc::Rc, cell::RefCell};
 
+use game::{Game, profile::create_encryption_key};
 use gfx::rect::RectBuilder;
 use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{Event, WindowEvent}}, Display, Surface};
 use math::{vec2::vec2, vec3::vec3, vec4::vec4};
@@ -21,6 +22,7 @@ pub mod ptrcell;
 
 fn main() {
     load_parts();
+    create_encryption_key();
     set_global_font("fonts/font.ttf");
     set_global_bold_font("fonts/bold_font.ttf");
 
@@ -47,54 +49,18 @@ fn main() {
         }
     };
 
-    let mut test = RectBuilder {
-        position: vec2(960.0, 540.0),
-        size: vec2(100.0, 100.0),
-        ..Default::default()
-    }.build(&display);
-
-    let mut textline = TextLineBuilder {
-        text: "te .st=12 !?".to_string(),
-        font_size: 36.0,
-        color: vec3(1.0, 1.0, 1.0),
-        bold: false,
-        position: vec2(400.0, 300.0)
-    }.build(&display);
-    
-    let multitextline = MultiTextLineBuilder {
-        id: "test multiline".to_string(),
-        text: "Waffle\nCheese123??ASDasd\n123".to_string(),
-        layout: ui::multitextline::TextLayout::Middle,
-        font_size: 40.0,
-        color: vec3(1.0, 1.0, 1.0),
-        bold: false,
-        position: vec2(800.0, 500.0)
-    }.build(&display);
-
-    let button = ButtonBuilder {
-        id: "test button".to_string(),
-        position: vec2(1400.0, 300.0),
-        size: vec2(400.0, 150.0),
-        text: None,
-        normal_face: ButtonFace::Color(vec4(1.0, 1.0, 1.0, 1.0)),
-        hovered_face: Some(ButtonFace::Color(vec4(0.8, 0.8, 0.8, 1.0))),
-        clicked_face: Some(ButtonFace::Color(vec4(0.6, 0.6, 0.6, 1.0)))
-    }.build(&display);
-
-    let textline = get_ui_mut().add_element(textline);
-    let button = get_ui_mut().add_element(button);
+    let mut game = Game::new(&display);
 
     // main loop
     event_loop.run(move |ev, _, control_flow| {
         //timings
 
+        game.run(&display);
+
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
         //drawing
-        test.draw(&mut target);
-        textline.draw(&mut target);
-        multitextline.draw(&mut target);
-        button.draw(&mut target);
+        game.draw(&mut target);
         target.finish().unwrap();
         
         if is_closed() {
@@ -118,6 +84,9 @@ fn main() {
     });
 }
 
+/// when true. hover the desired element and then press arrow keys.
+/// then press enter to print centre position
+pub const MOVE_UI: bool = true;
 const DEFAULT_WINDOW_WIDTH: i32 = 1920;
 const DEFAULT_WINDOW_HEIGHT: i32 = 1080;
 static mut WINDOW_WIDTH: i32 = DEFAULT_WINDOW_WIDTH;

@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div};
+use std::{ops::{Add, Sub, Mul, Div}, fmt::Display};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec2<T> {
@@ -85,4 +85,4 @@ impl<T: Div<Output = T> + Copy> Div<T> for Vec2<T> {
             y: self.y / rhs
         }
     }
-} 
+}

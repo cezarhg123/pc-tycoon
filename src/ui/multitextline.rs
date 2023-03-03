@@ -1,6 +1,6 @@
-use glium::{Display, glutin::event::{MouseButton, ElementState}};
+use glium::{Display, glutin::event::{MouseButton, ElementState, VirtualKeyCode}};
 
-use crate::{gfx::rect::{Rect, RectBuilder}, math::{vec2::{Vec2, vec2}, vec3::{Vec3, vec3}, vec4::vec4}};
+use crate::{gfx::rect::{Rect, RectBuilder}, math::{vec2::{Vec2, vec2}, vec3::{Vec3, vec3}, vec4::vec4}, MOVE_UI};
 use super::{textline::{TextLine, TextLineBuilder}, uielement::{UiOutput, UiElement}};
 
 pub enum TextLayout {
@@ -36,6 +36,33 @@ impl UiElement for MultiTextLine {
                         },
                         _ => {false}
                     }
+                }
+                WindowEvent::KeyboardInput {input, ..} => {
+                    if MOVE_UI {
+                        match (input.virtual_keycode.unwrap(), input.state) {
+                            (VirtualKeyCode::Up, ElementState::Pressed) => {
+                                self.set_top(self.top() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Down, ElementState::Pressed) => {
+                                self.set_bottom(self.bottom() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Right, ElementState::Pressed) => {
+                                self.set_right(self.right() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Left, ElementState::Pressed) => {
+                                self.set_left(self.left() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Return, ElementState::Pressed) => {
+                                println!("{:#?}", self.centre());
+                                true
+                            }
+                            _ => {false}
+                        }
+                    } else {false}
                 }
                 _ => {false}
             }
