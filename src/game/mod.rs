@@ -1,15 +1,17 @@
 use glium::{Display, Frame, glutin::event::WindowEvent};
 use crate::{log::log, math::vec2::{Vec2, vec2}, get_window_height, get_ui_mut};
-use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile};
+use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile, ingame::InGame};
 
 pub mod pc_components;
 pub mod profile;
 pub mod main_menu;
 pub mod select_save;
+pub mod ingame;
 
 pub enum GameState {
     MainMenu(MainMenu),
-    SelectSave(SelectSave)
+    SelectSave(SelectSave),
+    InGame(InGame)
 }
 
 pub struct Game {
@@ -41,7 +43,19 @@ impl Game {
                 }
             }
             GameState::SelectSave(select_save) => {
-                self.profile = select_save.run();
+                match select_save.run() {
+                    Some(profile) => {
+                        self.profile = Some(profile);
+                        log("loading ingame");
+                        get_ui_mut().clear();
+                        self.state = GameState::InGame(InGame::new(display));
+                        log("loaded ingame");
+                    }
+                    None => {}
+                };
+            }
+            GameState::InGame(ingame) => {
+                
             }
         }
     }
@@ -53,6 +67,9 @@ impl Game {
             }
             GameState::SelectSave(select_save) => {
                 select_save.draw(target);
+            }
+            GameState::InGame(ingame) => {
+                ingame.draw(target);
             }
         }
     }

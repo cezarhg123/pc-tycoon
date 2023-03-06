@@ -84,7 +84,7 @@ fn main() {
     });
 }
 
-/// when true. hover the desired element and then press arrow keys.
+/// when true, hover the desired element and then press arrow keys.
 /// then press enter to print centre position
 pub const MOVE_UI: bool = true;
 const DEFAULT_WINDOW_WIDTH: i32 = 1920;
