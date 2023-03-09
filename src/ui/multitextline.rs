@@ -73,7 +73,7 @@ impl UiElement for MultiTextLine {
                                 true
                             }
                             (VirtualKeyCode::Numpad8, ElementState::Pressed) => {
-                                self.set_width(self.width() + 1.0);
+                                self.set_height(self.height() + 1.0);
                                 true
                             }
                             (VirtualKeyCode::Numpad5, ElementState::Pressed) => {
