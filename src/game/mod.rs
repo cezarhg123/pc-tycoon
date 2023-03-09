@@ -1,17 +1,19 @@
 use glium::{Display, Frame, glutin::event::WindowEvent};
 use crate::{log::log, math::vec2::{Vec2, vec2}, get_window_height, get_ui_mut};
-use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile, ingame::InGame};
+use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile, ingame::{InGame, InGameOutput}, buildpc::BuildPC};
 
 pub mod pc_components;
 pub mod profile;
 pub mod main_menu;
 pub mod select_save;
 pub mod ingame;
+pub mod buildpc;
 
 pub enum GameState {
     MainMenu(MainMenu),
     SelectSave(SelectSave),
-    InGame(InGame)
+    InGame(InGame),
+    BuildPC(BuildPC)
 }
 
 pub struct Game {
@@ -48,14 +50,24 @@ impl Game {
                         self.profile = Some(profile);
                         log("loading ingame");
                         get_ui_mut().clear();
-                        self.state = GameState::InGame(InGame::new(display));
+                        self.state = GameState::InGame(InGame::new(display, self.profile.as_ref().unwrap()));
                         log("loaded ingame");
                     }
                     None => {}
                 };
             }
             GameState::InGame(ingame) => {
-                
+                match ingame.run() {
+                    InGameOutput::BuildPC => {
+                        log("loading build pc");
+                        get_ui_mut().clear();
+                        self.state = GameState::BuildPC(BuildPC::new(display));
+                        log("loaded build pc");
+                    }
+                    _ => {}
+                }
+            }
+            GameState::BuildPC(buildpc) => {
             }
         }
     }
@@ -70,6 +82,9 @@ impl Game {
             }
             GameState::InGame(ingame) => {
                 ingame.draw(target);
+            }
+            GameState::BuildPC(buildpc) => {
+                buildpc.draw(target);
             }
         }
     }

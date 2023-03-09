@@ -60,6 +60,26 @@ impl UiElement for MultiTextLine {
                                 println!("{:#?}", self.centre());
                                 true
                             }
+                            (VirtualKeyCode::Numpad4, ElementState::Pressed) => {
+                                self.set_width(self.width() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad6, ElementState::Pressed) => {
+                                self.set_width(self.width() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad2, ElementState::Pressed) => {
+                                self.set_height(self.height() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad8, ElementState::Pressed) => {
+                                self.set_width(self.width() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad5, ElementState::Pressed) => {
+                                println!("size: {}, {}", self.width(), self.height());
+                                true
+                            }
                             _ => {false}
                         }
                     } else {false}
@@ -202,6 +222,7 @@ impl MultiTextLineBuilder {
         let mut single_y = 0.0; // height of 1 textline
         for text in split_texts {
             let textline = TextLineBuilder {
+                id: text.to_string(),
                 text: text.to_string(),
                 font_size: self.font_size,
                 color: self.color,

@@ -38,6 +38,7 @@ impl MainMenu {
             position: vec2(378.0, 600.0),
             size: vec2(300.0, 80.0),
             text: Some(ButtonTextType::Single(TextLineBuilder {
+                id: "Play".to_string(),
                 text: "Play".to_string(),
                 font_size: 36.0,
                 color: vec3(1.0, 1.0, 1.0),
@@ -54,6 +55,7 @@ impl MainMenu {
             position: vec2(378.0, 500.0),
             size: vec2(300.0, 80.0),
             text: Some(ButtonTextType::Single(TextLineBuilder {
+                id: "Exit".to_string(),
                 text: "Exit".to_string(),
                 font_size: 36.0,
                 color: vec3(1.0, 1.0, 1.0),

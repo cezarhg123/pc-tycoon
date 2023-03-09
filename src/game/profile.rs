@@ -22,6 +22,7 @@ pub struct Profile {
     pub money: i32,
     pub level: u32,
     pub points: u32,
+    pub goal: u32,
     pub items: Vec<(String, ItemType)>
 }
 

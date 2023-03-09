@@ -119,6 +119,26 @@ impl UiElement for Button {
                                 println!("{:#?}", self.centre());
                                 true
                             }
+                            (VirtualKeyCode::Numpad4, ElementState::Pressed) => {
+                                self.set_width(self.width() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad6, ElementState::Pressed) => {
+                                self.set_width(self.width() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad2, ElementState::Pressed) => {
+                                self.set_height(self.height() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad8, ElementState::Pressed) => {
+                                self.set_width(self.width() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad5, ElementState::Pressed) => {
+                                println!("size: {}, {}", self.width(), self.height());
+                                true
+                            }
                             _ => {false}
                         }
                     } else {false}

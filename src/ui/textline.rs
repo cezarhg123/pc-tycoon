@@ -6,6 +6,7 @@ use crate::{math::{vec3::{Vec3, vec3}, vec2::{Vec2, vec2}, vec4::vec4}, gfx::rec
 use super::{uielement::{UiElement, UiOutput}, get_global_bold_font, get_global_font};
 
 pub struct TextLine {
+    id: String,
     output: UiOutput,
     text: String,
     font_size: f32,
@@ -58,6 +59,26 @@ impl UiElement for TextLine {
                                 println!("{:#?}", self.centre());
                                 true
                             }
+                            (VirtualKeyCode::Numpad4, ElementState::Pressed) => {
+                                self.set_width(self.width() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad6, ElementState::Pressed) => {
+                                self.set_width(self.width() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad2, ElementState::Pressed) => {
+                                self.set_height(self.height() - 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad8, ElementState::Pressed) => {
+                                self.set_width(self.width() + 1.0);
+                                true
+                            }
+                            (VirtualKeyCode::Numpad5, ElementState::Pressed) => {
+                                println!("size: {}, {}", self.width(), self.height());
+                                true
+                            }
                             _ => {false}
                         }
                     } else {false}
@@ -75,7 +96,7 @@ impl UiElement for TextLine {
     }
 
     fn id(&self) -> &str {
-        self.text.as_str()
+        self.id.as_str()
     }
 
     fn left(&self) -> f32 {
@@ -136,6 +157,7 @@ impl UiElement for TextLine {
 }
 
 pub struct TextLineBuilder {
+    pub id: String,
     pub text: String,
     pub font_size: f32,
     pub color: Vec3<f32>,
@@ -146,6 +168,7 @@ pub struct TextLineBuilder {
 impl Default for TextLineBuilder {
     fn default() -> TextLineBuilder {
         TextLineBuilder {
+            id: "Default".to_string(),
             text: "Default".to_string(),
             font_size: 12.0,
             color: vec3(1.0, 1.0, 1.0),
@@ -234,6 +257,7 @@ impl TextLineBuilder {
         let bitmap = SrgbTexture2d::new(display, bitmap).unwrap();
 
         TextLine {
+            id: self.id,
             text: self.text,
             font_size: self.font_size,
             color: self.color,

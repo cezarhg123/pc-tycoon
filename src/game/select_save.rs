@@ -47,6 +47,7 @@ impl SelectSave {
                 position: vec2(378.0, 600.0 - (100.0 * i as f32)),
                 size: vec2(300.0, 80.0),
                 text: Some(ButtonTextType::Single(TextLineBuilder {
+                    id: format!("{prefix} Save{i}"),
                     text: format!("{prefix} Save"),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -85,6 +86,7 @@ impl SelectSave {
                             money: 1500,
                             level: 1,
                             points: 0,
+                            goal: 1000,
                             items: Vec::new()
                         })
                     }
