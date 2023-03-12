@@ -1,6 +1,6 @@
 use glium::{Display, Frame, glutin::event::WindowEvent};
 use crate::{log::log, math::vec2::{Vec2, vec2}, get_window_height, get_ui_mut};
-use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile, ingame::{InGame, InGameOutput}, buildpc::BuildPC};
+use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile, ingame::{InGame, InGameOutput}, buildpc::BuildPC, market::Market};
 
 pub mod pc_components;
 pub mod profile;
@@ -8,12 +8,15 @@ pub mod main_menu;
 pub mod select_save;
 pub mod ingame;
 pub mod buildpc;
+pub mod inventory;
+pub mod market;
 
 pub enum GameState {
     MainMenu(MainMenu),
     SelectSave(SelectSave),
     InGame(InGame),
-    BuildPC(BuildPC)
+    BuildPC(BuildPC),
+    Market(Market)
 }
 
 pub struct Game {
@@ -64,10 +67,24 @@ impl Game {
                         self.state = GameState::BuildPC(BuildPC::new(display));
                         log("loaded build pc");
                     }
+                    InGameOutput::Market => {
+                        log("loading build pc");
+                        get_ui_mut().clear();
+                        self.state = GameState::Market(Market::new(display));
+                        log("loaded build pc");
+                    }
                     _ => {}
                 }
             }
             GameState::BuildPC(buildpc) => {
+            }
+            GameState::Market(market) => {
+                if market.run() {
+                    log("loading ingame");
+                    get_ui_mut().clear();
+                    self.state = GameState::InGame(InGame::new(display, self.profile.as_ref().unwrap()));
+                    log("loaded ingame");
+                }
             }
         }
     }
@@ -85,6 +102,9 @@ impl Game {
             }
             GameState::BuildPC(buildpc) => {
                 buildpc.draw(target);
+            }
+            GameState::Market(market) => {
+                market.draw(target);
             }
         }
     }

@@ -1,7 +1,5 @@
 use std::io::Cursor;
-
 use glium::{Display, Frame};
-
 use crate::{gfx::rect::{Rect, RectBuilder}, math::{vec2::vec2, vec4::vec4}, get_window_width, get_window_height, log::{log, save_log}};
 
 pub struct BuildPC {
@@ -31,6 +29,10 @@ impl BuildPC {
         BuildPC {
             background
         }
+    }
+
+    pub fn run(&mut self) {
+        
     }
 
     pub fn draw(&self, target: &mut Frame) {
