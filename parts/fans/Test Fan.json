@@ -3,5 +3,5 @@
   "price": 10,
   "power_usage": 5,
   "large": true,
-  "cooling": 1.8
+  "flow": 68.0
 }

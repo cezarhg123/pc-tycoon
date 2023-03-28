@@ -70,7 +70,7 @@ impl Game {
                     InGameOutput::Market => {
                         log("loading build pc");
                         get_ui_mut().clear();
-                        self.state = GameState::Market(Market::new(display));
+                        self.state = GameState::Market(Market::new(display, self.profile.as_mut().unwrap()));
                         log("loaded build pc");
                     }
                     _ => {}
@@ -79,7 +79,7 @@ impl Game {
             GameState::BuildPC(buildpc) => {
             }
             GameState::Market(market) => {
-                if market.run() {
+                if market.run(display, self.profile.as_mut().unwrap()) {
                     log("loading ingame");
                     get_ui_mut().clear();
                     self.state = GameState::InGame(InGame::new(display, self.profile.as_ref().unwrap()));

@@ -61,7 +61,9 @@ pub struct Ui {
     /// `add_element()` either adds the element to the list and returns a `PtrCell` or finds the element with the same id and returns a `PtrCell` of that
     /// 
     /// Doing this is highly unsafe because i dont know how `Box` handles its memory.
-    elements: Vec<Box<dyn UiElement>>,
+    /// 
+    /// Also the bool controls if the element handles events or not
+    elements: Vec<(bool, Box<dyn UiElement>)>,
     cursor_pos: Vec2<f32>
 }
 
@@ -87,7 +89,9 @@ impl Ui {
 
         // go over elements and handle event
         self.elements.iter_mut().for_each(|element| {
-            element.handle_event(event, self.cursor_pos, display);
+            if element.0 {
+                element.1.handle_event(event, self.cursor_pos, display);
+            }
         });
 
         false
@@ -96,9 +100,9 @@ impl Ui {
     pub fn add_element<T: UiElement + 'static>(&mut self, other_element: T) -> PtrCell<dyn UiElement> {
         let mut element_found;
 
-        match self.elements.iter_mut().find(|e| e.id() == other_element.id()) { // find element with the same id
+        match self.elements.iter_mut().find(|e| e.1.id() == other_element.id()) { // find element with the same id
             Some(element) => {
-                unsafe {element_found = Some(element.as_mut() as *mut dyn UiElement);}
+                unsafe {element_found = Some(element.1.as_mut() as *mut dyn UiElement);}
             }
             None => {
                 unsafe {element_found = None}
@@ -114,17 +118,17 @@ impl Ui {
             None => {
                 // push 'other_element' and return a 'PtrCell'
                 unsafe {
-                    self.elements.push(Box::new(other_element));
-                    PtrCell::new_raw(self.elements.last_mut().unwrap().as_mut() as *mut dyn UiElement)
+                    self.elements.push((true, Box::new(other_element)));
+                    PtrCell::new_raw(self.elements.last_mut().unwrap().1.as_mut() as *mut dyn UiElement)
                 }
             }
         }
     }
 
     pub fn get_element(&self, id: &str) -> Option<PtrCell<dyn UiElement>> {
-        match self.elements.iter().find(|e| e.id() == id) {
+        match self.elements.iter().find(|e| e.1.id() == id) {
             Some(element) => {
-                Some(PtrCell::new_raw((element.as_ref() as *const dyn UiElement).cast_mut()))
+                Some(PtrCell::new_raw((element.1.as_ref() as *const dyn UiElement).cast_mut()))
             }
             None => {
                 None
@@ -133,13 +137,27 @@ impl Ui {
     }
 
     pub fn remove_element(&mut self, id: &str) {
-        let index = self.elements.iter().position(|e| e.id() == id);
+        let index = self.elements.iter().position(|e| e.1.id() == id);
         
         match index {
             Some(index) => {
                 self.elements.remove(index);
             }
             None => {}
+        }
+    }
+
+    /// Enables element for handling events
+    pub fn enable_element(&mut self, id: &str) {
+        if let Some(element) = self.elements.iter_mut().find(|e| e.1.id() == id) {
+            element.0 = true;
+        }
+    }
+
+    /// Disables element for handling events
+    pub fn disable_element(&mut self, id: &str) {
+        if let Some(element) = self.elements.iter_mut().find(|e| e.1.id() == id) {
+            element.0 = false;
         }
     }
 

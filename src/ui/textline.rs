@@ -189,7 +189,7 @@ impl TextLineBuilder {
         let color = self.color * 255.0;
         let v_metrics = font.v_metrics(scale);
         let glyphs: Vec<_> = font
-            .layout(&self.text, scale, point(0.0, v_metrics.ascent))
+            .layout(self.text.trim(), scale, point(0.0, v_metrics.ascent))
             .collect();
         
         let glyphs_height = (v_metrics.ascent - v_metrics.descent).ceil() as u32;

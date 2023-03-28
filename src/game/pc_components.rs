@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -6,11 +8,32 @@ pub enum MBFormFactor {
     MicroATX
 }
 
+impl ToString for MBFormFactor {
+    fn to_string(&self) -> String {
+        match self {
+            MBFormFactor::ATX => {"ATX".to_string()}
+            MBFormFactor::MicroATX => {"Micro ATX".to_string()}
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum SocketType {
     AM4,
+    AM5,
     LGA1151,
     LGA1200
+}
+
+impl ToString for SocketType {
+    fn to_string(&self) -> String {
+        match self {
+            SocketType::AM4 => {"AM4".to_string()}
+            SocketType::AM5 => {"AM5".to_string()}
+            SocketType::LGA1151 => {"LGA1151".to_string()}
+            SocketType::LGA1200 => {"LGA1200".to_string()}
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -19,10 +42,30 @@ pub enum CaseFormFactor {
     MidTower
 }
 
+impl ToString for CaseFormFactor {
+    fn to_string(&self) -> String {
+        match self {
+            CaseFormFactor::FullTower => {"Full Tower".to_string()}
+            CaseFormFactor::MidTower => {"Mid Tower".to_string()}
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum RamType {
     DDR3,
-    DDR4
+    DDR4,
+    DDR5
+}
+
+impl ToString for RamType {
+    fn to_string(&self) -> String {
+        match self {
+            RamType::DDR3 => {"DDR3".to_string()}
+            RamType::DDR4 => {"DDR4".to_string()}
+            RamType::DDR5 => {"DDR5".to_string()}
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -30,6 +73,16 @@ pub enum StorageType {
     M2,
     SSD,
     HDD
+}
+
+impl ToString for StorageType {
+    fn to_string(&self) -> String {
+        match self {
+            StorageType::M2 => {"M2".to_string()}
+            StorageType::SSD => {"SSD".to_string()}
+            StorageType::HDD => {"HDD".to_string()}
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -123,7 +176,7 @@ pub struct Fan {
     pub price: u32,
     pub power_usage: u32,
     pub large: bool,
-    pub cooling: f32
+    pub flow: f32
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

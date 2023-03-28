@@ -250,19 +250,19 @@ impl MultiTextLineBuilder {
             TextLayout::Left => {
                 for (i, textline) in textlines.iter_mut().enumerate() {
                     textline.set_left(rect.left());
-                    textline.set_top(rect.top() + (i as f32 * single_y));
+                    textline.set_top(rect.top() - (i as f32 * single_y));
                 }
             }
             TextLayout::Middle => {
                 for (i, textline) in textlines.iter_mut().enumerate() {
                     textline.set_centre(vec2(self.position.x, 0.0));
-                    textline.set_top(rect.top() + (i as f32 * single_y));
+                    textline.set_top(rect.top() - (i as f32 * single_y));
                 }
             }
             TextLayout::Right => {
                 for (i, textline) in textlines.iter_mut().enumerate() {
                     textline.set_right(rect.right());
-                    textline.set_top(rect.top() + (i as f32 * single_y));
+                    textline.set_top(rect.top() - (i as f32 * single_y));
                 }
             }
         };

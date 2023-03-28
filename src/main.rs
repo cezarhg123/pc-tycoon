@@ -8,6 +8,7 @@ use gfx::rect::RectBuilder;
 use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{Event, WindowEvent}}, Display, Surface};
 use math::{vec2::vec2, vec3::vec3, vec4::vec4};
 use part_loader::load_parts;
+use timer::Timer;
 use ui::{set_global_font, set_global_bold_font, textline::TextLineBuilder, uielement::UiElement, multitextline::MultiTextLineBuilder, Ui, button::{ButtonBuilder, ButtonFace}, listbox::ListboxBuilder};
 use log::{log, save_log};
 
@@ -48,71 +49,23 @@ fn main() {
             panic!();
         }
     };
-
-    let listbox = get_ui_mut().add_element(ListboxBuilder {
-        id: "test listbox".to_string(),
-        elements: vec![
-            get_ui_mut().add_element(TextLineBuilder {
-                id: "test1".to_string(),
-                text: "Test1".to_string(),
-                font_size: 52.0,
-                color: vec3(1.0, 1.0, 1.0),
-                bold: true,
-                position: vec2(0.0, 0.0)
-            }.build(&display)),
-            get_ui_mut().add_element(TextLineBuilder {
-                id: "test2".to_string(),
-                text: "Test2".to_string(),
-                font_size: 52.0,
-                color: vec3(1.0, 1.0, 1.0),
-                bold: true,
-                position: vec2(0.0, 0.0)
-            }.build(&display)),
-            get_ui_mut().add_element(TextLineBuilder {
-                id: "test3".to_string(),
-                text: "Test3".to_string(),
-                font_size: 52.0,
-                color: vec3(1.0, 1.0, 1.0),
-                bold: true,
-                position: vec2(0.0, 0.0)
-            }.build(&display)),
-            get_ui_mut().add_element(TextLineBuilder {
-                id: "test4".to_string(),
-                text: "Test4".to_string(),
-                font_size: 52.0,
-                color: vec3(1.0, 1.0, 1.0),
-                bold: true,
-                position: vec2(0.0, 0.0)
-            }.build(&display)),
-            get_ui_mut().add_element(TextLineBuilder {
-                id: "test5".to_string(),
-                text: "Test5".to_string(),
-                font_size: 52.0,
-                color: vec3(1.0, 1.0, 1.0),
-                bold: true,
-                position: vec2(0.0, 0.0)
-            }.build(&display))
-        ],
-        bar_width: 10.0,
-        position: vec2(600.0, 400.0),
-        size: vec2(300.0, 200.0)
-    }.build(&display));
-
+    
     let mut game = Game::new(&display);
 
+    // fps shit
+    let mut fps_timer = Timer::new();
+    let mut frames = 0;
+    let mut fps_textline = TextLineBuilder {
+        id: "".to_string(),
+        text: frames.to_string(),
+        font_size: 12.0,
+        color: vec3(0.0, 0.0, 0.0),
+        bold: false,
+        position: vec2(0.0, 0.0)
+    }.build(&display);
+
     // main loop
-    event_loop.run(move |ev, _, control_flow| {
-        //timings
-
-        game.run(&display);
-
-        let mut target = display.draw();
-        target.clear_color(0.0, 0.0, 0.0, 1.0);
-        //drawing
-        game.draw(&mut target);
-        listbox.draw(&mut target);
-        target.finish().unwrap();
-        
+    event_loop.run(move |ev, _, control_flow| {        
         if is_closed() {
             *control_flow = ControlFlow::Exit;
             save_log();
@@ -128,6 +81,34 @@ fn main() {
                     WindowEvent::CloseRequested => close(),
                     _ => return
                 }
+            }
+            Event::MainEventsCleared => {
+                frames += 1;
+                fps_timer.tick();
+                if fps_timer.elapsed() >= 1.0 {
+                    fps_textline = TextLineBuilder {
+                        id: "".to_string(),
+                        text: frames.to_string(),
+                        font_size: 18.0,
+                        color: vec3(0.0, 0.0, 0.0),
+                        bold: false,
+                        position: vec2(0.0, 0.0)
+                    }.build(&display);
+                    fps_textline.set_left(0.0);
+                    fps_textline.set_bottom(0.0);
+
+                    frames = 0;
+                    fps_timer.reset();
+                }
+
+                game.run(&display);
+
+                let mut target = display.draw();
+                target.clear_color(0.0, 0.0, 0.0, 1.0);
+                //drawing
+                game.draw(&mut target);
+                fps_textline.draw(&mut target);
+                target.finish().unwrap();
             }
             _ => {}
         }

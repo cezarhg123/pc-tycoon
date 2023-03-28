@@ -1,7 +1,5 @@
 use glium::{Display, Frame, glutin::event::{WindowEvent, VirtualKeyCode, ElementState, MouseScrollDelta}};
-
-use crate::{ptrcell::PtrCell, gfx::rect::{Rect, RectBuilder}, math::{vec2::{Vec2, vec2}, vec4::vec4}, log::{log, save_log}, MOVE_UI};
-
+use crate::{ptrcell::PtrCell, gfx::rect::{Rect, RectBuilder}, math::{vec2::{Vec2, vec2}, vec4::vec4}, log::{log, save_log}, MOVE_UI, get_ui_mut};
 use super::uielement::{UiElement, UiOutput};
 
 pub struct Listbox {
@@ -23,7 +21,12 @@ impl UiElement for Listbox {
                     match delta {
                         MouseScrollDelta::LineDelta(x, y) => {
                             if *y > 0.0 { // scroll up
-                                if self.cursor_idx as i32 - self.viewable_elements as i32 > 0 { // checks if the cursor can be moved up without going above bar
+                                // disable all elements
+                                for element in self.elements.iter() {
+                                    get_ui_mut().disable_element(element.id());
+                                }
+
+                                if self.cursor_idx as i32 - self.viewable_elements as i32 > 0 {
                                     self.cursor_idx -= self.viewable_elements;
                                     self.cursor.set_bottom(self.cursor.top());
                                 } else {
@@ -34,35 +37,50 @@ impl UiElement for Listbox {
                                 // reposition elements
                                 let mut previous_bottom = 0.0;
                                 for i in self.cursor_idx..(self.cursor_idx + self.viewable_elements) {
-                                    if previous_bottom == 0.0 {
-                                        self.elements[i].set_top(self.rect.top());
-                                        previous_bottom = self.elements[i].bottom();
-                                    } else {
-                                        self.elements[i].set_top(previous_bottom);
-                                        previous_bottom = self.elements[i].bottom();
+                                    if let Some(element) = self.elements.get(i) {
+                                        if previous_bottom == 0.0 {
+                                            self.elements[i].set_top(self.rect.top());
+                                            previous_bottom = self.elements[i].bottom();
+                                        } else {
+                                            self.elements[i].set_top(previous_bottom);
+                                            previous_bottom = self.elements[i].bottom();
+                                        }
                                     }
+
+                                    // re-enable viewable elements
+                                    get_ui_mut().enable_element(self.elements[i].id());
                                 }
 
                                 return true;
                             } else if *y < 0.0 { // scroll down
-                                if self.cursor_idx + self.viewable_elements > self.elements.len() {
+                                // disable all elements
+                                for element in self.elements.iter() {
+                                    get_ui_mut().disable_element(element.id());
+                                }
+
+                                if self.cursor_idx + self.viewable_elements < self.elements.len() {
                                     self.cursor_idx += self.viewable_elements;
                                     self.cursor.set_top(self.cursor.bottom());
                                 } else {
-                                    self.cursor_idx = self.elements.len() - self.viewable_elements;
+                                    self.cursor_idx = self.elements.len() - 1;
                                     self.cursor.set_bottom(self.rect.bottom());
                                 }
 
                                 // reposition elements
                                 let mut previous_bottom = 0.0;
                                 for i in self.cursor_idx..(self.cursor_idx + self.viewable_elements) {
-                                    if previous_bottom == 0.0 {
-                                        self.elements[i].set_top(self.rect.top());
-                                        previous_bottom = self.elements[i].bottom();
-                                    } else {
-                                        self.elements[i].set_top(previous_bottom);
-                                        previous_bottom = self.elements[i].bottom();
+                                    if let Some(element) = self.elements.get(i) {
+                                        if previous_bottom == 0.0 {
+                                            self.elements[i].set_top(self.rect.top());
+                                            previous_bottom = self.elements[i].bottom();
+                                        } else {
+                                            self.elements[i].set_top(previous_bottom);
+                                            previous_bottom = self.elements[i].bottom();
+                                        }
                                     }
+
+                                    // re-enable viewable elements
+                                    get_ui_mut().enable_element(self.elements[i].id());
                                 }
                                 return true;
                             }
@@ -236,8 +254,6 @@ impl UiElement for Listbox {
         let diff = width - self.rect.width();
 
         self.rect.set_width(width);
-        self.bar.set_width(self.bar.width() + diff);
-        self.cursor.set_width(self.bar.width() + diff);
 
         // gotta do this because of rust's strict ass single mutability rules >:(
         let widths = self.elements.iter_mut().map(|element| element.width()).collect::<Vec<_>>();
@@ -254,8 +270,6 @@ impl UiElement for Listbox {
         let diff = height - self.rect.height();
 
         self.rect.set_height(height);
-        self.bar.set_height(self.bar.height() + diff);
-        self.cursor.set_height(self.bar.height() + diff);
 
         // gotta do this because of rust's strict ass single mutability rules >:(
         let heights = self.elements.iter_mut().map(|element| element.height()).collect::<Vec<_>>();
@@ -270,7 +284,9 @@ impl UiElement for Listbox {
         self.cursor.draw(target);
 
         for i in self.cursor_idx..(self.cursor_idx + self.viewable_elements) {
-            self.elements[i].draw(target);
+            if let Some(element) = self.elements.get(i) {
+                element.draw(target);
+            }
         }
     }
 }
