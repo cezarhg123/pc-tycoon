@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::log::{log, save_log};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub enum ItemType {
     Case,
     MB,

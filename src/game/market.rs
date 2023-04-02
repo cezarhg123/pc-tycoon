@@ -280,6 +280,7 @@ impl Market {
             (back_rect, black_rect, buy_button, close_button)
         }
 
+        // go back to ingame menu if the top right button is pressed
         if get_ui().get_element("close_button").unwrap().output() == UiOutput::LeftClicked {
             return true;
         }
@@ -723,6 +724,8 @@ Length: {}mm"#, psu.name.clone(),
 
         if bought {
             self.buy_popup = None;
+            get_ui_mut().remove_element("pop_up_close_button");
+            get_ui_mut().remove_element("buy_button");
         }
 
         false
@@ -731,8 +734,6 @@ Length: {}mm"#, psu.name.clone(),
     pub fn draw(&self, target: &mut Frame) {
         self.background.draw(target);
 
-        // commented out because i want it to be completely transparent and performance
-        // get_ui().get_element("close_button").unwrap().draw(target);
         get_ui().get_element("cases_listbox").unwrap().draw(target);
         get_ui().get_element("mbs_listbox").unwrap().draw(target);
         get_ui().get_element("cpus_listbox").unwrap().draw(target);

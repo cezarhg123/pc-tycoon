@@ -136,6 +136,10 @@ impl Ui {
         }
     }
 
+    pub fn get_cursor_pos(&self) -> Vec2<f32> {
+        self.cursor_pos.clone()
+    }
+
     pub fn remove_element(&mut self, id: &str) {
         let index = self.elements.iter().position(|e| e.1.id() == id);
         

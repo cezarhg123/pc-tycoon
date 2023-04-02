@@ -1,6 +1,6 @@
 use glium::{Display, Frame, glutin::event::WindowEvent};
 use crate::{log::log, math::vec2::{Vec2, vec2}, get_window_height, get_ui_mut};
-use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile, ingame::{InGame, InGameOutput}, buildpc::BuildPC, market::Market};
+use self::{main_menu::{MainMenu, MainMenuOutput}, select_save::SelectSave, profile::Profile, ingame::{InGame, InGameOutput}, buildpc::BuildPC, market::Market, inventory::Inventory};
 
 pub mod pc_components;
 pub mod profile;
@@ -16,6 +16,7 @@ pub enum GameState {
     SelectSave(SelectSave),
     InGame(InGame),
     BuildPC(BuildPC),
+    Inventory(Inventory),
     Market(Market)
 }
 
@@ -67,16 +68,30 @@ impl Game {
                         self.state = GameState::BuildPC(BuildPC::new(display));
                         log("loaded build pc");
                     }
+                    InGameOutput::Inventory => {
+                        log("loading inventory");
+                        get_ui_mut().clear();
+                        self.state = GameState::Inventory(Inventory::new(display, self.profile.as_ref().unwrap()));
+                        log("loaded inventory");
+                    }
                     InGameOutput::Market => {
-                        log("loading build pc");
+                        log("loading market");
                         get_ui_mut().clear();
                         self.state = GameState::Market(Market::new(display, self.profile.as_mut().unwrap()));
-                        log("loaded build pc");
+                        log("loaded market");
                     }
                     _ => {}
                 }
             }
             GameState::BuildPC(buildpc) => {
+            }
+            GameState::Inventory(inventory) => {
+                if inventory.run(self.profile.as_ref().unwrap(), display) {
+                    log("loading ingame");
+                    get_ui_mut().clear();
+                    self.state = GameState::InGame(InGame::new(display, self.profile.as_ref().unwrap()));
+                    log("loaded ingame");
+                }
             }
             GameState::Market(market) => {
                 if market.run(display, self.profile.as_mut().unwrap()) {
@@ -102,6 +117,9 @@ impl Game {
             }
             GameState::BuildPC(buildpc) => {
                 buildpc.draw(target);
+            }
+            GameState::Inventory(inventory) => {
+                inventory.draw(target);
             }
             GameState::Market(market) => {
                 market.draw(target);
