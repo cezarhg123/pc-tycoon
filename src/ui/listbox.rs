@@ -1,9 +1,10 @@
 use glium::{Display, Frame, glutin::event::{WindowEvent, VirtualKeyCode, ElementState, MouseScrollDelta}};
 use crate::{ptrcell::PtrCell, gfx::rect::{Rect, RectBuilder}, math::{vec2::{Vec2, vec2}, vec4::vec4}, log::{log, save_log}, MOVE_UI, get_ui_mut};
-use super::uielement::{UiElement, UiOutput};
+use super::{uielement::{UiElement, UiOutput}, customuidata::CustomUIData};
 
 pub struct Listbox {
     id: String,
+    custom_data: Vec<CustomUIData>,
     elements: Vec<PtrCell<dyn UiElement>>,
     cursor: Rect,
     bar: Rect,
@@ -156,6 +157,10 @@ impl UiElement for Listbox {
         &self.id
     }
 
+    fn custon_data(&self) -> &[CustomUIData] {
+        self.custom_data.as_slice()
+    }
+
     fn left(&self) -> f32 {
         self.rect.left()
     }
@@ -294,6 +299,7 @@ impl UiElement for Listbox {
 /// all elements better have the same height or else big problems
 pub struct ListboxBuilder {
     pub id: String,
+    pub custom_data: Vec<CustomUIData>,
     pub elements: Vec<PtrCell<dyn UiElement>>,
     pub bar_width: f32,
     pub position: Vec2<f32>,
@@ -304,6 +310,7 @@ impl Default for ListboxBuilder {
     fn default() -> Self {
         ListboxBuilder {
             id: "Default Listbox".to_string(),
+            custom_data: Vec::new(),
             elements: Vec::new(),
             bar_width: 10.0,
             position: vec2(400.0, 400.0),
@@ -370,6 +377,7 @@ impl ListboxBuilder {
 
         Listbox {
             id: self.id,
+            custom_data: self.custom_data,
             elements: self.elements,
             cursor,
             bar,

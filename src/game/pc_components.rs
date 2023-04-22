@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum MBFormFactor {
     ATX,
     MicroATX
@@ -17,7 +17,7 @@ impl ToString for MBFormFactor {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum SocketType {
     AM4,
     AM5,
@@ -36,7 +36,7 @@ impl ToString for SocketType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum CaseFormFactor {
     FullTower,
     MidTower
@@ -51,7 +51,7 @@ impl ToString for CaseFormFactor {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum RamType {
     DDR3,
     DDR4,
@@ -68,7 +68,7 @@ impl ToString for RamType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum StorageType {
     M2,
     SSD,

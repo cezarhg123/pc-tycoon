@@ -10,6 +10,7 @@ pub mod ingame;
 pub mod buildpc;
 pub mod inventory;
 pub mod market;
+pub mod pc;
 
 pub enum GameState {
     MainMenu(MainMenu),
@@ -84,6 +85,12 @@ impl Game {
                 }
             }
             GameState::BuildPC(buildpc) => {
+                if buildpc.run(self.profile.as_mut().unwrap(), display) {
+                    log("loading ingame");
+                    get_ui_mut().clear();
+                    self.state = GameState::InGame(InGame::new(display, self.profile.as_ref().unwrap()));
+                    log("loaded ingame");
+                }
             }
             GameState::Inventory(inventory) => {
                 if inventory.run(self.profile.as_ref().unwrap(), display) {

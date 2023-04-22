@@ -44,10 +44,12 @@ impl SelectSave {
 
             let save_button = get_ui_mut().add_element(ButtonBuilder {
                 id: format!("save{i}_button"),
+                custom_data: Vec::new(),
                 position: vec2(378.0, 600.0 - (100.0 * i as f32)),
                 size: vec2(300.0, 80.0),
                 text: Some(ButtonTextType::Single(TextLineBuilder {
                     id: format!("{prefix} Save{i}"),
+                    custom_data: Vec::new(),
                     text: format!("{prefix} Save"),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),

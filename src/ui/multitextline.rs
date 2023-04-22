@@ -1,7 +1,7 @@
 use glium::{Display, glutin::event::{MouseButton, ElementState, VirtualKeyCode}};
 
 use crate::{gfx::rect::{Rect, RectBuilder}, math::{vec2::{Vec2, vec2}, vec3::{Vec3, vec3}, vec4::vec4}, MOVE_UI};
-use super::{textline::{TextLine, TextLineBuilder}, uielement::{UiOutput, UiElement}};
+use super::{textline::{TextLine, TextLineBuilder}, uielement::{UiOutput, UiElement}, customuidata::CustomUIData};
 
 pub enum TextLayout {
     Left,
@@ -12,6 +12,7 @@ pub enum TextLayout {
 pub struct MultiTextLine {
     output: UiOutput,
     id: String,
+    custom_data: Vec<CustomUIData>,
     textlines: Vec<TextLine>,
     layout: TextLayout,
     rect: Rect
@@ -98,6 +99,10 @@ impl UiElement for MultiTextLine {
 
     fn id(&self) -> &str {
         self.id.as_str()
+    }
+
+    fn custon_data(&self) -> &[CustomUIData] {
+        self.custom_data.as_slice()
     }
 
     fn left(&self) -> f32 {
@@ -189,6 +194,7 @@ impl UiElement for MultiTextLine {
 /// Split text with \n to actually make it multiline
 pub struct MultiTextLineBuilder {
     pub id: String,
+    pub custom_data: Vec<CustomUIData>,
     pub text: String,
     pub layout: TextLayout,
     pub font_size: f32,
@@ -201,6 +207,7 @@ impl Default for MultiTextLineBuilder {
     fn default() -> Self {
         MultiTextLineBuilder {
             id: "Default".to_string(),
+            custom_data: Vec::new(),
             text: "Default\nDefault".to_string(),
             layout: TextLayout::Middle,
             font_size: 12.0,
@@ -223,6 +230,7 @@ impl MultiTextLineBuilder {
         for text in split_texts {
             let textline = TextLineBuilder {
                 id: text.to_string(),
+                custom_data: Vec::new(),
                 text: text.to_string(),
                 font_size: self.font_size,
                 color: self.color,
@@ -269,6 +277,7 @@ impl MultiTextLineBuilder {
 
         MultiTextLine {
             id: self.id,
+            custom_data: self.custom_data,
             output: UiOutput::None,
             textlines,
             layout: self.layout,

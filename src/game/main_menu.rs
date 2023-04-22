@@ -35,10 +35,12 @@ impl MainMenu {
         // creating buttons now so that i can just get them later in 'run()'
         let play_button = get_ui_mut().add_element(ButtonBuilder {
             id: "play_button".to_string(),
+            custom_data: Vec::new(),
             position: vec2(378.0, 600.0),
             size: vec2(300.0, 80.0),
             text: Some(ButtonTextType::Single(TextLineBuilder {
                 id: "Play".to_string(),
+                custom_data: Vec::new(),
                 text: "Play".to_string(),
                 font_size: 36.0,
                 color: vec3(1.0, 1.0, 1.0),
@@ -52,10 +54,12 @@ impl MainMenu {
 
         let exit_button = get_ui_mut().add_element(ButtonBuilder {
             id: "exit_button".to_string(),
+            custom_data: Vec::new(),
             position: vec2(378.0, 500.0),
             size: vec2(300.0, 80.0),
             text: Some(ButtonTextType::Single(TextLineBuilder {
                 id: "Exit".to_string(),
+                custom_data: Vec::new(),
                 text: "Exit".to_string(),
                 font_size: 36.0,
                 color: vec3(1.0, 1.0, 1.0),

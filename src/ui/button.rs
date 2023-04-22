@@ -4,7 +4,7 @@ use glium::{texture::{SrgbTexture2d, RawImage2d}, Display, glutin::event::{Mouse
 use image::{DynamicImage, GenericImageView};
 
 use crate::{math::{vec2::{Vec2, vec2}, vec4::{Vec4, vec4}}, gfx::rect::{Rect, RectBuilder}, MOVE_UI};
-use super::{uielement::{UiOutput, UiElement}, textline::{TextLine, TextLineBuilder}, multitextline::MultiTextLine};
+use super::{uielement::{UiOutput, UiElement}, textline::{TextLine, TextLineBuilder}, multitextline::MultiTextLine, customuidata::CustomUIData};
 
 pub enum ButtonTextType {
     Single(TextLine),
@@ -27,6 +27,7 @@ enum ButtonFaceState {
 pub struct Button {
     output: UiOutput,
     id: String,
+    custom_data: Vec<CustomUIData>,
     position: Vec2<f32>,
     size: Vec2<f32>,
     text: Option<ButtonTextType>,
@@ -172,6 +173,10 @@ impl UiElement for Button {
         self.id.as_str()
     }
 
+    fn custon_data(&self) -> &[CustomUIData] {
+        self.custom_data.as_slice()
+    }
+
     fn left(&self) -> f32 {
         self.rect.left()
     }
@@ -311,6 +316,7 @@ impl UiElement for Button {
 
 pub struct ButtonBuilder {
     pub id: String,
+    pub custom_data: Vec<CustomUIData>,
     pub position: Vec2<f32>,
     pub size: Vec2<f32>,
     pub text: Option<ButtonTextType>,
@@ -323,6 +329,7 @@ impl Default for ButtonBuilder {
     fn default() -> Self {
         ButtonBuilder {
             id: "Default".to_string(),
+            custom_data: Vec::new(),
             position: vec2(1000.0, 600.0),
             size: vec2(300.0, 100.0),
             text: None,
@@ -334,7 +341,7 @@ impl Default for ButtonBuilder {
 }
 
 impl ButtonBuilder {
-    pub fn build(self, display: &Display) -> Button {
+    pub fn build(mut self, display: &Display) -> Button {
         let hovered_face = match &self.hovered_face {
             Some(hovered_face) => {hovered_face.clone()} // just use the face that dev set
             None => {
@@ -381,9 +388,21 @@ impl ButtonBuilder {
             }
         }.build(display);
 
+        if let Some(text) = &mut self.text {
+            match text {
+                ButtonTextType::Multi(text) => {
+                    text.set_centre(rect.centre());
+                }
+                ButtonTextType::Single(text) => {
+                    text.set_centre(rect.centre());
+                }
+            }
+        }
+
         Button {
             output: UiOutput::None,
             id: self.id,
+            custom_data: self.custom_data,
             position: self.position,
             size: self.size,
             text: self.text,

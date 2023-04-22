@@ -1,7 +1,7 @@
 use glium::{texture::{SrgbTexture2d, RawImage2d}, VertexBuffer, IndexBuffer, Program, Display, Frame, uniform, Surface, DrawParameters, Blend};
 use image::{DynamicImage, GenericImageView};
 
-use crate::{math::{vec2::{Vec2, vec2}, vec4::{Vec4, vec4}}, get_window_width, get_window_height, log::{save_log, log}};
+use crate::{math::{vec2::{Vec2, vec2}, vec4::{Vec4, vec4}}, get_window_width, get_window_height, log::{save_log, log}, ui::uirect::UiRect};
 
 use super::{Vertex, vertex, WHITE_SQUARE_BYTES, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC};
 

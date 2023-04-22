@@ -37,6 +37,7 @@ impl Market {
 
         let close_button = get_ui_mut().add_element(ButtonBuilder {
             id: "close_button".to_string(),
+            custom_data: Vec::new(),
             position: vec2(1842.0, 1038.0),
             size: vec2(155.0, 84.0),
             text: None,
@@ -47,9 +48,11 @@ impl Market {
 
         let cases_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "cases_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_case_names().iter().map(|case| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: case.clone(),
+                    custom_data: Vec::new(),
                     text: case.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -64,9 +67,11 @@ impl Market {
 
         let mbs_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "mbs_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_mb_names().iter().map(|mb| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: mb.clone(),
+                    custom_data: Vec::new(),
                     text: mb.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -81,9 +86,11 @@ impl Market {
 
         let cpus_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "cpus_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_cpu_names().iter().map(|cpu| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: cpu.clone(),
+                    custom_data: Vec::new(),
                     text: cpu.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -98,9 +105,11 @@ impl Market {
 
         let cpu_coolers_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "cpu_coolers_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_cpu_cooler_names().iter().map(|cpu_cooler| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: cpu_cooler.clone(),
+                    custom_data: Vec::new(),
                     text: cpu_cooler.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -115,9 +124,11 @@ impl Market {
 
         let rams_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "rams_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_ram_names().iter().map(|ram| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: ram.clone(),
+                    custom_data: Vec::new(),
                     text: ram.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -132,9 +143,11 @@ impl Market {
 
         let gpus_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "gpus_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_gpu_names().iter().map(|gpu| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: gpu.clone(),
+                    custom_data: Vec::new(),
                     text: gpu.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -149,9 +162,11 @@ impl Market {
 
         let storages_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "storages_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_storage_names().iter().map(|storage| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: storage.clone(),
+                    custom_data: Vec::new(),
                     text: storage.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -166,9 +181,11 @@ impl Market {
 
         let fans_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "fans_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_fan_names().iter().map(|fan| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: fan.clone(),
+                    custom_data: Vec::new(),
                     text: fan.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -183,9 +200,11 @@ impl Market {
 
         let psus_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "psus_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: get_psu_names().iter().map(|psu| {
                 get_ui_mut().add_element(TextLineBuilder {
                     id: psu.clone(),
+                    custom_data: Vec::new(),
                     text: psu.clone(),
                     font_size: 36.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -200,6 +219,7 @@ impl Market {
 
         let mut money_textline = get_ui_mut().add_element(TextLineBuilder {
             id: "money_textline".to_string(),
+            custom_data: Vec::new(),
             text: format!("${}", profile.money),
             font_size: 68.0,
             color: vec3(0.0, 0.0, 0.0),
@@ -241,10 +261,12 @@ impl Market {
 
             let mut buy_button = get_ui_mut().add_element(ButtonBuilder {
                 id: "buy_button".to_string(),
+                custom_data: Vec::new(),
                 position: vec2(0.0, 0.0),
                 size: vec2(black_rect.width() / 2.2, 30.0),
                 text: Some(ButtonTextType::Single(TextLineBuilder {
                     id: "buy_button_text".to_string(),
+                    custom_data: Vec::new(),
                     text: "Buy".to_string(),
                     font_size: 26.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -260,10 +282,12 @@ impl Market {
 
             let mut close_button = get_ui_mut().add_element(ButtonBuilder {
                 id: "pop_up_close_button".to_string(),
+                custom_data: Vec::new(),
                 position: vec2(0.0, 0.0),
                 size: vec2(black_rect.width() / 2.2, 30.0),
                 text: Some(ButtonTextType::Single(TextLineBuilder {
                     id: "close_button_text".to_string(),
+                    custom_data: Vec::new(),
                     text: "Close".to_string(),
                     font_size: 26.0,
                     color: vec3(1.0, 1.0, 1.0),
@@ -288,6 +312,7 @@ impl Market {
         get_ui_mut().remove_element("money_textline");
         get_ui_mut().add_element(TextLineBuilder {
             id: "money_textline".to_string(),
+            custom_data: Vec::new(),
             text: format!("${}", profile.money),
             font_size: 68.0,
             color: vec3(0.0, 0.0, 0.0),
@@ -305,6 +330,7 @@ impl Market {
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: case.name.clone() + "/case",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Case Form Factor: {}
@@ -353,6 +379,7 @@ Length: {}mm"#, case.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: mb.name.clone() + "/mb",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Power Usage: {}W
@@ -399,6 +426,7 @@ Max RAM Speed: {}MHz"#, mb.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: cpu.name.clone() + "/cpu",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Power Usage: {}W
@@ -435,6 +463,7 @@ Speed: {}MHz"#, cpu.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: cpu_cooler.name.clone() + "/cpu_cooler",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Power Usage: {}W
@@ -467,6 +496,7 @@ Height: {}mm"#, cpu_cooler.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: ram.name.clone() + "/ram",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Power Usage: {}W
@@ -501,6 +531,7 @@ Speed: {}MHz"#, ram.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: gpu.name.clone() + "/gpu",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Power Usage: {}W
@@ -542,6 +573,7 @@ VRAM: {}GB"#, gpu.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: storage.name.clone() + "/storage",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Power Usage: {}W
@@ -576,6 +608,7 @@ Speed: {}MB/s"#, storage.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: fan.name.clone() + "/fan",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Power Usage: {}W
@@ -612,6 +645,7 @@ Flow: {}CM/s"#, fan.name.clone(),
 
                     let mut info_multitextline = MultiTextLineBuilder {
                         id: psu.name.clone() + "/psu",
+                        custom_data: Vec::new(),
                         text: format!(r#"{}
 Price: ${}
 Wattage: {}W

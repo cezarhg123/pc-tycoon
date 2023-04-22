@@ -3,11 +3,12 @@ use glium::{texture::{SrgbTexture2d, RawImage2d}, Display, glutin::event::{Mouse
 use image::{DynamicImage, Rgba, GenericImageView};
 use rusttype::{Scale, point};
 use crate::{math::{vec3::{Vec3, vec3}, vec2::{Vec2, vec2}, vec4::vec4}, gfx::rect::{Rect, RectBuilder}, MOVE_UI};
-use super::{uielement::{UiElement, UiOutput}, get_global_bold_font, get_global_font};
+use super::{uielement::{UiElement, UiOutput}, get_global_bold_font, get_global_font, customuidata::CustomUIData};
 
 pub struct TextLine {
     id: String,
     output: UiOutput,
+    custom_data: Vec<CustomUIData>,
     text: String,
     font_size: f32,
     color: Vec3<f32>,
@@ -99,6 +100,10 @@ impl UiElement for TextLine {
         self.id.as_str()
     }
 
+    fn custon_data(&self) -> &[CustomUIData] {
+        self.custom_data.as_slice()
+    }
+
     fn left(&self) -> f32 {
         self.rect.left()
     }
@@ -158,6 +163,7 @@ impl UiElement for TextLine {
 
 pub struct TextLineBuilder {
     pub id: String,
+    pub custom_data: Vec<CustomUIData>,
     pub text: String,
     pub font_size: f32,
     pub color: Vec3<f32>,
@@ -169,6 +175,7 @@ impl Default for TextLineBuilder {
     fn default() -> TextLineBuilder {
         TextLineBuilder {
             id: "Default".to_string(),
+            custom_data: Vec::new(),
             text: "Default".to_string(),
             font_size: 12.0,
             color: vec3(1.0, 1.0, 1.0),
@@ -258,6 +265,7 @@ impl TextLineBuilder {
 
         TextLine {
             id: self.id,
+            custom_data: self.custom_data,
             text: self.text,
             font_size: self.font_size,
             color: self.color,

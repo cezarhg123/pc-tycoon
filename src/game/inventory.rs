@@ -28,6 +28,7 @@ impl Inventory {
 
         let close_button = get_ui_mut().add_element(ButtonBuilder {
             id: "close_button".to_string(),
+            custom_data: Vec::new(),
             position: vec2(1842.0, 1038.0),
             size: vec2(155.0, 84.0),
             text: None,
@@ -48,10 +49,12 @@ impl Inventory {
         
         let cases_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "cases_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if case_names.len() > 0 {
                 case_names.iter().enumerate().map(|case| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", case.1, case.0),
+                        custom_data: Vec::new(),
                         text: case.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -63,6 +66,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No Cases".to_string(),
+                        custom_data: Vec::new(),
                         text: "No Cases".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -78,10 +82,12 @@ impl Inventory {
 
         let mbs_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "mbs_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if mb_names.len() > 0 {
                 mb_names.iter().enumerate().map(|mb| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", mb.1, mb.0),
+                        custom_data: Vec::new(),
                         text: mb.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -93,6 +99,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No Motherboard".to_string(),
+                        custom_data: Vec::new(),
                         text: "No Motherboard".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -108,10 +115,12 @@ impl Inventory {
 
         let cpus_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "cpus_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if cpu_names.len() > 0 {
                 cpu_names.iter().enumerate().map(|cpu| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", cpu.1, cpu.0),
+                        custom_data: Vec::new(),
                         text: cpu.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -123,6 +132,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No CPU".to_string(),
+                        custom_data: Vec::new(),
                         text: "No CPU".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -138,10 +148,12 @@ impl Inventory {
 
         let cpu_coolers_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "cpu_coolers_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if cpu_cooler_names.len() > 0 {
                 cpu_cooler_names.iter().enumerate().map(|cpu_cooler| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", cpu_cooler.1, cpu_cooler.0),
+                        custom_data: Vec::new(),
                         text: cpu_cooler.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -153,6 +165,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No CPU Cooler".to_string(),
+                        custom_data: Vec::new(),
                         text: "No CPU Cooler".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -168,10 +181,12 @@ impl Inventory {
 
         let rams_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "rams_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if ram_names.len() > 0 {
                 ram_names.iter().enumerate().map(|ram| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", ram.1, ram.0),
+                        custom_data: Vec::new(),
                         text: ram.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -183,6 +198,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No RAM".to_string(),
+                        custom_data: Vec::new(),
                         text: "No RAM".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -198,10 +214,12 @@ impl Inventory {
 
         let gpus_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "gpus_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if gpu_names.len() > 0 {
                 gpu_names.iter().enumerate().map(|gpu| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", gpu.1, gpu.0),
+                        custom_data: Vec::new(),
                         text: gpu.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -213,6 +231,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No GPU".to_string(),
+                        custom_data: Vec::new(),
                         text: "No GPU".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -228,10 +247,12 @@ impl Inventory {
 
         let storages_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "storages_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if storage_names.len() > 0 {
                 storage_names.iter().enumerate().map(|storage| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", storage.1, storage.0),
+                        custom_data: Vec::new(),
                         text: storage.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -243,6 +264,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No Storage".to_string(),
+                        custom_data: Vec::new(),
                         text: "No Storage".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -258,10 +280,12 @@ impl Inventory {
 
         let fans_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "fans_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if fan_names.len() > 0 {
                 fan_names.iter().enumerate().map(|fan| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", fan.1, fan.0),
+                        custom_data: Vec::new(),
                         text: fan.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -273,6 +297,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No Fan".to_string(),
+                        custom_data: Vec::new(),
                         text: "No Fan".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -288,10 +313,12 @@ impl Inventory {
 
         let psus_listbox = get_ui_mut().add_element(ListboxBuilder {
             id: "psus_listbox".to_string(),
+            custom_data: Vec::new(),
             elements: if psu_names.len() > 0 {
                 psu_names.iter().enumerate().map(|psu| {
                     get_ui_mut().add_element(TextLineBuilder {
                         id: format!("{}{}", psu.1, psu.0),
+                        custom_data: Vec::new(),
                         text: psu.1.clone(),
                         font_size: 36.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -303,6 +330,7 @@ impl Inventory {
                 vec![
                     get_ui_mut().add_element(TextLineBuilder {
                         id: "No PSU".to_string(),
+                        custom_data: Vec::new(),
                         text: "No PSU".to_string(),
                         font_size: 26.0,
                         color: vec3(1.0, 1.0, 1.0),
@@ -514,6 +542,7 @@ Length: {}mm"#, psu.name.clone(),
 
                     let mut info = MultiTextLineBuilder {
                         id: "info".to_string(),
+                        custom_data: Vec::new(),
                         text: info,
                         layout: TextLayout::Left,
                         font_size: 26.0,

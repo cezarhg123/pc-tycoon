@@ -3,9 +3,12 @@ pub mod textline;
 pub mod multitextline;
 pub mod button;
 pub mod listbox;
+pub mod uirect;
+pub mod draggable;
+pub mod customuidata;
 
 use std::{rc::Rc, cell::{RefCell, RefMut, Cell}, borrow::{Borrow, BorrowMut}, ops::Deref};
-use glium::{glutin::event::WindowEvent, Display};
+use glium::{glutin::event::{WindowEvent, VirtualKeyCode}, Display};
 use rusttype::Font;
 use crate::{log::{log, save_log}, math::vec2::{Vec2, vec2}, get_window_height, ptrcell::PtrCell};
 use self::uielement::UiElement;
@@ -64,14 +67,16 @@ pub struct Ui {
     /// 
     /// Also the bool controls if the element handles events or not
     elements: Vec<(bool, Box<dyn UiElement>)>,
-    cursor_pos: Vec2<f32>
+    cursor_pos: Vec2<f32>,
+    current_key_pressed: Option<VirtualKeyCode>
 }
 
 impl Ui {
     pub const fn new() -> Ui {
         Ui {
             elements: Vec::new(),
-            cursor_pos: vec2(0.0, 0.0)
+            cursor_pos: vec2(0.0, 0.0),
+            current_key_pressed: None
         }
     }
 
@@ -84,7 +89,12 @@ impl Ui {
 
                 self.cursor_pos = vec2(x, y);
             },
-            _ => {}
+            WindowEvent::KeyboardInput {input, ..} => {
+                self.current_key_pressed = input.virtual_keycode;
+            },
+            _ => {
+                self.current_key_pressed = None;
+            }
         }
 
         // go over elements and handle event
@@ -138,6 +148,14 @@ impl Ui {
 
     pub fn get_cursor_pos(&self) -> Vec2<f32> {
         self.cursor_pos.clone()
+    }
+
+    pub fn get_key_pressed(&self, key: VirtualKeyCode) -> bool {
+        if let Some(keycode) = self.current_key_pressed {
+            keycode == key
+        } else {
+            false
+        }
     }
 
     pub fn remove_element(&mut self, id: &str) {

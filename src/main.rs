@@ -1,7 +1,7 @@
 #![allow(non_upper_case_globals, unused)]
 // #![windows_subsystem = "windows"]
 
-use std::{rc::Rc, cell::RefCell};
+use std::{rc::Rc, cell::RefCell, io::Cursor};
 
 use game::{Game, profile::create_encryption_key};
 use gfx::rect::RectBuilder;
@@ -57,6 +57,7 @@ fn main() {
     let mut frames = 0;
     let mut fps_textline = TextLineBuilder {
         id: "".to_string(),
+        custom_data: Vec::new(),
         text: frames.to_string(),
         font_size: 12.0,
         color: vec3(0.0, 0.0, 0.0),
@@ -88,6 +89,7 @@ fn main() {
                 if fps_timer.elapsed() >= 1.0 {
                     fps_textline = TextLineBuilder {
                         id: "".to_string(),
+                        custom_data: Vec::new(),
                         text: frames.to_string(),
                         font_size: 18.0,
                         color: vec3(0.0, 0.0, 0.0),

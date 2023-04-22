@@ -38,10 +38,12 @@ impl InGame {
         // creating buttons
         let build_pc_button = get_ui_mut().add_element(ButtonBuilder {
             id: "build_pc_button".to_string(),
+            custom_data: Vec::new(),
             position: vec2(948.0, 780.0),
             size: vec2(600.0, 100.0),
             text: Some(ButtonTextType::Single(TextLineBuilder {
                 id: "Build PC".to_string(),
+                custom_data: Vec::new(),
                 text: "Build PC".to_string(),
                 font_size: 64.0,
                 color: vec3(1.0, 1.0, 1.0),
@@ -55,10 +57,12 @@ impl InGame {
 
         let inventory_button = get_ui_mut().add_element(ButtonBuilder {
             id: "inventory_button".to_string(),
+            custom_data: Vec::new(),
             position: vec2(948.0, 660.0),
             size: vec2(600.0, 100.0),
             text: Some(ButtonTextType::Single(TextLineBuilder {
                 id: "Inventory".to_string(),
+                custom_data: Vec::new(),
                 text: "Inventory".to_string(),
                 font_size: 64.0,
                 color: vec3(1.0, 1.0, 1.0),
@@ -72,10 +76,12 @@ impl InGame {
 
         let market_button = get_ui_mut().add_element(ButtonBuilder {
             id: "market_button".to_string(),
+            custom_data: Vec::new(),
             position: vec2(948.0, 540.0),
             size: vec2(600.0, 100.0),
             text: Some(ButtonTextType::Single(TextLineBuilder {
                 id: "Market".to_string(),
+                custom_data: Vec::new(),
                 text: "Market".to_string(),
                 font_size: 64.0,
                 color: vec3(1.0, 1.0, 1.0),
@@ -90,6 +96,7 @@ impl InGame {
         // creating profile texts that show stats
         let money_text = get_ui_mut().add_element(TextLineBuilder {
             id: "Money".to_string(),
+            custom_data: Vec::new(),
             text: format!("${}", profile.money),
             font_size: 56.0,
             color: vec3(0.0, 0.0, 0.0),
@@ -99,6 +106,7 @@ impl InGame {
 
         let level_text = get_ui_mut().add_element(TextLineBuilder {
             id: "Level".to_string(),
+            custom_data: Vec::new(),
             text: format!("LVL: {}", profile.level),
             font_size: 56.0,
             color: vec3(0.0, 0.0, 0.0),
@@ -108,6 +116,7 @@ impl InGame {
 
         let points_text = get_ui_mut().add_element(TextLineBuilder {
             id: "Points".to_string(),
+            custom_data: Vec::new(),
             text: format!("{}/{}", profile.points, profile.goal),
             font_size: 56.0,
             color: vec3(0.0, 0.0, 0.0),
