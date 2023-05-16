@@ -1,8 +1,10 @@
-use glium::implement_vertex;
-
-use crate::math::vec2::Vec2;
-
 pub mod rect;
+
+use std::{io::Cursor, error::Error};
+
+use glium::{implement_vertex, texture::{SrgbTexture2d, RawImage2d}, Display};
+use image::GenericImageView;
+use crate::math::vec2::Vec2;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
@@ -49,3 +51,14 @@ pub const FRAGMENT_SHADER_SRC: &'static str = r#"
         frag_color = texture(tex, uv) * color;
     }
 "#;
+
+pub fn texture_from_path(path: impl ToString, display: &Display) -> Result<SrgbTexture2d, Box<dyn Error>> {
+    let path = path.to_string();
+
+    let texture_bytes = std::fs::read(path)?;
+    let texture = image::load(Cursor::new(texture_bytes), image::ImageFormat::Png)?;
+    let texture = RawImage2d::from_raw_rgba_reversed(texture.as_bytes(), texture.dimensions());
+    let texture = SrgbTexture2d::new(display, texture)?;
+
+    Ok(texture)
+}

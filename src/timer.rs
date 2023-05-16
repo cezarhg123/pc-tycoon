@@ -26,4 +26,8 @@ impl Timer {
     pub fn elapsed(&self) -> f32 {
         (self.crnt_time - self.prev_time).as_secs_f32()
     }
+
+    pub fn elapsed_milliseconds(&self) -> u128 {
+        (self.crnt_time - self.prev_time).as_millis()
+    }
 }

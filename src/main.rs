@@ -2,74 +2,48 @@
 // #![windows_subsystem = "windows"]
 
 use std::{rc::Rc, cell::RefCell, io::Cursor};
-
-use game::{Game, profile::create_encryption_key};
 use gfx::rect::RectBuilder;
-use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::WindowBuilder, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{Event, WindowEvent}}, Display, Surface};
+use glium::{glutin::{event_loop::{EventLoop, ControlFlow}, window::{WindowBuilder, Fullscreen}, dpi::{LogicalSize, PhysicalPosition}, ContextBuilder, event::{Event, WindowEvent, VirtualKeyCode, ElementState}}, Display, Surface};
+use log::{create_log_file, log};
 use math::{vec2::vec2, vec3::vec3, vec4::vec4};
-use part_loader::load_parts;
 use timer::Timer;
-use ui::{set_global_font, set_global_bold_font, textline::TextLineBuilder, uielement::UiElement, multitextline::MultiTextLineBuilder, Ui, button::{ButtonBuilder, ButtonFace}, listbox::ListboxBuilder};
-use log::{log, save_log};
+use ui::{Ui, uielement::UiElement, uirect::UiRect};
 
-pub mod game;
-pub mod part_loader;
 pub mod timer;
 pub mod gfx;
 pub mod math;
 pub mod ui;
 pub mod log;
-pub mod ptrcell;
 
 fn main() {
-    load_parts();
-    create_encryption_key();
-    set_global_font("fonts/font.ttf");
-    set_global_bold_font("fonts/bold_font.ttf");
+    create_log_file();
 
     let mut event_loop = EventLoop::new();
     let wb = WindowBuilder::new()
         .with_inner_size(LogicalSize::new(get_window_width(), get_window_height()))
-        .with_decorations(false)
+        .with_decorations(true)
         .with_position(PhysicalPosition::new(0, 0))
-        .with_resizable(false)
+        .with_resizable(true)
         .with_title("PC Tycoon");
 
     let cb = ContextBuilder::new();
 
-    log("creating display");
     let display = match Display::new(wb, cb, &event_loop) {
         Ok(display) => {
-            log("created display");
             display
         }
         Err(err) => {
-            log("CRITICAL ERROR: fucked up creating display");
-            log(format!("CRITICAL ERROR: more info for the error above:\n{}", err.to_string()));
             panic!();
         }
     };
-    
-    let mut game = Game::new(&display);
 
-    // fps shit
-    let mut fps_timer = Timer::new();
-    let mut frames = 0;
-    let mut fps_textline = TextLineBuilder {
-        id: "".to_string(),
-        custom_data: Vec::new(),
-        text: frames.to_string(),
-        font_size: 12.0,
-        color: vec3(0.0, 0.0, 0.0),
-        bold: false,
-        position: vec2(0.0, 0.0)
-    }.build(&display);
+    log("created all necessary objects");
 
+    let mut fullscreen = false;
     // main loop
-    event_loop.run(move |ev, _, control_flow| {        
+    event_loop.run(move |ev, _, control_flow| {
         if is_closed() {
             *control_flow = ControlFlow::Exit;
-            save_log();
         } else {
             *control_flow = ControlFlow::Poll;
         }
@@ -77,39 +51,41 @@ fn main() {
             Event::WindowEvent {
                 event,
                 ..
-            } => if !get_ui_mut().handle_event(&event, &display) {
+            } => if !ui().handle_events(&event) {
                 match event {
                     WindowEvent::CloseRequested => close(),
+                    WindowEvent::Resized(new_size) => {
+                        set_window_width(new_size.width);
+                        set_window_height(new_size.height);
+                    }
+                    WindowEvent::KeyboardInput {input, ..} => {
+                        if input.virtual_keycode == Some(VirtualKeyCode::F11) && input.state == ElementState::Pressed {
+                            if fullscreen {
+                                display.gl_window().window().set_fullscreen(None);
+                                fullscreen = false;
+                            } else {
+                                display.gl_window().window().set_fullscreen(Some(Fullscreen::Borderless(None)));
+                                fullscreen = true;
+                            }
+                        }
+
+                        if input.virtual_keycode == Some(VirtualKeyCode::A) && input.state == ElementState::Pressed {
+                            let rect = RectBuilder::new()
+                                .with_position(vec2(400.0, 400.0))
+                                .build(&display);
+
+                            let rect = ui().add_element(UiElement::new("test", UiRect::new(rect)));
+                            rect.set_enabled(true);
+                        }
+                    }
                     _ => return
                 }
             }
             Event::MainEventsCleared => {
-                frames += 1;
-                fps_timer.tick();
-                if fps_timer.elapsed() >= 1.0 {
-                    fps_textline = TextLineBuilder {
-                        id: "".to_string(),
-                        custom_data: Vec::new(),
-                        text: frames.to_string(),
-                        font_size: 18.0,
-                        color: vec3(0.0, 0.0, 0.0),
-                        bold: false,
-                        position: vec2(0.0, 0.0)
-                    }.build(&display);
-                    fps_textline.set_left(0.0);
-                    fps_textline.set_bottom(0.0);
-
-                    frames = 0;
-                    fps_timer.reset();
-                }
-
-                game.run(&display);
-
                 let mut target = display.draw();
                 target.clear_color(0.0, 0.0, 0.0, 1.0);
                 //drawing
-                game.draw(&mut target);
-                fps_textline.draw(&mut target);
+                ui().draw(&mut target);
                 target.finish().unwrap();
             }
             _ => {}
@@ -120,10 +96,14 @@ fn main() {
 /// when true, hover the desired element and then press arrow keys.
 /// then press enter to print centre position
 pub const MOVE_UI: bool = true;
-const DEFAULT_WINDOW_WIDTH: i32 = 1920;
-const DEFAULT_WINDOW_HEIGHT: i32 = 1080;
-static mut WINDOW_WIDTH: i32 = DEFAULT_WINDOW_WIDTH;
-static mut WINDOW_HEIGHT: i32 = DEFAULT_WINDOW_HEIGHT;
+const DEFAULT_WINDOW_WIDTH: u32 = 1280;
+const DEFAULT_WINDOW_HEIGHT: u32 = 720;
+static mut WINDOW_WIDTH: u32 = DEFAULT_WINDOW_WIDTH;
+static mut WINDOW_HEIGHT: u32 = DEFAULT_WINDOW_HEIGHT;
+
+// these are just for me to do maths n shit
+pub const DEV_WINDOW_WIDTH: u32 = 1920;
+pub const DEV_WINDOW_HEIGHT: u32 = 1080;
 
 pub fn get_window_width() -> u32 {
     unsafe {
@@ -134,6 +114,18 @@ pub fn get_window_width() -> u32 {
 pub fn get_window_height() -> u32 {
     unsafe {
         WINDOW_HEIGHT.try_into().unwrap()
+    }
+}
+
+pub fn set_window_width(width: u32) {
+    unsafe {
+        WINDOW_WIDTH = width;
+    }
+}
+
+pub fn set_window_height(height: u32) {
+    unsafe {
+        WINDOW_HEIGHT = height;
     }
 }
 
@@ -151,16 +143,9 @@ pub fn is_closed() -> bool {
     }
 }
 
-static mut ui: Ui = Ui::new();
-
-pub fn get_ui_mut() -> &'static mut Ui {
+static mut ui_context: Ui = Ui::new();
+pub fn ui() -> &'static mut Ui<'static> {
     unsafe {
-       &mut ui
-    }
-}
-
-pub fn get_ui() -> &'static Ui {
-    unsafe {
-        &ui
+        &mut ui_context
     }
 }

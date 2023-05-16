@@ -1,36 +1,66 @@
-use std::{cell::{Ref, RefCell}, rc::Rc};
-use glium::{Frame, glutin::event::WindowEvent, Display};
-use crate::math::vec2::Vec2;
-use super::customuidata::CustomUIData;
+use std::{rc::Rc, cell::{Cell, RefCell, Ref, RefMut}};
+use glium::{Frame, glutin::event::WindowEvent};
+use super::{uiattributes::UiAttributes, uioutput::UiOutput};
 
-pub trait UiElement {
-    fn handle_event(&mut self, event: &WindowEvent, cursor_pos: Vec2<f32>, display: &Display) -> bool;
-    fn output(&self) -> UiOutput;
-    fn id(&self) -> &str;
-    fn custon_data(&self) -> &[CustomUIData];
-
-    fn left(&self) -> f32;
-    fn set_left(&mut self, left: f32);
-    fn top(&self) -> f32;
-    fn set_top(&mut self, top: f32);
-    fn right(&self) -> f32;
-    fn set_right(&mut self, right: f32);
-    fn bottom(&self) -> f32;
-    fn set_bottom(&mut self, bottom: f32);
-    fn centre(&self) -> Vec2<f32>;
-    fn set_centre(&mut self, centre: Vec2<f32>);
-    fn width(&self) -> f32;
-    fn set_width(&mut self, width: f32);
-    fn height(&self) -> f32;
-    fn set_height(&mut self, height: f32);
-
-    fn draw(&self, target: &mut Frame);
+pub struct UiElement<'a> {
+    id: String,
+    output: Cell<UiOutput>,
+    element: Rc<RefCell<dyn UiAttributes + 'a>>,
+    enabled: Cell<bool>,
+    children: Vec<&'a UiElement<'a>>
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum UiOutput {
-    None,
-    Hovered,
-    LeftClicked,
-    RightClicked
+impl<'a> UiElement<'a> {
+    /// element disabled by default
+    pub fn new<T: UiAttributes + 'a>(id: impl ToString, element: T) -> UiElement<'a> {
+        UiElement {
+            id: id.to_string(),
+            output: Cell::new(UiOutput::None),
+            element: Rc::new(RefCell::new(element)),
+            enabled: Cell::new(false),
+            children: Vec::new()
+        }
+    }
+
+    pub fn inner(&self) -> Ref<dyn UiAttributes> {
+        self.element.borrow()
+    }
+
+    pub fn inner_mut(&self) -> RefMut<dyn UiAttributes> {
+        self.element.borrow_mut()
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn add_child(&'a mut self, child: &'a UiElement<'a>) {
+        self.children.push(child);
+    }
+
+    pub fn enabled(&self) -> bool {
+        self.enabled.get().clone()
+    }
+
+    pub fn set_enabled(&self, enabled: bool) {
+        self.enabled.set(enabled);
+    }
+
+    pub fn output(&self) -> UiOutput {
+        self.element.borrow().output()
+    }
+
+    pub fn handle_events(&self, event: &WindowEvent) -> bool {
+        if self.element.borrow_mut().handle_events(event) {
+            return true;
+        }
+
+        false
+    }
+
+    pub fn draw(&self, target: &mut Frame) {
+        if self.enabled.get() {
+            self.element.borrow().draw(target)
+        }
+    }
 }

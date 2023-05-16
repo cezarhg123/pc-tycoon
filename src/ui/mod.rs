@@ -1,189 +1,93 @@
-pub mod uielement;
-pub mod textline;
-pub mod multitextline;
-pub mod button;
-pub mod listbox;
-pub mod uirect;
-pub mod draggable;
-pub mod customuidata;
-
-use std::{rc::Rc, cell::{RefCell, RefMut, Cell}, borrow::{Borrow, BorrowMut}, ops::Deref};
-use glium::{glutin::event::{WindowEvent, VirtualKeyCode}, Display};
-use rusttype::Font;
-use crate::{log::{log, save_log}, math::vec2::{Vec2, vec2}, get_window_height, ptrcell::PtrCell};
+use std::{rc::Rc, cell::{RefMut, RefCell, Ref}};
+use glium::{glutin::{event::{VirtualKeyCode, WindowEvent, KeyboardInput, ElementState}, dpi::PhysicalPosition}, Frame};
+use crate::{math::vec2::{Vec2, vec2}, get_window_height, DEV_WINDOW_WIDTH, get_window_width, DEV_WINDOW_HEIGHT};
 use self::uielement::UiElement;
 
-static mut GLOBAL_FONT: Option<Font> = None;
-static mut GLOBAL_BOLD_FONT: Option<Font> = None;
+pub mod uiattributes;
+pub mod uielement;
+pub mod uioutput;
+pub mod uirect;
 
-pub fn get_global_font() -> &'static Font<'static> {
-    unsafe {
-        GLOBAL_FONT.as_ref().unwrap()
-    }
+pub struct Ui<'a> {
+    elements: Vec<Rc<RefCell<UiElement<'a>>>>,
+    key_pressed: Option<VirtualKeyCode>,
+    cursor_pos: Vec2<f32>
 }
 
-pub fn set_global_font(font_path: &str) {
-    unsafe {
-        GLOBAL_FONT = Some(Font::try_from_vec(std::fs::read(font_path).unwrap_or_else(|err| {
-            log(format!("ERROR: cant load font at '{}'. trying to load default path", font_path));
-            log(format!("ERROR: error output for the error above: {}", err.to_string()));
-            //try default
-            std::fs::read("fonts/font.ttf").unwrap_or_else(|err| {
-                log("CRITICAL ERROR: cant load default font");
-                save_log();
-                panic!();
-            })
-        })).unwrap());
-    }
-}
-
-pub fn get_global_bold_font() -> &'static Font<'static> {
-    unsafe {
-        GLOBAL_BOLD_FONT.as_ref().unwrap()
-    }
-}
-
-pub fn set_global_bold_font(font_path: &str) {
-    unsafe {
-        GLOBAL_BOLD_FONT = Some(Font::try_from_vec(std::fs::read(font_path).unwrap_or_else(|err| {
-            log(format!("ERROR: cant load bold font at '{}'. trying to load default path", font_path));
-            log(format!("ERROR: error output for the error above: {}", err.to_string()));
-            //try default
-            std::fs::read("fonts/bold_font.ttf").unwrap_or_else(|err| {
-                log("CRITICAL ERROR: cant load default bold font");
-                save_log();
-                panic!();
-            })
-        })).unwrap());
-    }
-}
-
-pub struct Ui {
-    /// Brief explanation on how elements work
-    /// 
-    /// `add_element()` either adds the element to the list and returns a `PtrCell` or finds the element with the same id and returns a `PtrCell` of that
-    /// 
-    /// Doing this is highly unsafe because i dont know how `Box` handles its memory.
-    /// 
-    /// Also the bool controls if the element handles events or not
-    elements: Vec<(bool, Box<dyn UiElement>)>,
-    cursor_pos: Vec2<f32>,
-    current_key_pressed: Option<VirtualKeyCode>
-}
-
-impl Ui {
-    pub const fn new() -> Ui {
+impl<'b: 'a, 'a> Ui<'a> {
+    pub const fn new() -> Ui<'a> {
         Ui {
             elements: Vec::new(),
-            cursor_pos: vec2(0.0, 0.0),
-            current_key_pressed: None
+            key_pressed: None,
+            cursor_pos: vec2(0.0, 0.0)
         }
     }
 
-    pub fn handle_event(&mut self, event: &WindowEvent, display: &Display) -> bool {
-        match event {
-            WindowEvent::CursorMoved {position, ..} => {
-                let x = position.x as f32;
-                // gotta do this because the fucking cursor y position starts at the top instead of bottom
-                let y = get_window_height() as f32 - position.y as f32;
+    /// adds element and returns a `Ref` of it
+    pub fn add_element(&'b mut self, element: UiElement<'a>) -> Ref<UiElement<'a>> {
+        let id = element.id().to_string().clone();
 
-                self.cursor_pos = vec2(x, y);
-            },
-            WindowEvent::KeyboardInput {input, ..} => {
-                self.current_key_pressed = input.virtual_keycode;
-            },
-            _ => {
-                self.current_key_pressed = None;
+        // i would use 'find' but it causes issues with mutability
+        match self.elements.iter().position(|e| e.borrow().id() == id.as_str()) {
+            Some(element) => {
+                self.elements[element].borrow()
+            }
+            None => {
+                self.elements.push(Rc::new(RefCell::new(element)));
+                self.elements.last().unwrap().borrow()
             }
         }
+    }
 
-        // go over elements and handle event
-        self.elements.iter_mut().for_each(|element| {
-            if element.0 {
-                element.1.handle_event(event, self.cursor_pos, display);
+    pub fn get_element(&'a self, id: impl ToString) -> Option<Ref<UiElement<'a>>> {
+        let id = id.to_string();
+        self.elements.iter().find_map(|e| if e.borrow().id() == id {Some(e.borrow())} else {None})
+    }
+
+    pub fn handle_events(&mut self, event: &WindowEvent) -> bool {
+        match event {
+            WindowEvent::CursorMoved {position, ..} => {
+                self.cursor_pos = glium_position_to_mine(position);
+                self.key_pressed = None;
             }
-        });
+            WindowEvent::KeyboardInput {input, ..} => {
+                if input.state == ElementState::Pressed {
+                    self.key_pressed = input.virtual_keycode;
+                } else if input.state == ElementState::Released {
+                    self.key_pressed = None;
+                }
+            }
+            _ => {}
+        }
 
+        for element in self.elements.iter_mut() {
+            if !element.borrow().enabled() {
+                continue;
+            }
+
+            if element.borrow_mut().handle_events(event) {
+                return true;
+            }
+        }
+        
         false
     }
 
-    pub fn add_element<T: UiElement + 'static>(&mut self, other_element: T) -> PtrCell<dyn UiElement> {
-        let mut element_found;
+    pub fn draw(&self, target: &mut Frame) {
+        for element in self.elements.iter() {
+            if !element.borrow().enabled() {
+                continue;
+            }
 
-        match self.elements.iter_mut().find(|e| e.1.id() == other_element.id()) { // find element with the same id
-            Some(element) => {
-                unsafe {element_found = Some(element.1.as_mut() as *mut dyn UiElement);}
-            }
-            None => {
-                unsafe {element_found = None}
-            }
-        }
-
-        match element_found {
-            Some(element) => {
-                unsafe {
-                    PtrCell::new_raw(element) // really dont think this is safe at all
-                }
-            }
-            None => {
-                // push 'other_element' and return a 'PtrCell'
-                unsafe {
-                    self.elements.push((true, Box::new(other_element)));
-                    PtrCell::new_raw(self.elements.last_mut().unwrap().1.as_mut() as *mut dyn UiElement)
-                }
-            }
+            element.borrow().draw(target);
         }
     }
+}
 
-    pub fn get_element(&self, id: &str) -> Option<PtrCell<dyn UiElement>> {
-        match self.elements.iter().find(|e| e.1.id() == id) {
-            Some(element) => {
-                Some(PtrCell::new_raw((element.1.as_ref() as *const dyn UiElement).cast_mut()))
-            }
-            None => {
-                None
-            }
-        }
-    }
+// this functions only exists because glium
+pub fn glium_position_to_mine(position: &PhysicalPosition<f64>) -> Vec2<f32> {
+    let x = position.x as f32;
+    let y = get_window_height() as f32 - position.y as f32;
 
-    pub fn get_cursor_pos(&self) -> Vec2<f32> {
-        self.cursor_pos.clone()
-    }
-
-    pub fn get_key_pressed(&self, key: VirtualKeyCode) -> bool {
-        if let Some(keycode) = self.current_key_pressed {
-            keycode == key
-        } else {
-            false
-        }
-    }
-
-    pub fn remove_element(&mut self, id: &str) {
-        let index = self.elements.iter().position(|e| e.1.id() == id);
-        
-        match index {
-            Some(index) => {
-                self.elements.remove(index);
-            }
-            None => {}
-        }
-    }
-
-    /// Enables element for handling events
-    pub fn enable_element(&mut self, id: &str) {
-        if let Some(element) = self.elements.iter_mut().find(|e| e.1.id() == id) {
-            element.0 = true;
-        }
-    }
-
-    /// Disables element for handling events
-    pub fn disable_element(&mut self, id: &str) {
-        if let Some(element) = self.elements.iter_mut().find(|e| e.1.id() == id) {
-            element.0 = false;
-        }
-    }
-
-    pub fn clear(&mut self) {
-        self.elements.clear();
-    }
+    vec2(x * (DEV_WINDOW_WIDTH as f32 / get_window_width() as f32), y * (DEV_WINDOW_HEIGHT as f32 / get_window_height() as f32))
 }
