@@ -1,7 +1,0 @@
-{
-  "name": "Test Fan",
-  "price": 10,
-  "power_usage": 5,
-  "large": true,
-  "cooling": 1.8
-}

@@ -1,8 +1,0 @@
-{
-  "name": "Test Storage",
-  "price": 40,
-  "power_usage": 5,
-  "storage_type": "M2",
-  "size": 1024,
-  "speed": 4400
-}

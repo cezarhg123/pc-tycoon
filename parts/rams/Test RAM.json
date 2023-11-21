@@ -1,8 +1,0 @@
-{
-  "name": "Test RAM",
-  "price": 30,
-  "power_usage": 5,
-  "ram_type": "DDR4",
-  "size": 8,
-  "speed": 3200
-}
