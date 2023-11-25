@@ -15,12 +15,6 @@ layout(binding = 1) uniform Rect {
 void main() {
     vec2 actual_position = vec2((v_pos * size) + position);
     gl_Position = vec4(actual_position, 0.0, 1.0);
-    // gl_Position = vec4(v_pos, 0.0, 1.0);
-    // if (actual_position.x <= -1.0) {
-    //     f_color = vec3(1.0, 1.0, 1.0);
-    // } else {
-    //     f_color = color;
-    // }
     f_color = color;
     f_uv = v_uv;
 }
