@@ -198,7 +198,7 @@ impl RectBuilder {
 
             let raw_byte_buffer = device.create_buffer(
                 &vk::BufferCreateInfo::builder()
-                    .size(size_of_val(dynamic_image_bytes) as u64)
+                    .size(size_of_val(dynamic_image_bytes.as_slice()) as u64)
                     .usage(vk::BufferUsageFlags::TRANSFER_SRC)
                     .sharing_mode(vk::SharingMode::EXCLUSIVE),
                 None
