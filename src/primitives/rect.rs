@@ -1,24 +1,22 @@
 use std::mem::{size_of_val, size_of};
-
 use ash::vk;
 use gpu_allocator::vulkan::{Allocator, AllocationCreateDesc, Allocation};
 use image::{DynamicImage, GenericImage, Rgba};
-
 use crate::{vust::{vertex::Vertex, self, transition_image_layout, instance::DrawCall}, WINDOW_WIDTH, WINDOW_HEIGHT};
 
 pub struct Rect {
-    left: f32,
-    top: f32,
-    width: f32,
-    height: f32,
+    pub(super) left: f32,
+    pub(super) top: f32,
+    pub(super) width: f32,
+    pub(super) height: f32,
     /// Name is only used for debug purposes
-    name: String,
-    color: glm::Vec3,
-    vertex_buffer: (vk::Buffer, Allocation),
-    image: (vk::Image, Allocation, vk::ImageView, vk::Sampler),
-    descriptor_pool: vk::DescriptorPool,
-    descriptor_set: vk::DescriptorSet,
-    uniform: (vk::Buffer, Allocation)
+    pub(super) name: String,
+    pub(super) color: glm::Vec3,
+    pub(super) vertex_buffer: (vk::Buffer, Allocation),
+    pub(super) image: (vk::Image, Allocation, vk::ImageView, vk::Sampler),
+    pub(super) descriptor_pool: vk::DescriptorPool,
+    pub(super) descriptor_set: vk::DescriptorSet,
+    pub(super) uniform: (vk::Buffer, Allocation)
 }
 
 impl Rect {

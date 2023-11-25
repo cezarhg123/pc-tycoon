@@ -36,7 +36,7 @@ fn main() {
         .name("Rect".to_string())
         .color(glm::vec3(0.0, 1.0, 1.0))
         .build(&mut allocator);
-
+    
     let rect2 = Rect::builder()
         .width(100.0)
         .height(100.0)
