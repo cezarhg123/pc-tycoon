@@ -407,7 +407,7 @@ unsafe fn create_graphics_pipeline() {
         .polygon_mode(vk::PolygonMode::FILL)
         .line_width(1.0)
         .cull_mode(vk::CullModeFlags::NONE)
-        .front_face(vk::FrontFace::COUNTER_CLOCKWISE)
+        .front_face(vk::FrontFace::CLOCKWISE)
         .depth_bias_enable(false)
         .build();
     if DEBUG {
@@ -444,7 +444,14 @@ unsafe fn create_graphics_pipeline() {
         .stage_flags(vk::ShaderStageFlags::FRAGMENT)
         .build();
 
-    let bindings = [sampler_descriptor_binding];
+    let rect_descriptor_binding = vk::DescriptorSetLayoutBinding::builder()
+        .binding(1)
+        .descriptor_count(1)
+        .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
+        .stage_flags(vk::ShaderStageFlags::VERTEX)
+        .build();
+
+    let bindings = [sampler_descriptor_binding, rect_descriptor_binding];
 
     let local_descriptor_set_layout = device.as_ref().unwrap().create_descriptor_set_layout(
         &vk::DescriptorSetLayoutCreateInfo::builder()
