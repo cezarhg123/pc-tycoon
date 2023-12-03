@@ -8,5 +8,7 @@ layout(location = 0) out vec4 frag_color;
 layout(binding = 0) uniform sampler2D tex;
 
 void main() {
-    frag_color = texture(tex, f_uv) * vec4(f_color, 1.0);
+    vec4 color = texture(tex, f_uv) * vec4(f_color, 1.0)
+    
+    frag_color = color;
 }

@@ -4,6 +4,8 @@ use gpu_allocator::vulkan::{Allocator, AllocationCreateDesc, Allocation};
 use image::{DynamicImage, GenericImage, Rgba};
 use crate::{vust::{vertex::Vertex, self, transition_image_layout, instance::DrawCall}, WINDOW_WIDTH, WINDOW_HEIGHT};
 
+/// MAKE SURE TO UPDATE DESCRIPTOR SETS AFTER MAKING CHANGES
+#[derive(Debug)]
 pub struct Rect {
     pub(super) left: f32,
     pub(super) top: f32,
@@ -34,6 +36,20 @@ impl Rect {
 
     pub fn update_descriptor_set(&self) {
         unsafe {
+            let position = glm::vec2(
+                ((self.left / WINDOW_WIDTH as f32) + (self.width / 2.0 / WINDOW_WIDTH as f32)) * 2.0 - 1.0,
+                ((self.top / WINDOW_HEIGHT as f32) + (self.height / 2.0 / WINDOW_HEIGHT as f32)) * 2.0 - 1.0
+            );
+    
+            let size = glm::vec2(
+                self.width / WINDOW_WIDTH as f32,
+                self.height / WINDOW_HEIGHT as f32
+            );
+
+            let uniform_ptr = self.uniform.1.mapped_ptr().unwrap().as_ptr() as *mut RectUniform;
+
+            uniform_ptr.write(RectUniform::new(position, self.color, size));
+
             let device = vust::instance::get_device();
             device.update_descriptor_sets(
                 &[
@@ -70,11 +86,27 @@ impl Rect {
     }
 
     pub fn draw(&self) {
+        self.update_descriptor_set();
+
         vust::instance::draw(DrawCall {
             buffer: self.vertex_buffer.0,
             descriptor_set: self.descriptor_set,
             vertex_count: 6
         });
+    }
+}
+
+impl Drop for Rect {
+    fn drop(&mut self) {
+        unsafe {
+            let device = vust::instance::get_device();
+            device.destroy_sampler(self.image.3, None);
+            device.destroy_image_view(self.image.2, None);
+            device.destroy_image(self.image.0, None);
+            device.destroy_descriptor_pool(self.descriptor_pool, None);
+            device.destroy_buffer(self.vertex_buffer.0, None);
+            device.destroy_buffer(self.uniform.0, None);
+        }
     }
 }
 
@@ -305,9 +337,9 @@ impl RectBuilder {
 
             let sampler = device.create_sampler(
                 &vk::SamplerCreateInfo::builder()
-                    .mag_filter(vk::Filter::LINEAR)
-                    .min_filter(vk::Filter::LINEAR)
-                    .mipmap_mode(vk::SamplerMipmapMode::LINEAR)
+                    .mag_filter(vk::Filter::NEAREST)
+                    .min_filter(vk::Filter::NEAREST)
+                    .mipmap_mode(vk::SamplerMipmapMode::NEAREST)
                     .address_mode_u(vk::SamplerAddressMode::REPEAT)
                     .address_mode_v(vk::SamplerAddressMode::REPEAT)
                     .address_mode_w(vk::SamplerAddressMode::REPEAT)

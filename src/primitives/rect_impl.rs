@@ -49,7 +49,7 @@ impl Rect {
         self.top = bottom - self.height;
     }
 
-    pub fn center(&mut self) -> glm::Vec2 {
+    pub fn center(&self) -> glm::Vec2 {
         glm::vec2(self.left + (self.width / 2.0), self.top + (self.height / 2.0))
     }
 
@@ -68,5 +68,23 @@ impl Rect {
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    /// Dim color by `amount`
+    /// 
+    /// # Arguments
+    /// 
+    /// * `amount` - Amount to dim by (0.0 - 1.0)
+    pub fn dim(&mut self, amount: f32) {
+        self.color = self.color - glm::vec3(amount, amount, amount);
+    }
+
+    /// Undim color by `amount`
+    /// 
+    /// # Arguments
+    /// 
+    /// * `amount` - Amount to undim by (0.0 - 1.0)
+    pub fn undim(&mut self, amount: f32) {
+        self.color = self.color + glm::vec3(amount, amount, amount);
     }
 }

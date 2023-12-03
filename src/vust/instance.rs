@@ -425,13 +425,21 @@ unsafe fn create_graphics_pipeline() {
     let color_blend_attachments = [
         vk::PipelineColorBlendAttachmentState::builder()
             .color_write_mask(vk::ColorComponentFlags::R | vk::ColorComponentFlags::G | vk::ColorComponentFlags::B | vk::ColorComponentFlags::A)
-            .blend_enable(false)
+            .blend_enable(true)
+            .src_color_blend_factor(vk::BlendFactor::SRC_ALPHA)
+            .dst_color_blend_factor(vk::BlendFactor::ONE_MINUS_SRC_ALPHA)
+            .color_blend_op(vk::BlendOp::ADD)
+            .src_alpha_blend_factor(vk::BlendFactor::ONE)
+            .dst_alpha_blend_factor(vk::BlendFactor::ZERO)
+            .alpha_blend_op(vk::BlendOp::ADD)
             .build()
     ];
 
     let color_blend_info = vk::PipelineColorBlendStateCreateInfo::builder()
         .attachments(&color_blend_attachments)
-        .logic_op_enable(false)
+        .logic_op_enable(true)
+        .logic_op(vk::LogicOp::COPY)
+        .blend_constants([0.0, 0.0, 0.0, 0.0])
         .build();
     if DEBUG {
         println!("Created Color Blend State Info");

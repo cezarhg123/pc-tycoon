@@ -1,7 +1,5 @@
 /// MY VULKAN "ENGINE"
 
-
-
 use ash::vk;
 
 macro_rules! make_static {
@@ -23,6 +21,8 @@ macro_rules! make_static {
         }
     };
 }
+
+pub(crate) use make_static;
 
 #[allow(non_upper_case_globals)]
 pub mod instance;
