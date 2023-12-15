@@ -37,4 +37,8 @@ impl Ui {
                 |e| e.clone()
             )
     }
+
+    pub fn remove_element(&mut self, id: &str) {
+        self.elements.retain(|e| e.borrow().id != id);
+    }
 }

@@ -29,61 +29,15 @@ impl Text {
         &mut self.rect
     }
 
-    pub fn draw(&self) {
-        self.rect.draw();
-    }
-
-    pub fn calculate_length(str_len: usize, font_size: f32) -> f32 {
-        str_len as f32 * font_size
-    }
-}
-
-pub struct TextBuilder {
-    left: f32,
-    top: f32,
-    text: String,
-    font_size: f32,
-    font_color: glm::Vec3
-}
-
-// doesnt have other helper methods like `right` or `bottom`, just create it and set it later
-impl TextBuilder {
-    pub fn left(mut self, left: f32) -> TextBuilder {
-        self.left = left;
-        self
-    }
-
-    pub fn top(mut self, top: f32) -> TextBuilder {
-        self.top = top;
-        self
-    }
-
-    pub fn text(mut self, text: String) -> TextBuilder {
-        self.text = text;
-        self
-    }
-
-    pub fn font_size(mut self, font_size: f32) -> TextBuilder {
-        self.font_size = font_size;
-        self
-    }
-
-    pub fn font_color(mut self, font_color: glm::Vec3) -> TextBuilder {
-        self.font_color = font_color;
-        self
-    }
-
-    pub fn build(self, allocator: &mut Allocator) -> Text {
-        // I HAVE NO CLUE WHAT THIS SHIT DOES
-        
-        let scale = PxScale::from(self.font_size);
+    pub fn create_image(font_size: f32, text: String, font_color: glm::Vec3) -> image::DynamicImage {
+        let scale = PxScale::from(font_size);
         let scaled_font = get_font().as_scaled(scale);
         let mut caret = point(0.0, scaled_font.ascent());
 
         let mut glyphs = Vec::new();
         let mut last_glyph: Option<Glyph> = None;
 
-        for c in self.text.chars() {
+        for c in text.chars() {
             let mut glyph = scaled_font.scaled_glyph(c);
 
             if let Some(last) = last_glyph.take() {
@@ -107,15 +61,13 @@ impl TextBuilder {
 
         let glyphs_height = scaled_font.height().ceil() as u32;
 
-        println!("{} {}", glyphs_width, glyphs_height);
-
         let mut image = DynamicImage::new_rgba8(glyphs_width * 2, glyphs_height * 2);
 
         for glyph in glyphs {
             if let Some(outlined) = scaled_font.outline_glyph(glyph) {
                 let bounds = outlined.px_bounds();
                 outlined.draw(|x, y, v| {
-                    image.put_pixel(x + bounds.min.x as u32, y + bounds.min.y as u32, Rgba([(self.font_color.x * 255.0) as u8, (self.font_color.y * 255.0) as u8, (self.font_color.z * 255.0) as u8, (v * 255.0) as u8]));
+                    image.put_pixel(x + bounds.min.x as u32, y + bounds.min.y as u32, Rgba([(font_color.x * 255.0) as u8, (font_color.y * 255.0) as u8, (font_color.z * 255.0) as u8, (v * 255.0) as u8]));
                 });
             }
         }
@@ -140,16 +92,60 @@ impl TextBuilder {
                 }
             }
         }
+        
+        image.crop_imm(0, 0, max_x, max_y)
+    }
 
-        println!("{} {}", max_x, max_y);
+    pub fn draw(&self) {
+        self.rect.draw();
+    }
+}
 
-        image = image.crop_imm(0, 0, max_x, max_y);
+pub struct TextBuilder {
+    left: f32,
+    top: f32,
+    text: String,
+    font_size: f32,
+    font_color: glm::Vec3
+}
+
+// doesnt have other helper methods like `right` or `bottom`, just create it and set it later
+impl TextBuilder {
+    pub fn left(mut self, left: f32) -> TextBuilder {
+        self.left = left;
+        self
+    }
+
+    pub fn top(mut self, top: f32) -> TextBuilder {
+        self.top = top;
+        self
+    }
+
+    pub fn text(mut self, text: impl ToString) -> TextBuilder {
+        self.text = text.to_string();
+        self
+    }
+
+    pub fn font_size(mut self, font_size: f32) -> TextBuilder {
+        self.font_size = font_size;
+        self
+    }
+
+    pub fn font_color(mut self, font_color: glm::Vec3) -> TextBuilder {
+        self.font_color = font_color;
+        self
+    }
+
+    pub fn build(self, allocator: &mut Allocator) -> Text {
+        // I HAVE NO CLUE WHAT THIS SHIT DOES
+        
+        let image = Text::create_image(self.font_size, self.text.clone(), self.font_color);
 
         let rect = Rect::builder()
             .left(self.left)
             .top(self.top)
-            .width(glyphs_width as f32)
-            .height(glyphs_height as f32)
+            .width(image.width() as f32)
+            .height(image.height() as f32)
             .name(self.text.clone())
             .texture(image)
             .build(allocator);

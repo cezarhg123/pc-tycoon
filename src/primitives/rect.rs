@@ -34,6 +34,11 @@ impl Rect {
         }
     }
 
+    pub fn contains(&self, pos: glm::Vec2) -> bool {
+        (pos.x >= self.left && pos.x <= self.left + self.width) && 
+        (pos.y >= self.top && pos.y <= self.top + self.height)
+    }
+
     pub fn update_descriptor_set(&self) {
         unsafe {
             let position = glm::vec2(
@@ -111,14 +116,14 @@ impl Drop for Rect {
 }
 
 pub struct RectBuilder {
-    left: f32,
-    top: f32,
-    width: f32,
-    height: f32,
+    pub left: f32,
+    pub top: f32,
+    pub width: f32,
+    pub height: f32,
     /// Name is only used for debug purposes
-    name: String,
-    color: glm::Vec3,
-    texture: Option<DynamicImage>
+    pub name: String,
+    pub color: glm::Vec3,
+    pub texture: Option<DynamicImage>
 }
 
 impl RectBuilder {
