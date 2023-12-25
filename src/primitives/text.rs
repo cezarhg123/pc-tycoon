@@ -1,3 +1,4 @@
+use std::ops::{Deref, DerefMut};
 use ab_glyph::*;
 use gpu_allocator::vulkan::Allocator;
 use image::{DynamicImage, GenericImage, Rgba, GenericImageView};
@@ -137,8 +138,6 @@ impl TextBuilder {
     }
 
     pub fn build(self, allocator: &mut Allocator) -> Text {
-        // I HAVE NO CLUE WHAT THIS SHIT DOES
-        
         let image = Text::create_image(self.font_size, self.text.clone(), self.font_color);
 
         let rect = Rect::builder()
@@ -156,5 +155,19 @@ impl TextBuilder {
             font_size: self.font_size,
             font_color: self.font_color
         }
+    }
+}
+
+impl Deref for Text {
+    type Target = Rect;
+
+    fn deref(&self) -> &Self::Target {
+        &self.rect
+    }
+}
+
+impl DerefMut for Text {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.rect
     }
 }

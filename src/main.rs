@@ -1,9 +1,11 @@
 pub mod vust;
 pub mod primitives;
 pub mod ui;
+pub mod game;
 
 use std::{io::Cursor, mem::size_of_val};
 use ash::vk;
+use game::Game;
 use gpu_allocator::vulkan::{Allocator, AllocatorCreateDesc, AllocationCreateDesc};
 use primitives::{rect::Rect, load_font, text::Text};
 use ui::button::Button;
@@ -34,26 +36,18 @@ fn main() {
         debug_settings: Default::default()
     }).unwrap();
 
-    let mut button = Button::builder()
-        .dimensions(Rect::builder().width(400.0).height(150.0).center(glm::vec2(WINDOW_WIDTH as f32 / 2.0, WINDOW_HEIGHT as f32 / 2.0)))
-        .text(Text::builder().text("i like men").font_size(24.0).font_color(glm::vec3(0.0, 0.0, 0.0)))
-        .build(&mut allocator);
+    let mut game = Game::new(&mut allocator);
 
     while !window.should_close() {
         glfw.poll_events();
         
-        for (_, event) in glfw::flush_messages(&events) {
-            button.handle_events(event, &mut allocator);
-        }
-
-        if button.pressed_once() {
-            println!("pressed once");
+        game.handle_events(glfw::flush_messages(&events).map(|iter| iter.1), &mut allocator);
+        if game.run(&mut allocator) {
+            window.set_should_close(true);
         }
 
         vust::instance::reset_command_buffer();
-        
-        button.draw();
-
+        game.draw();
         vust::instance::render_surface();
     }
 

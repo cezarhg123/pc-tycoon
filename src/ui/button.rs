@@ -1,5 +1,6 @@
+use std::ops::{Deref, DerefMut};
 use gpu_allocator::vulkan::Allocator;
-use crate::primitives::{rect::{Rect, RectBuilder}, text::{Text, TextBuilder}};
+use crate::{primitives::{rect::{Rect, RectBuilder}, text::{Text, TextBuilder}}};
 use super::ui_object::UiObject;
 
 pub struct Button {
@@ -126,47 +127,6 @@ impl Button {
         }
     }
 
-    pub fn handle_events(&mut self, event: glfw::WindowEvent, allocator: &mut Allocator) -> bool {
-        match event {
-            glfw::WindowEvent::CursorPos(x, y) => {
-                match &self.state {
-                    // dont change the state if the button is clicked but the mouse moves around
-                    ButtonState::Pressed => return true,
-                    ButtonState::Hovered => {
-                        if !self.rect.contains(glm::vec2(x as f32, y as f32)) {
-                            self.state = ButtonState::Normal;
-                            self.change_rect_face(false, allocator);
-                        }
-                    }
-                    ButtonState::Normal => {
-                        if self.rect.contains(glm::vec2(x as f32, y as f32)) {
-                            self.state = ButtonState::Hovered;
-                            self.change_rect_face(false, allocator);
-                        }
-                    }
-                }
-
-                true
-            }
-            glfw::WindowEvent::MouseButton(button, action, _) => {
-                if button == glfw::MouseButton::Button1 && action == glfw::Action::Press && self.state == ButtonState::Hovered {
-                    self.state = ButtonState::Pressed;
-                    self.change_rect_face(false, allocator);
-                } else if button == glfw::MouseButton::Button1 && action == glfw::Action::Release && self.state == ButtonState::Pressed {
-                    self.state = ButtonState::Hovered;
-                    self.change_rect_face(true, allocator);
-
-                    self.clicked_once = true;
-                }
-
-                true
-            }
-            _ => {
-                false
-            }
-        }
-    }
-
     pub fn pressed(&self) -> bool {
         self.state == ButtonState::Pressed
     }
@@ -182,13 +142,6 @@ impl Button {
             true
         } else {
             false
-        }
-    }
-
-    pub fn draw(&self) {
-        self.rect.draw();
-        if let Some(text) = &self.text {
-            text.draw();
         }
     }
 }
@@ -252,6 +205,7 @@ impl ButtonBuilder {
         }
 
         let rect = rect.build(allocator);
+        let rect_color = rect.color();
 
         let mut button = Button {
             rect,
@@ -263,12 +217,156 @@ impl ButtonBuilder {
             text: None,
         };
 
-        if let Some(text) = self.text {
+        if let Some(mut text) = self.text {
+            // set text color to black if rect color is white
+            if rect_color == glm::vec3(1.0, 1.0, 1.0) {
+                text = text.font_color(glm::vec3(0.0, 0.0, 0.0));
+            }
+
             button.text = Some(text.build(allocator));
             // centre text
-            button.text.as_mut().unwrap().rect_mut().set_center(button.rect.center());
+            button.text.as_mut().unwrap().set_center(button.rect.center());
         }
 
         button
+    }
+}
+
+impl UiObject for Button {
+    fn contains(&self, pos: glm::Vec2) -> bool {
+        self.rect.contains(pos)
+    }
+
+    fn left(&self) -> f32 {
+        self.rect.left()
+    }
+
+    fn set_left(&mut self, left: f32) {
+        let diff = left - self.rect.left();
+        self.rect.set_left(left);
+        if let Some(text) = &mut self.text {
+            let left = text.left();
+            text.set_left(left + diff);
+        }
+    }
+
+    fn top(&self) -> f32 {
+        self.rect.top()
+    }
+
+    fn set_top(&mut self, top: f32) {
+        let diff = top - self.rect.top();
+        self.rect.set_top(top);
+        if let Some(text) = &mut self.text {
+            let top = text.top();
+            text.set_top(top + diff);
+        }
+    }
+
+    fn right(&self) -> f32 {
+        self.rect.right()
+    }
+
+    fn set_right(&mut self, right: f32) {
+        let diff = right - self.rect.right();
+        self.rect.set_right(right);
+        if let Some(text) = &mut self.text {
+            let right = text.right();
+            text.set_right(right + diff);
+        }
+    }
+
+    fn bottom(&self) -> f32 {
+        self.rect.bottom()
+    }
+
+    fn set_bottom(&mut self, bottom: f32) {
+        let diff = bottom - self.rect.bottom();
+        self.rect.set_bottom(bottom);
+        if let Some(text) = &mut self.text {
+            let bottom = text.bottom();
+            text.set_bottom(bottom + diff);
+        }
+    }
+
+    fn width(&self) -> f32 {
+        self.rect.width()
+    }
+
+    fn set_width(&mut self, width: f32) {
+        self.rect.set_width(width);
+    }
+
+    fn height(&self) -> f32 {
+        self.rect.height()
+    }
+
+    fn set_height(&mut self, height: f32) {
+        self.rect.set_height(height);
+    }
+
+    fn center(&self) -> glm::Vec2 {
+        self.rect.center()
+    }
+
+    fn set_center(&mut self, center: glm::Vec2) {
+        let diff = center - self.rect.center();
+        self.rect.set_center(center);
+        if let Some(text) = &mut self.text {
+            let center = text.center();
+            text.set_center(center + diff);
+        }
+    }
+
+    fn handle_events(&mut self, event: &glfw::WindowEvent, allocator: &mut Allocator) -> bool {
+        match *event {
+            glfw::WindowEvent::CursorPos(x, y) => {
+                match &self.state {
+                    // dont change the state if the button is clicked but the mouse moves around
+                    ButtonState::Pressed => return true,
+                    ButtonState::Hovered => {
+                        if !self.rect.contains(glm::vec2(x as f32, y as f32)) {
+                            self.state = ButtonState::Normal;
+                            self.change_rect_face(false, allocator);
+                        }
+                        false
+                    }
+                    ButtonState::Normal => {
+                        if self.rect.contains(glm::vec2(x as f32, y as f32)) {
+                            self.state = ButtonState::Hovered;
+                            self.change_rect_face(false, allocator);
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }
+            }
+            glfw::WindowEvent::MouseButton(button, action, _) => {
+                if button == glfw::MouseButton::Button1 && action == glfw::Action::Press && self.state == ButtonState::Hovered {
+                    self.state = ButtonState::Pressed;
+                    self.change_rect_face(false, allocator);
+                    true
+                } else if button == glfw::MouseButton::Button1 && action == glfw::Action::Release && self.state == ButtonState::Pressed {
+                    self.state = ButtonState::Hovered;
+                    self.change_rect_face(true, allocator);
+
+                    self.clicked_once = true;
+                    false
+                } else {
+                    false
+                }
+            }
+            _ => {
+                false
+            }
+        }
+    }
+
+    fn draw(&self) {
+        self.rect.draw();
+        if let Some(text) = &self.text {
+            text.draw();
+        }
     }
 }
