@@ -5,11 +5,13 @@ pub mod game;
 
 use std::{io::Cursor, mem::size_of_val};
 use ash::vk;
-use game::Game;
+use game::{Game, profile::{save_profile, Profile}};
 use gpu_allocator::vulkan::{Allocator, AllocatorCreateDesc, AllocationCreateDesc};
 use primitives::{rect::Rect, load_font, text::Text};
 use ui::button::Button;
 use vust::{vertex::Vertex, transition_image_layout, instance::DrawCall};
+
+use crate::game::profile::load_profile;
 
 pub const WINDOW_WIDTH: u32 = 1920;
 pub const WINDOW_HEIGHT: u32 = 1080;

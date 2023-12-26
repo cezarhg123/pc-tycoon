@@ -85,6 +85,10 @@ impl Ui {
     pub fn remove_element(&mut self, id: &str) {
         self.elements.retain(|e| e.borrow().id != id);
     }
+
+    pub fn clear_elements(&mut self) {
+        self.elements.clear();
+    }
 }
 
 pub fn as_ui_type<T>(element: Ref<UiElement>) -> &T {

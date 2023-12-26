@@ -1,8 +1,10 @@
 pub mod main_menu;
+pub mod ingame;
+pub mod profile;
 
 use gpu_allocator::vulkan::Allocator;
 use crate::ui::Ui;
-use self::main_menu::{MainMenu, MainMenuOutput};
+use self::{main_menu::{MainMenu, MainMenuOutput}, ingame::InGame};
 
 pub struct Game {
     ui: Ui,
@@ -10,7 +12,8 @@ pub struct Game {
 }
 
 pub enum GameState {
-    MainMenu(MainMenu)
+    MainMenu(MainMenu),
+    InGame(InGame)
 }
 
 impl Game {
@@ -30,6 +33,8 @@ impl Game {
             GameState::MainMenu(menu) => { 
                 match menu.run(&mut self.ui, allocator) {
                     MainMenuOutput::Play => {
+                        self.state = GameState::InGame(InGame::new(allocator));
+                        self.ui.clear_elements();
                         false
                     }
                     MainMenuOutput::Exit => {
@@ -40,6 +45,10 @@ impl Game {
                     }
                 } 
             }
+            GameState::InGame(in_game) => {
+                
+                false
+            }
         }
     }
 
@@ -47,6 +56,9 @@ impl Game {
         match &self.state {
             GameState::MainMenu(menu) => {
                 menu.draw();
+            }
+            GameState::InGame(in_game) => {
+                in_game.draw();
             }
         }
 
