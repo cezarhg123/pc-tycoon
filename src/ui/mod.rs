@@ -6,6 +6,7 @@
 pub mod ui_element;
 pub mod button;
 pub mod ui_object;
+pub mod ui_text;
 
 use std::{rc::Rc, cell::{RefCell, Ref}};
 use glfw::WindowEvent;
@@ -33,9 +34,9 @@ impl Ui {
                 match event {
                     WindowEvent::Key(key, _, action, _) => {
                         if *key == glfw::Key::KpAdd && *action == glfw::Action::Press {
-                            self.dev_change_scale += 0.1;
+                            self.dev_change_scale += 1.0;
                         } else if *key == glfw::Key::KpSubtract && *action == glfw::Action::Press {
-                            self.dev_change_scale -= 0.1;
+                            self.dev_change_scale -= 1.0;
                         }
                     }
                     _ => {}

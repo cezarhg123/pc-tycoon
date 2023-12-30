@@ -45,19 +45,21 @@ impl UiElement {
                     if *key == glfw::Key::Left && *action == glfw::Action::Press { // move left
                         self.ui_object.set_left(self.ui_object.left() - (1.0 * scale));
                     } else if *key == glfw::Key::Down && *action == glfw::Action::Press { // move down
-                        self.ui_object.set_top(self.ui_object.top() - (1.0 * scale));
+                        self.ui_object.set_top(self.ui_object.top() + (1.0 * scale));
                     } else if *key == glfw::Key::Right && *action == glfw::Action::Press { // move right
                         self.ui_object.set_left(self.ui_object.left() + (1.0 * scale));
                     } else if *key == glfw::Key::Up && *action == glfw::Action::Press { // move up
-                        self.ui_object.set_top(self.ui_object.top() + (1.0 * scale));
-                    } else if *key == glfw::Key::Num1 && *action == glfw::Action::Press { // shrink width
+                        self.ui_object.set_top(self.ui_object.top() - (1.0 * scale));
+                    } else if *key == glfw::Key::Delete && *action == glfw::Action::Press { // shrink width
                         self.ui_object.set_width(self.ui_object.width() - (1.0 * scale));
-                    } else if *key == glfw::Key::Num2 && *action == glfw::Action::Press { // shrink height
+                    } else if *key == glfw::Key::End && *action == glfw::Action::Press { // shrink height
                         self.ui_object.set_height(self.ui_object.height() - (1.0 * scale));
-                    } else if *key == glfw::Key::Num3 && *action == glfw::Action::Press { // grow width
+                    } else if *key == glfw::Key::PageDown && *action == glfw::Action::Press { // grow width
                         self.ui_object.set_width(self.ui_object.width() + (1.0 * scale));
-                    } else if *key == glfw::Key::Num5 && *action == glfw::Action::Press { // grow height
+                    } else if *key == glfw::Key::Home && *action == glfw::Action::Press { // grow height
                         self.ui_object.set_height(self.ui_object.height() + (1.0 * scale));
+                    } else if *key == glfw::Key::Enter && *action == glfw::Action::Press { // print position and size
+                        println!("left: {}, top: {}, width: {}, height: {}", self.ui_object.left(), self.ui_object.top(), self.ui_object.width(), self.ui_object.height());
                     }
                 }
                 _ => {}

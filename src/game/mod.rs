@@ -4,7 +4,7 @@ pub mod profile;
 
 use gpu_allocator::vulkan::Allocator;
 use crate::ui::Ui;
-use self::{main_menu::{MainMenu, MainMenuOutput}, ingame::InGame};
+use self::{main_menu::{MainMenu, MainMenuOutput}, ingame::{InGame, InGameOutput}};
 
 pub struct Game {
     ui: Ui,
@@ -46,7 +46,11 @@ impl Game {
                 } 
             }
             GameState::InGame(in_game) => {
-                
+                match in_game.run(&mut self.ui, allocator) {
+
+                    InGameOutput::None => {}
+                }
+
                 false
             }
         }

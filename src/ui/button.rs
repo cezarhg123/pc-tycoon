@@ -295,6 +295,10 @@ impl UiObject for Button {
 
     fn set_width(&mut self, width: f32) {
         self.rect.set_width(width);
+        
+        if let Some(text) = &mut self.text {
+            text.set_center(self.rect.center());
+        }
     }
 
     fn height(&self) -> f32 {
@@ -303,6 +307,10 @@ impl UiObject for Button {
 
     fn set_height(&mut self, height: f32) {
         self.rect.set_height(height);
+        
+        if let Some(text) = &mut self.text {
+            text.set_center(self.rect.center());
+        }
     }
 
     fn center(&self) -> glm::Vec2 {
