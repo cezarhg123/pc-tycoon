@@ -2,6 +2,7 @@ pub mod vust;
 pub mod primitives;
 pub mod ui;
 pub mod game;
+pub mod part_loader;
 
 use std::{io::Cursor, mem::size_of_val};
 use ash::vk;
@@ -10,7 +11,6 @@ use gpu_allocator::vulkan::{Allocator, AllocatorCreateDesc, AllocationCreateDesc
 use primitives::{rect::Rect, load_font, text::Text};
 use ui::button::Button;
 use vust::{vertex::Vertex, transition_image_layout, instance::DrawCall};
-
 use crate::game::profile::load_profile;
 
 pub const WINDOW_WIDTH: u32 = 1920;

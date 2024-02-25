@@ -33,7 +33,7 @@ impl MainMenu {
             true,
             Button::builder()
                 .dimensions(Rect::builder().left(200.0).top(400.0).width(320.0).height(120.0))
-                .text(Text::builder().text("Play").font_size(40.0))
+                .text(Text::builder().text("Play").font_size(100.0))
                 .build(allocator)
         ));
 
@@ -43,7 +43,7 @@ impl MainMenu {
             true,
             Button::builder()
                 .dimensions(Rect::builder().left(200.0).top(600.0).width(320.0).height(120.0))
-                .text(Text::builder().text("Exit").font_size(40.0))
+                .text(Text::builder().text("Exit").font_size(100.0))
                 .build(allocator)
         ));
 

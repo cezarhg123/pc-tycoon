@@ -17,7 +17,7 @@ pub fn get_font() -> &'static ab_glyph::FontRef<'static> {
 pub fn load_font() {
     unsafe {
         FONT = Some(
-            ab_glyph::FontRef::try_from_slice(include_bytes!("../../fonts/font.ttf")).unwrap()
+            ab_glyph::FontRef::try_from_slice(include_bytes!("../../fonts/arial.ttf")).unwrap()
         );
     }
 }

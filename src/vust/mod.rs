@@ -30,7 +30,7 @@ pub mod vertex;
 
 use self::instance::{begin_single_exec_command, end_single_exec_command, get_device};
 
-pub const DEBUG: bool = true;
+pub const DEBUG: bool = cfg!(debug_assertions);
 
 /// yoinked from ash examples
 unsafe extern "system" fn vulkan_debug_callback(

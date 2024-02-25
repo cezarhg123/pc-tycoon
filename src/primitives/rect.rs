@@ -13,7 +13,7 @@ pub struct Rect {
     pub(super) height: f32,
     /// Name is only used for debug purposes
     pub(super) name: String,
-    pub(super) color: glm::Vec3,
+    pub(super) color: glm::Vec4,
     pub(super) vertex_buffer: (vk::Buffer, Allocation),
     pub(super) image: (vk::Image, Allocation, vk::ImageView, vk::Sampler),
     pub(super) descriptor_pool: vk::DescriptorPool,
@@ -29,7 +29,7 @@ impl Rect {
             width: 0.0,
             height: 0.0,
             name: String::new(),
-            color: glm::vec3(1.0, 1.0, 1.0),
+            color: glm::vec4(1.0, 1.0, 1.0, 1.0),
             texture: None
         }
     }
@@ -122,7 +122,7 @@ pub struct RectBuilder {
     pub height: f32,
     /// Name is only used for debug purposes
     pub name: String,
-    pub color: glm::Vec3,
+    pub color: glm::Vec4,
     pub texture: Option<DynamicImage>
 }
 
@@ -169,7 +169,7 @@ impl RectBuilder {
         self
     }
 
-    pub fn color(mut self, color: glm::Vec3) -> RectBuilder {
+    pub fn color(mut self, color: glm::Vec4) -> RectBuilder {
         self.color = color;
         self
     }
@@ -501,18 +501,16 @@ const RECT_VERTICES_SIZE: usize = size_of::<Vertex>() * 6;
 struct RectUniform {
     pub position: glm::Vec2,
     padding: [f32; 2],
-    pub color: glm::Vec3,
-    padding2: [f32; 1],
+    pub color: glm::Vec4,
     pub size: glm::Vec2
 }
 
 impl RectUniform {
-    fn new(position: glm::Vec2, color: glm::Vec3, size: glm::Vec2) -> RectUniform {
+    fn new(position: glm::Vec2, color: glm::Vec4, size: glm::Vec2) -> RectUniform {
         RectUniform {
             position,
             padding: [0.0, 0.0],
             color,
-            padding2: [0.0],
             size
         }
     }

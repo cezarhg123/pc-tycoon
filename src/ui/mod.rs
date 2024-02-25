@@ -7,6 +7,8 @@ pub mod ui_element;
 pub mod button;
 pub mod ui_object;
 pub mod ui_text;
+pub mod text_box;
+pub mod ui_rect;
 
 use std::{rc::Rc, cell::{RefCell, Ref}};
 use glfw::WindowEvent;
@@ -100,6 +102,7 @@ pub fn as_ui_type<T>(element: Ref<UiElement>) -> &T {
 
 pub fn as_ui_type_mut<T>(element: Ref<UiElement>) -> &mut T {
     let ptr: *const dyn UiObject = element.ui_object.as_ref();
-    
-    unsafe { &mut *(ptr as *mut T) }
+    let ptr = std::cell::UnsafeCell::from(ptr as *mut T);
+
+    unsafe { &mut *ptr.into_inner() }
 }

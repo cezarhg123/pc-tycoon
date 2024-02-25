@@ -1,12 +1,16 @@
 use std::io::Cursor;
 use gpu_allocator::vulkan::Allocator;
-use crate::{primitives::{rect::Rect, text::Text}, WINDOW_WIDTH, WINDOW_HEIGHT, ui::{Ui, ui_element::UiElement, button::Button}};
+use crate::{primitives::{rect::Rect, text::Text}, WINDOW_WIDTH, WINDOW_HEIGHT, ui::{Ui, ui_element::UiElement, button::Button, ui_text::UiText, as_ui_type}};
+use super::profile::Profile;
 
 pub struct InGame {
     background: Rect,
 }
 
 pub enum InGameOutput {
+    BuildPC,
+    Inventory,
+    Market,
     None
 }
 
@@ -26,7 +30,7 @@ impl InGame {
         }
     }
 
-    pub fn run(&mut self, ui: &mut Ui, allocator: &mut Allocator) -> InGameOutput {
+    pub fn run(&mut self, ui: &mut Ui, allocator: &mut Allocator, profile: &Profile) -> InGameOutput {
         let build_pc_button = ui.add_element(
             UiElement::new(
                 "Build PC",
@@ -62,8 +66,68 @@ impl InGame {
                     .build(allocator)
             )
         );
+
+        let money_text = ui.add_element(
+            UiElement::new(
+                "Player Money",
+                true,
+                true,
+                UiText::new(
+                    Text::builder()
+                        .left(13.0)
+                        .top(266.0)
+                        .font_size(48.0)
+                        .font_color(glm::vec3(0.0, 0.0, 0.0))
+                        .text(format!("€{}", profile.money))
+                        .build(allocator)
+                )
+            )
+        );
+
+        let level_text = ui.add_element(
+            UiElement::new(
+                "Player Level",
+                true,
+                true,
+                UiText::new(
+                    Text::builder()
+                        .left(249.0)
+                        .top(266.0)
+                        .font_size(48.0)
+                        .font_color(glm::vec3(0.0, 0.0, 0.0))
+                        .text(format!("LVL {}", profile.level))
+                        .build(allocator)
+                )
+            )
+        );
+
+        let points = ui.add_element(
+            UiElement::new(
+                "Player Points",
+                true,
+                true,
+                UiText::new(
+                    Text::builder()
+                        .left(0.0)
+                        .top(266.0)
+                        .font_size(48.0)
+                        .font_color(glm::vec3(0.0, 0.0, 0.0))
+                        .text(format!("{}/{}", profile.points, 1000))
+                        .build(allocator)
+                )
+            )
+        );
+        points.borrow_mut().ui_object.set_right(620.0);
         
-        InGameOutput::None
+        if as_ui_type::<Button>(build_pc_button.borrow()).pressed_once() {
+            InGameOutput::BuildPC
+        } else if as_ui_type::<Button>(inventory_button.borrow()).pressed_once() {
+            InGameOutput::Inventory
+        } else if as_ui_type::<Button>(market_button.borrow()).pressed_once() {
+            InGameOutput::Market
+        } else {
+            InGameOutput::None
+        }
     }
 
     pub fn draw(&self) {

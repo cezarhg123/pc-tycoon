@@ -80,14 +80,7 @@ unsafe fn create_instance(glfw: &glfw::Glfw) {
     let supported_extensions = supported_extensions.iter().map(|s| format!("{s}\0")).collect::<Vec<_>>();
     let supported_extension_ptrs = supported_extensions.iter().map(|s| s.as_ptr() as *const i8).collect::<Vec<_>>(); 
     
-    let enabled_layer = if DEBUG {
-        [
-            "VK_LAYER_KHRONOS_validation\0"
-        ]
-    } else {
-        // should work™
-        ["\0"]
-    };
+    let enabled_layer = ["VK_LAYER_KHRONOS_validation\0"];
     let enabled_layer_ptrs = enabled_layer.iter().map(|s| s.as_ptr() as *const i8).collect::<Vec<_>>();
 
     let app_info = vk::ApplicationInfo::builder()
@@ -115,6 +108,7 @@ unsafe fn create_debug_utils() {
         set_debug_utils(ash::extensions::ext::DebugUtils::new(get_entry(), get_instance()));
 
         set_debug_messenger(get_debug_utils().create_debug_utils_messenger(
+            #[cfg(debug_assertions)]
             &vk::DebugUtilsMessengerCreateInfoEXT::builder()
                 .message_severity( // information is empowering
                     vk::DebugUtilsMessageSeverityFlagsEXT::ERROR |
@@ -129,6 +123,8 @@ unsafe fn create_debug_utils() {
                 )
                 .pfn_user_callback(Some(vulkan_debug_callback))
                 .build(),
+            #[cfg(not(debug_assertions))]
+            &vk::DebugUtilsMessengerCreateInfoEXT::builder().build(),
             None
         ).unwrap());
 

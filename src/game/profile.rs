@@ -1,11 +1,9 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Debug)]
 pub struct Profile {
-    name: String,
-    level: u64,
-    points: u64,
-    money: i64
+    pub name: String,
+    pub level: u64,
+    pub points: u64,
+    pub money: i64
 }
 
 impl Default for Profile {
@@ -19,17 +17,23 @@ impl Default for Profile {
     }
 }
 
-pub fn load_profile(name: impl ToString) -> Result<Profile, Box<dyn std::error::Error>> {
-    let name = name.to_string();
+pub fn load_profile(path: impl ToString) -> Option<Profile> {
+    let path = path.to_string();
 
-    Ok(serde_json::from_str(
-        &std::fs::read_to_string(format!("saves/{}.save", name))?)
-    ?)
+    let data = std::fs::read_to_string(path).ok()?;
+    let mut lines = data.lines();
+
+    Some(Profile {
+        name: lines.next()?.to_string(),
+        level: lines.next()?.parse().ok()?,
+        points: lines.next()?.parse().ok()?,
+        money: lines.next()?.parse().ok()?
+    })
 }
 
 pub fn save_profile(profile: &Profile) {
     std::fs::write(
         format!("saves/{}.save", profile.name),
-        serde_json::to_string(profile).unwrap()
+        format!("{}\n{}\n{}\n{}\n", profile.name, profile.level, profile.points, profile.money)
     ).unwrap();
 }

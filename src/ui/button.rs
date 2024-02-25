@@ -14,9 +14,9 @@ pub struct Button {
 }
 
 pub enum ButtonFace {
-    Color(glm::Vec3),
+    Color(glm::Vec4),
     Texture(image::DynamicImage),
-    Both(glm::Vec3, image::DynamicImage)
+    Both(glm::Vec4, image::DynamicImage)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -31,7 +31,7 @@ impl Button {
         ButtonBuilder {
             position: glm::vec2(0.0, 0.0),
             size: glm::vec2(100.0, 100.0),
-            normal_face: ButtonFace::Color(glm::vec3(1.0, 1.0, 1.0)),
+            normal_face: ButtonFace::Color(glm::vec4(1.0, 1.0, 1.0, 1.0)),
             hovered_face: None,
             pressed_face: None,
             text: None,
@@ -76,7 +76,7 @@ impl Button {
                 } else {
                     let color = match &self.normal_face {
                         ButtonFace::Color(color) => *color,
-                        _ => glm::vec3(1.0, 1.0, 1.0)
+                        _ => glm::vec4(1.0, 1.0, 1.0, 1.0)
                     };
                     // how bright the button is
                     let how_lit = (color.x + color.y + color.z) / 3.0;
@@ -103,7 +103,7 @@ impl Button {
                 } else {
                     let color = match &self.normal_face {
                         ButtonFace::Color(color) => *color,
-                        _ => glm::vec3(1.0, 1.0, 1.0)
+                        _ => glm::vec4(1.0, 1.0, 1.0, 1.0)
                     };
                     // how bright the button is
                     let how_lit = (color.x + color.y + color.z) / 3.0;
@@ -219,7 +219,7 @@ impl ButtonBuilder {
 
         if let Some(mut text) = self.text {
             // set text color to black if rect color is white
-            if rect_color == glm::vec3(1.0, 1.0, 1.0) {
+            if rect_color == glm::vec4(1.0, 1.0, 1.0, 1.0) {
                 text = text.font_color(glm::vec3(0.0, 0.0, 0.0));
             }
 
